@@ -73,6 +73,7 @@ class Window
 		void setView(const View& view);
 		View getView() const;
 		void setMainView(const View& view);
+		View& getMainView();
 		const View& getMainView() const;
 		void applyMainView();
 		sf::IntRect getViewport(const View& view) const; 

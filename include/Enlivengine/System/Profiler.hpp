@@ -126,6 +126,7 @@ class Profile
 };
 
 #define ENLIVE_PROFILE_FUNCTION() en::Profile functionProfile(ENLIVE_FUNCTION);
+#define ENLIVE_PROFILE_SCOPE(name) en::Profile scope##name(#name);
 
 // TODO : Separate to another thread because it slow the run quite a lot
 class ConsoleProfiler : public ProfilerDisplay
@@ -162,5 +163,10 @@ private:
 #endif // ENLIVE_ENABLE_IMGUI
 
 } // namespace en
+
+#else
+
+#define ENLIVE_PROFILE_FUNCTION()
+#define ENLIVE_PROFILE_SCOPE(name)
 
 #endif // ENLIVE_ENABLE_PROFILE

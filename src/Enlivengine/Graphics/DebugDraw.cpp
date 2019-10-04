@@ -2,6 +2,7 @@
 
 #ifdef ENLIVE_DEBUG
 
+#include <Enlivengine/System/Profiler.hpp>
 #include <Enlivengine/Graphics/SFMLWrapper.hpp>
 
 namespace en
@@ -103,6 +104,8 @@ U32 DebugDraw::getCurrentCircleCount()
 
 void DebugDraw::render(sf::RenderTarget& target)
 {
+	ENLIVE_PROFILE_FUNCTION();
+
 	if (mVisible)
 	{
 		for (U32 i = 0; i < mCurrentCircleIndex; ++i)

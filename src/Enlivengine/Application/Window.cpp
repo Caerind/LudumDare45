@@ -359,6 +359,11 @@ void Window::setMainView(const View& view)
 	mMainView = view;
 }
 
+View& Window::getMainView()
+{
+	return mMainView;
+}
+
 const View& Window::getMainView() const
 {
 	return mMainView;
@@ -578,7 +583,15 @@ void Window::screenshot()
 	sf::Texture texture;
 	texture.create((U32)getSize().x, (U32)getSize().y);
 	texture.update(mWindow);
-	texture.copyToImage().saveToFile(mScreenshotPath + oss.str() +".png");
+	const std::string filename = mScreenshotPath + oss.str() + ".png";
+	if (texture.copyToImage().saveToFile(filename))
+	{
+		LogInfo(en::LogChannel::Application, 5, "Screenshot saved to : %s", filename.c_str());
+	}
+	else
+	{
+		LogError(en::LogChannel::Application, 8, "Can't save screenshot to : %s", filename.c_str());
+	}
 }
 
 const std::string& Window::getScreenshotPath() const

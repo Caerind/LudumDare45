@@ -327,7 +327,7 @@ DateTime DateTime::now()
 	struct tm* timeinfo = localtime(&rawtime);
 
 	return DateTime(
-		timeinfo->tm_yday - 1900, // year since 1900
+		2019, // TODO : HARDCODED
 		timeinfo->tm_mon + 1, // months since January 0-11
 		timeinfo->tm_mday, // day of the month 1-31
 		timeinfo->tm_hour, // hours since midnight 0-23
