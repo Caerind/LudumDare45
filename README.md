@@ -1,10 +1,5 @@
-# Enlivengine
+# LudumDare45
 
-[![Build Status](https://travis-ci.com/Cmdu76/Enlivengine.svg?branch=master)](https://travis-ci.com/Cmdu76/Enlivengine)
+Game made from the LudumDare45 using C++ and my engine Enlivengine!  
 
-My new 2D engine using C++17 
-
-WIP
-
-The setup and the code are very ugly now...  
-I need to get the engine working for the next LudumDare...  
+Assets will come here only at the end of the game jam.  

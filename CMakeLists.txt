@@ -40,3 +40,6 @@ add_subdirectory(examples)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
+
+# LudumDare45
+add_subdirectory(LudumDare45)
