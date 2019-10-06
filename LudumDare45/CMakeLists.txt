@@ -1,10 +1,14 @@
 set(PATH_LUDUMDARE45 ${PROJECT_SOURCE_DIR}/LudumDare45)
 set(SRC_LUDUMDARE45
+	${PATH_LUDUMDARE45}/Components.hpp
+	${PATH_LUDUMDARE45}/Components.cpp
 	${PATH_LUDUMDARE45}/EditorComponents.hpp
     ${PATH_LUDUMDARE45}/EntityPrefab.hpp
     ${PATH_LUDUMDARE45}/EntityPrefab.cpp
     ${PATH_LUDUMDARE45}/GameConfig.hpp
     ${PATH_LUDUMDARE45}/GameConfig.cpp
+    ${PATH_LUDUMDARE45}/GameMap.hpp
+    ${PATH_LUDUMDARE45}/GameMap.cpp
     ${PATH_LUDUMDARE45}/GameSingleton.hpp
     ${PATH_LUDUMDARE45}/GameSingleton.cpp
     ${PATH_LUDUMDARE45}/GameState.hpp

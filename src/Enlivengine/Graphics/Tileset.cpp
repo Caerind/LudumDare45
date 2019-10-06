@@ -119,16 +119,23 @@ sf::Texture& Tileset::getTexture()
 {
 	if (mImageChanged)
 	{
+		const std::string filename = mRelativePath + mImageSource;
 		if (mImageTransparent != Color::Transparent)
 		{
 			sf::Image image;
-			image.loadFromFile(mRelativePath + mImageSource);
+			if (!image.loadFromFile(filename))
+			{
+				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
+			}
 			image.createMaskFromColor(toSF(mImageTransparent));
 			mTexture.loadFromImage(image);
 		}
 		else
 		{
-			mTexture.loadFromFile(mRelativePath + mImageSource);
+			if (!mTexture.loadFromFile(mRelativePath + mImageSource))
+			{
+				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
+			}
 		}
 		
 		mImageChanged = false;

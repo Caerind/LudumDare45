@@ -19,12 +19,11 @@ void DebugDraw::drawPoint(F32 x, F32 y, const Color& color, F32 r)
 {
 	if (mVisible && mCurrentCircleIndex < mMaxSize)
 	{
-		if (mCurrentCircleIndex < mCircles.size())
+		if (mCurrentCircleIndex <= mCircles.size())
 		{
 			mCircles.push_back(sf::CircleShape());
 		}
 		mCurrentCircleIndex++;
-		mCircles.push_back(sf::CircleShape());
 		sf::CircleShape& circle = mCircles.back();
 		circle.setFillColor(toSF(color));
 		circle.setPosition(x - r * 0.5f, y - r * 0.5f);

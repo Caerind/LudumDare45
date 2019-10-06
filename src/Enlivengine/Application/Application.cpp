@@ -151,7 +151,7 @@ void Application::run()
 #endif
 
 #ifdef ENLIVE_ENABLE_IMGUI
-			ImGui::SFML::Update(mWindow.getHandle(), toSF(dt));
+			ImGui::SFML::Update(mWindow.getHandle(), toSF(TimePerFrame));
 			if (mShowImGui)
 			{
 				ImGuiMain();
@@ -159,7 +159,7 @@ void Application::run()
 #endif
 
 			preUpdate();
-			update(dt);
+			update(TimePerFrame);
 			postUpdate();
 
 #ifdef ENLIVE_ENABLE_IMGUI

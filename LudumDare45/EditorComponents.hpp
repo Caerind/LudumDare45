@@ -13,6 +13,7 @@
 
 #include "GameConfig.hpp"
 #include "GameSingleton.hpp"
+#include "Components.hpp"
 
 class EditorComponents
 {
@@ -29,7 +30,8 @@ class EditorComponents
 
 			TrivialComponent(en::PositionComponent, Position);
 			TrivialComponent(en::RenderableComponent, Renderable);
-
+			TrivialComponent(VelocityComponent, Velocity);
+			TrivialComponent(HumanComponent, Human);
 
 
 			#undef TrivialComponent
@@ -65,6 +67,35 @@ class EditorComponents
 			{
 				renderable.z = z;
 			}
+		}
+
+		static void Human(HumanComponent& component)
+		{
+			int dir = (int)component.direction;
+			if (ImGui::SliderInt("direction##Human", &dir, 0, 4))
+			{
+				component.direction = (HumanComponent::Direction)dir;
+			}
+
+			int anim = (int)component.currentAnimation;
+			if (ImGui::SliderInt("anim##Human", &anim, 0, 6))
+			{
+				component.currentAnimation = (HumanComponent::Animation)anim;
+			}
+
+			int frame = (int)component.currentFrame;
+			if (ImGui::SliderInt("frame##Human", &frame, 0, 10))
+			{
+				component.currentFrame = (en::U32)frame;
+			}
+
+
+		}
+
+		static void Velocity(VelocityComponent& component)
+		{
+			ImGui::SliderFloat("x##Velocity", &component.velocity.x, -4.f, +4.f);
+			ImGui::SliderFloat("y##Velocity", &component.velocity.y, -4.f, +4.f);
 		}
 };
 

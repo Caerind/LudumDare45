@@ -26,6 +26,8 @@ struct PositionComponent : public sf::Transformable
 
 struct RenderableComponent
 {
+	en::F32 x;
+	en::F32 y;
 	en::U32 z;
 };
 

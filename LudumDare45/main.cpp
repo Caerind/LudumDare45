@@ -12,14 +12,22 @@ int main(int argc, char** argv)
 {
 	en::LogManager::initialize();
 
+	LogInfo(en::LogChannel::Global, 3, "Starting...");
+
 	en::Application app;
 
 	// GameConfig::loadFromFile();
 	
 	app.getWindow().create(sf::VideoMode(1024, 768), "LudumDare45");
 	app.getWindow().setScreenshotPath("Assets/Screenshots/");
+	app.getWindow().setCursorTexture("Assets/Textures/cursor.png");
+	app.getWindow().setCursorOrigin({ 16,16 });
+	app.getWindow().getMainView().setCenter(512.0f, 384.0f);
+	app.getWindow().getMainView().setSize(en::Vector2f(1024, 768));
 
 	GameSingleton::loadResourcesMain(app);
+
+	LogInfo(en::LogChannel::Global, 3, "Main resources loaded");
 
 	app.start<GameState>();
 

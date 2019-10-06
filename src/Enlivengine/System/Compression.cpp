@@ -1,9 +1,7 @@
 #include <Enlivengine/System/Compression.hpp>
 
-/*
 #include <miniz/miniz.h>
 #include <miniz/miniz.c> // TODO : This is weird na ?
-*/
 
 #include <cstring>
 
@@ -89,7 +87,6 @@ bool Compression::decode64(std::string& data)
 
 bool Compression::compress(std::string& data)
 {
-	/*
     mz_stream zs; // mz_stream is zlib's control structure
     std::memset(&zs, 0, sizeof(zs));
     if (mz_deflateInit(&zs, MZ_BEST_COMPRESSION) != MZ_OK)
@@ -119,13 +116,11 @@ bool Compression::compress(std::string& data)
         return false;
     }
     data = outstring;
-	*/
     return true;
 }
 
 bool Compression::decompress(std::string& data)
 {
-	/*
 	mz_stream zstream;
 	zstream.zalloc = 0;
 	zstream.zfree = 0;
@@ -165,7 +160,6 @@ bool Compression::decompress(std::string& data)
 	}
 	mz_inflateEnd(&zstream);
 	data = outstring;
-	*/
 	return true;
 }
 

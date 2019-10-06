@@ -19,7 +19,7 @@ class ImGuiEntityEditor {
 		std::map<component_type, void(*)(Registry&, typename Registry::entity_type)> _component_destroy;
 
 	public:
-		bool show_window = true;
+		bool show_window = false;
 
 	private:
 		inline bool entity_has_component(Registry& ecs, typename Registry::entity_type& e, component_type ct) {

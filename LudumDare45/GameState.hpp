@@ -21,7 +21,16 @@ class GameState : public en::State
 
 	private:
 		inline en::Window& getWindow();
-		inline en::View& getView();
+		en::Vector2f getAdjustedCursorPos();
+
+		bool isCollision(const en::Vector2f& point);
+
+		bool isCollisionSlow(const en::Vector2f& point);
+		bool isCollisionFast(const en::Vector2f& point);
+
+		void velocities();
+		void directions();
+		void movements(en::Time dt);
 
 #ifdef ENLIVE_DEBUG
 		void devEvent(const sf::Event& event);
@@ -29,4 +38,7 @@ class GameState : public en::State
 #endif // ENLIVE_DEBUG
 
 	private:
+		en::Time mCursorTime;
+		en::U32 mCursorFrame;
+		sf::Sprite mCursor;
 };
