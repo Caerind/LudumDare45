@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Enlivengine/System/Config.hpp>
-
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 #include <Enlivengine/System/Log.hpp>
+#include <Enlivengine/Math/Random.hpp>
 #include <Enlivengine/Core/Components.hpp>
 
 #include <entt/entt.hpp>
@@ -31,7 +31,11 @@ struct NothingComponent
 
 struct AIComponent
 {
+	en::Time changeRandomMvtTime{ en::seconds(1.2f) };
+	en::Time randomMvtTimer{ en::Time::Zero };
+	en::RandomEngine randomEngine;
 
+	en::Time cooldownHitTimer{ en::Time::Zero };
 };
 
 struct HumanComponent
@@ -65,6 +69,8 @@ struct HumanComponent
 
 	Animation currentAnimation;
 
+	en::F32 life{ 1.0f };
+
 	bool walking{ false };
 
 	en::Time frameTime;
@@ -95,6 +101,8 @@ struct PropsComponent
 	sf::Sprite sprite;
 	en::Vector2i coords;
 
+	en::U32 gid{ 0 };
+
 	bool destructed{ false };
 	en::Time destructTimeAnimation{ en::Time::Zero };
 	en::U32 destructCurrentFrame{ 0 };
@@ -103,4 +111,9 @@ struct PropsComponent
 	static en::Time timePerFrame;
 
 	void destruct();
+};
+
+struct DoorComponent
+{
+	en::Time cooldownSpawnTimer{ en::Time::Zero };
 };

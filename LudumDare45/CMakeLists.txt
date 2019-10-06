@@ -13,6 +13,9 @@ set(SRC_LUDUMDARE45
     ${PATH_LUDUMDARE45}/GameSingleton.cpp
     ${PATH_LUDUMDARE45}/GameState.hpp
     ${PATH_LUDUMDARE45}/GameState.cpp
+    ${PATH_LUDUMDARE45}/IntroState.hpp
+    ${PATH_LUDUMDARE45}/MenuState.hpp
+    ${PATH_LUDUMDARE45}/PreGameState.hpp
     ${PATH_LUDUMDARE45}/imgui_entt_entity_editor.hpp
     ${PATH_LUDUMDARE45}/main.cpp
 )

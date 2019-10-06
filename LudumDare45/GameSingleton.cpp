@@ -10,6 +10,8 @@
 
 en::Application* GameSingleton::application;
 
+bool GameSingleton::mFirstIntroDone = false;
+
 en::Tileset GameSingleton::mTileset;
 GameMap GameSingleton::mMap;
 en::View GameSingleton::mView;
@@ -22,12 +24,24 @@ en::ResourceId GameSingleton::mFont;
 
 en::ResourceId GameSingleton::mNothingTexture;
 en::ResourceId GameSingleton::mEverythingTexture;
+en::ResourceId GameSingleton::mAITexture;
 
-en::ResourceId GameSingleton::mClickSound;
+en::ResourceId GameSingleton::mChopSound;
+en::ResourceId GameSingleton::mHitSound;
+en::ResourceId GameSingleton::mKnockoutSound;
+en::ResourceId GameSingleton::mSelectSound;
+en::ResourceId GameSingleton::mThrowSound;
+en::ResourceId GameSingleton::mDestrPropsSound;
+en::ResourceId GameSingleton::mNothingWallSound;
+en::ResourceId GameSingleton::mNothingAISound;
 
 std::vector<en::Animation> GameSingleton::mAnimations;
 
-en::U32 GameSingleton::mMoney;
+en::F32 GameSingleton::hitLife = 0.03f;
+en::F32 GameSingleton::aiNothingLife = 1.0f;
+en::F32 GameSingleton::nothingMurLife = 0.15f;
+en::F32 GameSingleton::nothingPropsLife = 0.10f;
+en::F32 GameSingleton::nothingAILife = 0.05f;
 
 #ifdef ENLIVE_ENABLE_IMGUI
 entt::entity GameSingleton::currentEntity = entt::null;
@@ -48,12 +62,20 @@ void GameSingleton::loadResourcesGame()
 {
 	// Textures
 	const std::string texturePath = "Assets/Textures/";
-	mNothingTexture = application->getTextures().create("nothing", en::TextureLoader::loadFromFile("Assets/Textures/perso_nothing.png"));
-	mEverythingTexture = application->getTextures().create("everything", en::TextureLoader::loadFromFile("Assets/Textures/perso_everything.png"));
+	mNothingTexture = application->getTextures().create("nothingtexture", en::TextureLoader::loadFromFile(texturePath + "perso_nothing.png"));
+	mEverythingTexture = application->getTextures().create("everythingtexture", en::TextureLoader::loadFromFile(texturePath + "perso_everything.png"));
+	mAITexture = application->getTextures().create("aitexture", en::TextureLoader::loadFromFile(texturePath + "perso_IA.png"));
 
 	// Sound
-	const std::string soundPath = "Assets/Textures/";
-	mClickSound = application->getAudio().createSound("click", "Assets/Sounds/click.wav");
+	const std::string soundPath = "Assets/Sounds/";
+	mChopSound = application->getAudio().createSound("chop", soundPath + "Chop.wav");
+	mHitSound = application->getAudio().createSound("hit", soundPath + "Hit.wav");
+	mKnockoutSound = application->getAudio().createSound("knockout", soundPath + "Knockout.wav");
+	mSelectSound = application->getAudio().createSound("select", soundPath + "Select.wav");
+	mThrowSound = application->getAudio().createSound("throw", soundPath + "Throw.wav");
+	mDestrPropsSound = application->getAudio().createSound("props", soundPath + "Props.wav");
+	mNothingWallSound = application->getAudio().createSound("nwall", soundPath + "Nwall.wav");
+	mNothingAISound = application->getAudio().createSound("nai", soundPath + "Nia.wav");
 }
 
 void GameSingleton::loadAnimations()
@@ -385,14 +407,13 @@ void GameSingleton::clear()
 {
 }
 
-void GameSingleton::playSound(en::ResourceId r, const en::Vector2f& position)
+void GameSingleton::playSound(en::ResourceId r)
 {
-	application->getAudio().playSound(r)->setVolume(20.0f);
-}
-
-void GameSingleton::playClick()
-{
-	application->getAudio().playSound(mClickSound)->setVolume(20.0f);
+	en::AudioSystem::SoundPtr soundPtr = application->getAudio().playSound(r);
+	if (soundPtr != nullptr)
+	{
+		soundPtr->setVolume(40.0f);
+	}
 }
 
 #ifdef ENLIVE_ENABLE_IMGUI

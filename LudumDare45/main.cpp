@@ -7,6 +7,7 @@
 #include "GameConfig.hpp"
 
 #include "GameState.hpp"
+#include "IntroState.hpp"
 
 int main(int argc, char** argv)
 {
@@ -20,8 +21,10 @@ int main(int argc, char** argv)
 	
 	app.getWindow().create(sf::VideoMode(1024, 768), "LudumDare45");
 	app.getWindow().setScreenshotPath("Assets/Screenshots/");
-	app.getWindow().setCursorTexture("Assets/Textures/cursor.png");
-	app.getWindow().setCursorOrigin({ 16,16 });
+	//app.getWindow().setCursorTexture("Assets/Textures/cursor.png");
+	//app.getWindow().setCursorTextureRect(sf::IntRect(0, 0, 32, 32));
+	//app.getWindow().setCursorOrigin({ 16,16 });
+	app.getWindow().setCursor(en::Window::Cursor::None);
 	app.getWindow().getMainView().setCenter(512.0f, 384.0f);
 	app.getWindow().getMainView().setSize(en::Vector2f(1024, 768));
 
@@ -29,7 +32,7 @@ int main(int argc, char** argv)
 
 	LogInfo(en::LogChannel::Global, 3, "Main resources loaded");
 
-	app.start<GameState>();
+	app.start<IntroState>();
 
 	return 0;
 }

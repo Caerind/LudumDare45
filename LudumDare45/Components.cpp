@@ -33,7 +33,10 @@ en::Vector2f PlayerComponent::getVelocity() const
 
 void PropsComponent::destruct()
 {
-	GameSingleton::mMap.setCollision(coords, false);
+	if (gid != 113)
+	{
+		GameSingleton::mMap.setCollision(coords, false);
+	}
 
 	destructed = true;
 	destructCurrentFrame = 1;

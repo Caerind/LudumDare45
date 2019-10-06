@@ -28,8 +28,9 @@ class GameState : public en::State
 		bool isCollisionSlow(const en::Vector2f& point);
 		bool isCollisionFast(const en::Vector2f& point);
 
-		void velocities();
+		void velocities(en::Time dt);
 		void directions();
+		void animations(en::Time dt);
 		void movements(en::Time dt);
 
 #ifdef ENLIVE_DEBUG

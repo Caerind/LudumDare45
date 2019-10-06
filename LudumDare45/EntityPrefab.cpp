@@ -79,14 +79,25 @@ bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::
 	sf::Vector2f vertexPos = tileset.toPos(gid);
 	propsComponent.sprite.setTextureRect(sf::IntRect((int)vertexPos.x, (int)vertexPos.y, 16, 16));
 	propsComponent.coords = GameSingleton::mMap.worldToCoords(en::Vector2f(x + 8, y + 8));
+	propsComponent.destructFrames = 3;
+	propsComponent.gid = gid;
 
-	propsComponent.destructFrames = 6;
+	if (gid == 113)
+	{
+		auto& doorComponent = world.assign<DoorComponent>(entity);
+		doorComponent.cooldownSpawnTimer = en::seconds(en::Random::get<en::I32>(8,20));
+	}
 
 	return true;
 }
 
 bool EntityPrefab::createAI(entt::registry& world, en::F32 x, en::F32 y)
 {
+	if (GameSingleton::world.view<AIComponent>().size() > 50)
+	{
+		return true;
+	}
+
 	static int aiCounter = 0;
 	auto entity = world.create();
 	auto& nameComponent = world.assign<en::NameComponent>(entity);
@@ -95,8 +106,9 @@ bool EntityPrefab::createAI(entt::registry& world, en::F32 x, en::F32 y)
 	positionComponent.setPosition(x, y);
 	auto& renderableComponent = world.assign<en::RenderableComponent>(entity);
 	auto& aiComponent = world.assign<AIComponent>(entity);
+	aiComponent.randomEngine.setSeed(aiCounter);
 	auto& humanComponent = world.assign<HumanComponent>(entity);
-	humanComponent.body.setTexture(GameSingleton::application->getTextures().get(GameSingleton::mNothingTexture));
+	humanComponent.body.setTexture(GameSingleton::application->getTextures().get(GameSingleton::mAITexture));
 	humanComponent.body.setOrigin(8, 16);
 	humanComponent.body.setTextureRect(sf::IntRect(0, 0, 16, 16));
 	humanComponent.direction = HumanComponent::Direction::BasGauche;
