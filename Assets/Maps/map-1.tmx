@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="29">
+ <tileset firstgid="1" source="tileset.tsx"/>
+ <layer id="1" name="Map" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   eJztl09vgzAMxaMOkEq57M8Felo5UU4bX3AffYnmJ6yMpGWbRMLe4aemaRr87NgxR2PMkRBCCCGEEEIIUbxaLgH6G2v6P3j+1to7y9nSWE6Wq6W2PFtGWTfI9xf5/Sprx18+f+t4d6L1oHhQjMpHpVBYKhm3Jr8zMUisEecqor8N+Ai4c4Mz0wht4j4YVPwQS+0DrR9nfkk7KNV+lUk/Lwax9dHyJDYXAf0gpt/t8y57wQep64eNGIfiDx/F9EPrm/JnTvoLM+eC1u+0T7LmHv3+3lvrjOkvxEYXM5xdXz9qe7dj/ZiDH+ALpx/3Q7NSv793atyK0WDW1b+96Ucd07Vdnw1/flqxdwo4G8sFG/2+0OlEDejVf/W8T5eJ/mJBg7Nd9/gHM/d1+j1Az7tex/WAtYybTPRXZq5veJdxOkL57usP9YG4R1PXjzu/Mt/7n3t7HL82aKbI87dG33VLtW0JnSs55PhP/aJ9oN8PUBfqr8+PPer3zwZ6X+Q08gXjPeqP+SOnHCeEEEIIIYQQ8j/4BDwlfr0=
+  </data>
+ </layer>
+ <layer id="3" name="props" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   eJzt1jEKgDAMheGuXsUbdHR0dHT0CN5/UVFBApaAhdbX/4MO0ggpSaMhAAAAAAAAay2dQAWGa91Gsx8TsYomR0wrfaNc67vPYzLqNO9reTx73qndW597zmZnhDpbf8+M+IvUHVe+/x4K9zyHZx/EQF8AKv+Axzns981LcT62PtsUa5pDXzoBAMBnXekEAAAAgAw2a8oKRg==
+  </data>
+ </layer>
+</map>
