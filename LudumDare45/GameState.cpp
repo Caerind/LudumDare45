@@ -13,44 +13,50 @@
 
 GameState::GameState(en::StateManager& manager)
 	: en::State(manager)
+	, mText(GameSingleton::application->getTextures().get("buble"), GameSingleton::application->getFonts().get("pix"))
+	, mCursorFrame(0)
 {
 	GameSingleton::clear();
 
-	GameSingleton::loadResourcesGame();
-	GameSingleton::loadAnimations();
-
-	//getApplication().getTextures().create("atmog", en::TextureLoader::loadFromFile("Assets/Textures/atmog.png"));
-	//asteroidTextureId = getApplication().getTextures().create("asteroids", en::TextureLoader::loadFromFile("Assets/Textures/asteroids.png"));
-	//fontId = getApplication().getFonts().create("font", en::FontLoader::loadFromFile("Assets/Fonts/ErasBoldITC.ttf"));
+	GameSingleton::mMap.load(1, en::Vector2f(408, 312), &GameSingleton::mTileset, en::Vector2i(16, 16));
 
 #ifdef ENLIVE_ENABLE_IMGUI
-	GameSingleton::currentEntity = entt::null;
-	EditorComponents::registerToEditor(GameSingleton::worldEditor);
+	static bool editorRegisterDone = false;
+	if (!editorRegisterDone)
+	{
+		EditorComponents::registerToEditor(GameSingleton::worldEditor);
+		editorRegisterDone = true;
+	}
 #endif
 
 	// mCursor
-	getApplication().getWindow().setCursor(en::Window::Cursor::None);
-	getApplication().getTextures().create("cursor", en::TextureLoader::loadFromFile("Assets/Textures/cursor.png"));
 	mCursor.setTexture(getApplication().getTextures().get("cursor"));
 	mCursor.setTextureRect(sf::IntRect(0, 0, 32, 32));
 	mCursor.setOrigin(16, 16);
 	mCursor.setScale(0.3f, 0.3f);
 	mCursorTime = en::Time::Zero;
 
+	// Tutorial
+	if (GameSingleton::mFirstThrowNothingDone)
+	{
+		mText.handleEvent(NothingTextSystem::Event::FightBegin);
+		tutorialState = 99;
+	}
+	else
+	{
+		mText.handleEvent(NothingTextSystem::Event::Tutorial1);
+		tutorialState = 0;
+	}
+
 	// Audio
-	getApplication().getAudio().setGlobalVolume(50.0f);
+	if (GameSingleton::soundEnabled)
+	{
+		getApplication().getAudio().setGlobalVolume(50.0f);
 
-	// Music
-	getApplication().getAudio().createMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
-	getApplication().getAudio().playMusic("mainTheme");
-
-	// Tileset & Map
-	GameSingleton::mTileset.setFirstGid(1);
-	GameSingleton::mTileset.setTileSize(en::Vector2i(16, 16));
-	GameSingleton::mTileset.setTileCount(160);
-	GameSingleton::mTileset.setColumns(8);
-	GameSingleton::mTileset.setImageSource("Assets/Textures/tileset.png");
-	GameSingleton::mMap.load(1, en::Vector2f(408, 312), &GameSingleton::mTileset, en::Vector2i(16, 16));
+		// Music
+		getApplication().getAudio().createMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
+		getApplication().getAudio().playMusic("mainTheme");
+	}
 
 	// View
 	GameSingleton::mView.setCenter(GameSingleton::mMap.getSpawnPoint());
@@ -60,9 +66,9 @@ GameState::GameState(en::StateManager& manager)
 	GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).setPosition(en::toSF(GameSingleton::mMap.getSpawnPoint()));
 
 	EntityPrefab::createNothing(GameSingleton::world, GameSingleton::nothingEntity);
-	GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity).setPosition(en::toSF(GameSingleton::mMap.getSpawnPoint()));
+	GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity).setPosition(en::toSF(GameSingleton::mMap.getSpawnPoint()) + sf::Vector2f(-20, -10));
 
-	LogInfo(en::LogChannel::System, 9, "Loading game");
+	mPieceGenerator.setSeed(45676567);
 }
 
 bool GameState::handleEvent(const sf::Event& event)
@@ -71,6 +77,7 @@ bool GameState::handleEvent(const sf::Event& event)
 
 	if (event.type == sf::Event::Closed)
 	{
+		getApplication().getAudio().stop();
 		getApplication().stop();
 	}
 
@@ -78,17 +85,17 @@ bool GameState::handleEvent(const sf::Event& event)
 	devEvent(event);
 #endif
 
+	// Screenshot
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1)
+	{
+		getWindow().screenshot();
+	}
+
 	bool clickHandled = false;
 	const en::Vector2f mPos = getApplication().getWindow().getCursorPositionView(GameSingleton::mView);
 	const en::Vector2f cPos = getAdjustedCursorPos();
 	const en::Vector2f pPos = en::toEN(GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition()) + en::Vector2f(0, -8);
-	const en::Vector2f d = getAdjustedCursorPos() - pPos;
-
-	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
-	{
-		getApplication().clearStates();
-		getApplication().pushState<MenuState>();
-	}
+	const en::Vector2f d = cPos - pPos;
 
 	if (!clickHandled && event.type == sf::Event::MouseButtonPressed)
 	{
@@ -96,6 +103,17 @@ bool GameState::handleEvent(const sf::Event& event)
 		{
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
+				if (!GameSingleton::mFirstThrowNothingDone)
+				{
+					mText.handleEvent(NothingTextSystem::Event::FightBegin);
+					GameSingleton::mFirstThrowNothingDone = true;
+					auto viewDoorEnable = GameSingleton::world.view<DoorComponent>();
+					for (auto entity : viewDoorEnable)
+					{
+						auto& door = viewDoorEnable.get(entity);
+						door.enabled = true;
+					}
+				}
 				GameSingleton::playSound(GameSingleton::mThrowSound);
 				GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity).playAnimOnce(HumanComponent::Animation::Throw);
 				GameSingleton::world.get<PlayerComponent>(GameSingleton::playerEntity).chopping = false;
@@ -124,6 +142,11 @@ bool GameState::handleEvent(const sf::Event& event)
 				GameSingleton::playSound(GameSingleton::mHitSound);
 				GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity).playAnimOnce(HumanComponent::Animation::HitIdle);
 				action = 0;
+
+				if (tutorialState == 1)
+				{
+					tutorialState++;
+				}
 			}
 			else if (event.mouseButton.button == sf::Mouse::Right)
 			{
@@ -142,11 +165,8 @@ bool GameState::handleEvent(const sf::Event& event)
 				{
 					validDirection = d.normalized().dotProduct(dNothing.normalized()) > 0.8f;
 				}
-				if (sqrNP < 0.1f)
-				{
-					validDirection = true;
-				}
-				if (sqrNP <= sqrCP && validDirection)
+				sf::FloatRect aabb = nothingPositionComponent.getTransform().transformRect(GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).body.getGlobalBounds());
+				if (validDirection && aabb.contains(en::toSF(cPos)))
 				{
 					if (action == 0)
 					{
@@ -154,8 +174,13 @@ bool GameState::handleEvent(const sf::Event& event)
 						{
 							GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).life -= GameSingleton::hitLife;
 							GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).hits++;
-							if (GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).hits >= 5)
+							if (GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).hits >= 3)
 							{
+								if (tutorialState == 2)
+								{
+									mText.handleEvent(NothingTextSystem::Event::Tutorial3);
+									tutorialState++;
+								}
 								GameSingleton::playSound(GameSingleton::mKnockoutSound);
 								GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).playAnimLoop(HumanComponent::Animation::KO);
 								GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).hits = 0;
@@ -216,6 +241,15 @@ bool GameState::handleEvent(const sf::Event& event)
 		}
 	}
 
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
+	{
+		GameSingleton::clear();
+		getApplication().getAudio().stop();
+
+		getApplication().clearStates();
+		getApplication().pushState<MenuState>();
+	}
+
 	return false;
 }
 
@@ -237,6 +271,8 @@ bool GameState::update(en::Time dt)
 	auto& nothingPositionComponent = GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity);
 	auto& nothingVelocityComponent = GameSingleton::world.get<VelocityComponent>(GameSingleton::nothingEntity);
 
+	mText.update(dt);
+
 	// AI components
 
 	auto viewDoor = GameSingleton::world.view<DoorComponent, en::PositionComponent>();
@@ -244,13 +280,16 @@ bool GameState::update(en::Time dt)
 	{
 		auto& doorComponent = viewDoor.get<DoorComponent>(entity);
 		auto& positionComponent = viewDoor.get<en::PositionComponent>(entity);
-		doorComponent.cooldownSpawnTimer -= dt;
-		if (doorComponent.cooldownSpawnTimer <= en::Time::Zero)
+		if (doorComponent.enabled)
 		{
-			doorComponent.cooldownSpawnTimer = en::seconds(en::Random::get<en::F32>(15.0f, 25.0f));
-			const sf::Vector2f& p = positionComponent.getPosition();
-			EntityPrefab::createAI(GameSingleton::world, p.x, p.y + 16.0f);
-			GameSingleton::playSound(GameSingleton::mSelectSound);
+			doorComponent.cooldownSpawnTimer -= dt;
+			if (doorComponent.cooldownSpawnTimer <= en::Time::Zero)
+			{
+				doorComponent.cooldownSpawnTimer = en::seconds(en::Random::get<en::F32>(15.0f, 25.0f));
+				const sf::Vector2f& p = positionComponent.getPosition();
+				EntityPrefab::createAI(GameSingleton::world, p.x, p.y + 16.0f);
+				//GameSingleton::playSound(GameSingleton::mSelectSound);
+			}
 		}
 	}
 
@@ -296,9 +335,25 @@ bool GameState::update(en::Time dt)
 
 	movements(dt);
 
+	const sf::Vector2f& playerUpdatePos = GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition();
+
+	// Pieces
+	auto viewPieces = GameSingleton::world.view<PieceComponent, en::PositionComponent>();
+	for (auto entity : viewPieces)
+	{
+		auto& piece = viewPieces.get<PieceComponent>(entity);
+		auto& position = viewPieces.get<en::PositionComponent>(entity);
+		const en::Vector2f d = en::toEN(position.getPosition() - playerUpdatePos);
+		if (d.getSquaredLength() < 16.0f * 16.0f)
+		{
+			GameSingleton::playSound(GameSingleton::mPieceGetSound);
+			GameSingleton::world.destroy(entity);
+		}
+	}
+
 	// Cursor/View animation
 	const en::Vector2f cPos = getAdjustedCursorPos();
-	const en::Vector2f pPos = en::toEN(GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition()) + en::Vector2f(0, -8);
+	const en::Vector2f pPos = en::toEN(playerUpdatePos) + en::Vector2f(0, -8);
 	const en::Vector2f lPos = en::Vector2f::lerp(cPos, pPos, 0.6f);
 	GameSingleton::mView.setCenter(lPos);
 	mCursor.setPosition(en::toSF(cPos));
@@ -433,12 +488,18 @@ void GameState::render(sf::RenderTarget& target)
 			{
 				target.draw(GameSingleton::world.get<PropsComponent>(entity).sprite, states);
 			}
+			if (GameSingleton::world.has<PieceComponent>(entity))
+			{
+				target.draw(GameSingleton::world.get<PieceComponent>(entity).sprite, states);
+			}
 		}
 	}
 
 	target.draw(mCursor);
 
 	getWindow().applyMainView();
+
+	mText.render(target);
 }
 
 en::Window& GameState::getWindow()
@@ -562,6 +623,11 @@ void GameState::velocities(en::Time dt)
 	if (playerHumanComponent.currentAnimation != HumanComponent::Animation::Chop)
 	{
 		playerVelocityComponent.velocity = playerPlayerComponent.getVelocity();
+		if (playerVelocityComponent.velocity.getSquaredLength() > 0.1f && tutorialState == 0)
+		{
+			mText.handleEvent(NothingTextSystem::Event::Tutorial2);
+			tutorialState++;
+		}
 	}
 	else
 	{
@@ -927,11 +993,18 @@ void GameState::movements(en::Time dt)
 
 						if (!props.destructed)
 						{
-							en::Vector2f d = newPos - en::toEN(position.getPosition());
+							const sf::Vector2f& pos = position.getPosition();
+							en::Vector2f d = newPos - en::toEN(pos);
 							if (d.getSquaredLength() < 11.5f * 11.5f)
 							{
 								wasAProps = true;
 								props.destruct();
+
+								if (mPieceGenerator.get<en::U32>(0, 4) == 1)
+								{
+									GameSingleton::playSound(GameSingleton::mPieceSound);
+									EntityPrefab::createPiece(GameSingleton::world, pos.x, pos.y);
+								}
 							}
 						}
 					}
@@ -990,12 +1063,6 @@ void GameState::movements(en::Time dt)
 void GameState::devEvent(const sf::Event& event)
 {
 	ENLIVE_PROFILE_FUNCTION();
-
-	// Screenshot
-	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1)
-	{
-		getWindow().screenshot();
-	}
 
 	// Config
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F2)

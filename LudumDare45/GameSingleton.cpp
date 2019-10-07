@@ -11,6 +11,9 @@
 en::Application* GameSingleton::application;
 
 bool GameSingleton::mFirstIntroDone = false;
+bool GameSingleton::mFirstThrowNothingDone = false;
+
+bool GameSingleton::soundEnabled = true;
 
 en::Tileset GameSingleton::mTileset;
 GameMap GameSingleton::mMap;
@@ -34,6 +37,8 @@ en::ResourceId GameSingleton::mThrowSound;
 en::ResourceId GameSingleton::mDestrPropsSound;
 en::ResourceId GameSingleton::mNothingWallSound;
 en::ResourceId GameSingleton::mNothingAISound;
+en::ResourceId GameSingleton::mPieceSound;
+en::ResourceId GameSingleton::mPieceGetSound;
 
 std::vector<en::Animation> GameSingleton::mAnimations;
 
@@ -56,6 +61,7 @@ void GameSingleton::loadResourcesMain(en::Application& application)
 	// Font
 	const std::string fontPath = "Assets/Fonts/";
 	mFont = application.getFonts().create("sansation", en::FontLoader::loadFromFile(fontPath + "ErasBoldITC.ttf"));
+	application.getFonts().create("pix", en::FontLoader::loadFromFile(fontPath + "EndlessBossBattle.ttf"));
 }
 
 void GameSingleton::loadResourcesGame()
@@ -65,6 +71,9 @@ void GameSingleton::loadResourcesGame()
 	mNothingTexture = application->getTextures().create("nothingtexture", en::TextureLoader::loadFromFile(texturePath + "perso_nothing.png"));
 	mEverythingTexture = application->getTextures().create("everythingtexture", en::TextureLoader::loadFromFile(texturePath + "perso_everything.png"));
 	mAITexture = application->getTextures().create("aitexture", en::TextureLoader::loadFromFile(texturePath + "perso_IA.png"));
+	application->getTextures().create("buble", en::TextureLoader::loadFromFile(texturePath + "buble.png"));
+	application->getTextures().create("coin", en::TextureLoader::loadFromFile(texturePath + "coin.png"));
+	application->getTextures().create("cursor", en::TextureLoader::loadFromFile(texturePath + "cursor.png"));
 
 	// Sound
 	const std::string soundPath = "Assets/Sounds/";
@@ -76,10 +85,16 @@ void GameSingleton::loadResourcesGame()
 	mDestrPropsSound = application->getAudio().createSound("props", soundPath + "Props.wav");
 	mNothingWallSound = application->getAudio().createSound("nwall", soundPath + "Nwall.wav");
 	mNothingAISound = application->getAudio().createSound("nai", soundPath + "Nia.wav");
-}
+	mPieceSound = application->getAudio().createSound("piece", soundPath + "Piece.wav");
+	mPieceGetSound = application->getAudio().createSound("pieceGet", soundPath + "PieceGet.wav");
 
-void GameSingleton::loadAnimations()
-{
+	// Tileset & Map
+	GameSingleton::mTileset.setFirstGid(1);
+	GameSingleton::mTileset.setTileSize(en::Vector2i(16, 16));
+	GameSingleton::mTileset.setTileCount(160);
+	GameSingleton::mTileset.setColumns(8);
+	GameSingleton::mTileset.setImageSource("Assets/Textures/tileset.png");
+
 	// Idle
 	en::Animation animIdleBG;
 	animIdleBG.addFrame(en::Animation::Frame(0, en::Recti(0, 0, 16, 16), en::seconds(0.3f)));
@@ -403,16 +418,43 @@ void GameSingleton::loadAnimations()
 	mAnimations.push_back(animThrowHD);
 }
 
+void GameSingleton::setCursor(bool enable)
+{
+	if (enable)
+	{
+		application->getWindow().setCursor(en::Window::Cursor::Custom);
+		application->getWindow().setCursorTexture("Assets/Textures/cursor.png");
+		application->getWindow().setCursorTextureRect(sf::IntRect(0, 0, 32, 32));
+		application->getWindow().setCursorOrigin({ 16,16 });
+		application->getWindow().setCursorScale({ 1.2f,1.2f });
+		application->getWindow().setCursorRotation(45.f);
+	}
+	else
+	{
+		application->getWindow().setCursor(en::Window::Cursor::None);
+	}
+}
+
 void GameSingleton::clear()
 {
+	world.reset();
+	playerEntity = entt::null;
+	nothingEntity = entt::null;
+
+#ifdef ENLIVE_ENABLE_IMGUI
+	currentEntity = entt::null;
+#endif
 }
 
 void GameSingleton::playSound(en::ResourceId r)
 {
-	en::AudioSystem::SoundPtr soundPtr = application->getAudio().playSound(r);
-	if (soundPtr != nullptr)
+	if (GameSingleton::soundEnabled)
 	{
-		soundPtr->setVolume(40.0f);
+		en::AudioSystem::SoundPtr soundPtr = application->getAudio().playSound(r);
+		if (soundPtr != nullptr)
+		{
+			soundPtr->setVolume(40.0f);
+		}
 	}
 }
 

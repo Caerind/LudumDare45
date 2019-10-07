@@ -1,5 +1,5 @@
 #include <Enlivengine/System/Log.hpp>
-
+#include <Enlivengine/System/Assert.hpp>
 #include <Enlivengine/System/String.hpp>
 
 #ifdef ENLIVE_ENABLE_IMGUI

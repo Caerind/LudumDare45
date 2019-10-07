@@ -53,6 +53,9 @@ en::Vector2f GameMap::coordsToWorld(const en::Vector2i& coords)
 
 void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* tileset /*= nullptr*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
 {
+	mTileGrid.clear();
+	mCollisions.clear();
+
 	mMapID = mapID;
 	mSpawnPoint = spawnPoint;
 	mTileset = tileset;
@@ -79,6 +82,7 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 	mSize = size;
 
 	en::U32 max = size.x * size.y;
+	mTileGrid.resize(max * 4); // TODO : Why 4 ?
 	mCollisions.resize(max);
 	for (en::U32 i = 0; i < max; i++)
 	{

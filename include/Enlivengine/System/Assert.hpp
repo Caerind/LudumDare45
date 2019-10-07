@@ -15,5 +15,5 @@
 			for (;;) {} \
 		}
 #else
-	#define assert
+	#define assert(expr) 
 #endif

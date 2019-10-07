@@ -5,7 +5,6 @@
 #include <Enlivengine/Application/Window.hpp>
 
 #include "GameState.hpp"
-#include "PreGameState.hpp"
 
 class MenuState : public en::State
 {
@@ -22,14 +21,18 @@ class MenuState : public en::State
 			buttonPlay.setPosition(512 - 150, 384);
 			buttonPlay.setScale(3.5f, 3.5f);
 
-			if (GameSingleton::mFirstIntroDone)
-			{
-				getApplication().getTextures().create("menucontinuebutton", en::TextureLoader::loadFromFile("Assets/Textures/PlayButtons.png"));
-				buttonContinue.setTexture(getApplication().getTextures().get("menucontinuebutton"));
-				buttonContinue.setTextureRect(sf::IntRect(0, 0, 96, 32));
-				buttonContinue.setPosition(512 - 150, 384 + 100);
-				buttonContinue.setScale(3.5f, 3.5f);
-			}
+			/*
+			getApplication().getTextures().create("menucontinuebutton", en::TextureLoader::loadFromFile("Assets/Textures/PlayButtons.png"));
+			buttonContinue.setTexture(getApplication().getTextures().get("menucontinuebutton"));
+			buttonContinue.setTextureRect(sf::IntRect(0, 0, 96, 32));
+			buttonContinue.setPosition(512 - 150, 384 + 100);
+			buttonContinue.setScale(3.5f, 3.5f);
+			*/
+
+			buttonSound.setTexture(getApplication().getTextures().get("menuplaybutton"));
+			buttonSound.setTextureRect(sf::IntRect(((GameSingleton::soundEnabled) ? 0 : 18), 114, 14, 14));
+			buttonSound.setPosition(512 + 300, 384 + 35);
+			buttonSound.setScale(3.5f, 3.5f);
 		}
 
 		bool handleEvent(const sf::Event& event) 
@@ -44,12 +47,20 @@ class MenuState : public en::State
 				if (buttonPlay.getGlobalBounds().contains(p))
 				{
 					getApplication().clearStates();
-					getApplication().pushState<PreGameState>();
+					getApplication().pushState<GameState>();
 				}
-				else if (buttonContinue.getGlobalBounds().contains(p))
+				/*else if (buttonContinue.getGlobalBounds().contains(p))
 				{
 					getApplication().clearStates();
 					getApplication().pushState<GameState>();
+				}*/
+				else if (buttonSound.getGlobalBounds().contains(p))
+				{
+					GameSingleton::soundEnabled = !GameSingleton::soundEnabled;
+					if (!GameSingleton::soundEnabled)
+					{
+						getApplication().getAudio().stop();
+					}
 				}
 			}
 			return false; 
@@ -67,6 +78,7 @@ class MenuState : public en::State
 				buttonPlay.setTextureRect(sf::IntRect(0, 0, 96, 32));
 			}
 
+			/*
 			if (buttonContinue.getGlobalBounds().contains(p))
 			{
 				buttonContinue.setTextureRect(sf::IntRect(0, 32, 96, 32));
@@ -74,6 +86,16 @@ class MenuState : public en::State
 			else
 			{
 				buttonContinue.setTextureRect(sf::IntRect(0, 0, 96, 32));
+			}
+			*/
+
+			if (GameSingleton::soundEnabled)
+			{
+				buttonSound.setTextureRect(sf::IntRect(0, 114, 14, 14));
+			}
+			else
+			{
+				buttonSound.setTextureRect(sf::IntRect(18, 114, 14, 14));
 			}
 
 			return false;
@@ -83,14 +105,18 @@ class MenuState : public en::State
 		{
 			target.draw(background);
 			target.draw(buttonPlay);
+			/*
 			if (GameSingleton::mFirstIntroDone)
 			{
 				target.draw(buttonContinue);
 			}
+			*/
+			target.draw(buttonSound);
 		}
 
 	private:
 		sf::Sprite background;
 		sf::Sprite buttonPlay;
 		sf::Sprite buttonContinue;
+		sf::Sprite buttonSound;
 };

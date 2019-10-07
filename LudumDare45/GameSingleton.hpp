@@ -22,7 +22,8 @@ class GameSingleton
 	public:
 		static void loadResourcesMain(en::Application& application);
 		static void loadResourcesGame();
-		static void loadAnimations();
+
+		static void setCursor(bool enable);
 
 		static void clear();
 
@@ -31,6 +32,9 @@ class GameSingleton
 		static en::Application* application;
 
 		static bool mFirstIntroDone;
+		static bool mFirstThrowNothingDone;
+
+		static bool soundEnabled;
 
 		static en::Tileset mTileset;
 		static GameMap mMap;
@@ -54,6 +58,8 @@ class GameSingleton
 		static en::ResourceId mDestrPropsSound;
 		static en::ResourceId mNothingWallSound;
 		static en::ResourceId mNothingAISound;
+		static en::ResourceId mPieceSound;
+		static en::ResourceId mPieceGetSound;
 
 		static std::vector<en::Animation> mAnimations;
 

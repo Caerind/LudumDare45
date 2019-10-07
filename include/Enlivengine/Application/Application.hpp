@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Enlivengine/System/Time.hpp>
+#include <Enlivengine/System/Config.hpp>
 #include <Enlivengine/System/Profiler.hpp>
 
 #include <Enlivengine/Application/Window.hpp>

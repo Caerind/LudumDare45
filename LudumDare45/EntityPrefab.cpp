@@ -29,8 +29,10 @@ bool EntityPrefab::createEntity(entt::registry& world, en::F32 x, en::F32 y)
 bool EntityPrefab::createPlayer(entt::registry& world, entt::entity& playerEntity)
 {
 	playerEntity = world.create();
+#ifdef ENLIVE_DEBUG
 	auto& nameComponent = world.assign<en::NameComponent>(playerEntity);
 	nameComponent.insert(0, "Player");
+#endif
 	auto& positionComponent = world.assign<en::PositionComponent>(playerEntity);
 	auto& renderableComponent = world.assign<en::RenderableComponent>(playerEntity);
 	auto& playerComponent = world.assign<PlayerComponent>(playerEntity);
@@ -45,8 +47,10 @@ bool EntityPrefab::createPlayer(entt::registry& world, entt::entity& playerEntit
 bool EntityPrefab::createNothing(entt::registry& world, entt::entity& nothingEntity)
 {
 	nothingEntity = world.create();
+#ifdef ENLIVE_DEBUG
 	auto& nameComponent = world.assign<en::NameComponent>(nothingEntity);
 	nameComponent.insert(0, "Nothing");
+#endif
 	auto& positionComponent = world.assign<en::PositionComponent>(nothingEntity);
 	auto& renderableComponent = world.assign<en::RenderableComponent>(nothingEntity);
 	auto& nothingComponent = world.assign<NothingComponent>(nothingEntity);
@@ -66,10 +70,12 @@ bool EntityPrefab::createNothing(entt::registry& world, entt::entity& nothingEnt
 
 bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::Tileset& tileset)
 {
-	static int propsCounter = 0;
 	auto entity = world.create();
+#ifdef ENLIVE_DEBUG
+	static int propsCounter = 0;
 	auto& nameComponent = world.assign<en::NameComponent>(entity);
 	nameComponent.insert(0, "Props-" + std::to_string(propsCounter++));
+#endif
 	auto& positionComponent = world.assign<en::PositionComponent>(entity);
 	positionComponent.setPosition(x + 8, y + 8);
 	auto& renderableComponent = world.assign<en::RenderableComponent>(entity);
@@ -85,7 +91,8 @@ bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::
 	if (gid == 113)
 	{
 		auto& doorComponent = world.assign<DoorComponent>(entity);
-		doorComponent.cooldownSpawnTimer = en::seconds(en::Random::get<en::I32>(8,20));
+		doorComponent.enabled = GameSingleton::mFirstThrowNothingDone;
+		doorComponent.cooldownSpawnTimer = en::seconds(en::Random::get<en::I32>(8, 20));
 	}
 
 	return true;
@@ -100,8 +107,10 @@ bool EntityPrefab::createAI(entt::registry& world, en::F32 x, en::F32 y)
 
 	static int aiCounter = 0;
 	auto entity = world.create();
+#ifdef ENLIVE_DEBUG
 	auto& nameComponent = world.assign<en::NameComponent>(entity);
 	nameComponent.insert(0, "AI-" + std::to_string(aiCounter++));
+#endif
 	auto& positionComponent = world.assign<en::PositionComponent>(entity);
 	positionComponent.setPosition(x, y);
 	auto& renderableComponent = world.assign<en::RenderableComponent>(entity);
@@ -117,5 +126,25 @@ bool EntityPrefab::createAI(entt::registry& world, en::F32 x, en::F32 y)
 	humanComponent.frameTime = en::Time::Zero;
 	humanComponent.currentFrame = 0;
 	auto& velocityComponent = world.assign<VelocityComponent>(entity);
+	return true;
+}
+
+bool EntityPrefab::createPiece(entt::registry& world, en::F32 x, en::F32 y)
+{
+	auto entity = world.create();
+#ifdef ENLIVE_DEBUG
+	static int pieceCounter = 0;
+	auto& nameComponent = world.assign<en::NameComponent>(entity);
+	nameComponent.insert(0, "Piece-" + std::to_string(pieceCounter++));
+#endif
+	auto& positionComponent = world.assign<en::PositionComponent>(entity);
+	positionComponent.setPosition(x, y);
+	auto& renderableComponent = world.assign<en::RenderableComponent>(entity);
+	auto& pieceComponent = world.assign<PieceComponent>(entity);
+	pieceComponent.sprite.setScale(sf::Vector2f(0.3f, 0.3f));
+	pieceComponent.sprite.setOrigin(sf::Vector2f(2, 2));
+	pieceComponent.sprite.setTexture(GameSingleton::application->getTextures().get("coin"));
+	pieceComponent.sprite.setTextureRect(sf::IntRect(0, 0, 16, 16));
+	pieceComponent.value = 1;
 	return true;
 }

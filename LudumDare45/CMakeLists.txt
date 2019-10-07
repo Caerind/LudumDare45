@@ -16,10 +16,11 @@ set(SRC_LUDUMDARE45
     ${PATH_LUDUMDARE45}/IntroState.hpp
     ${PATH_LUDUMDARE45}/MenuState.hpp
     ${PATH_LUDUMDARE45}/PreGameState.hpp
+    ${PATH_LUDUMDARE45}/NothingTextSystem.hpp
     ${PATH_LUDUMDARE45}/imgui_entt_entity_editor.hpp
     ${PATH_LUDUMDARE45}/main.cpp
 )
 source_group("" FILES ${SRC_LUDUMDARE45})
 
 add_executable(LudumDare45 ${SRC_LUDUMDARE45})
-target_link_libraries(LudumDare45 sfml-system OpenGL::GL sfml-window sfml-graphics sfml-network sfml-audio EnlivengineThirdParty EnlivengineLibrary)
+target_link_libraries(LudumDare45 sfml-system OpenGL::GL sfml-main sfml-window sfml-graphics sfml-network sfml-audio EnlivengineThirdParty EnlivengineLibrary)

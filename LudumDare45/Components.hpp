@@ -87,7 +87,8 @@ private:
 		currentAnimation = anim;
 		frameTime = en::Time::Zero;
 		currentFrame = 0; 
-		body.setTextureRect(en::toSF(GameSingleton::mAnimations[getAnimIdx()].getFrame(currentFrame).rect));
+		en::U32 animIdx = getAnimIdx();
+		body.setTextureRect(en::toSF(GameSingleton::mAnimations[animIdx].getFrame(currentFrame).rect));
 	}
 };
 
@@ -115,5 +116,12 @@ struct PropsComponent
 
 struct DoorComponent
 {
+	bool enabled{ false };
 	en::Time cooldownSpawnTimer{ en::Time::Zero };
+};
+
+struct PieceComponent
+{
+	sf::Sprite sprite;
+	en::U32 value;
 };

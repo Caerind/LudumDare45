@@ -1,11 +1,14 @@
 #include "GameConfig.hpp"
 
-std::string GameConfig::configFilename = "Assets/Data/config.ini";
-en::ParserIni GameConfig::mIni;
-bool GameConfig::showWindow = false;
-
 #ifdef ENLIVE_ENABLE_IMGUI
 #include <imgui/imgui.h>
+#endif
+
+std::string GameConfig::configFilename = "Assets/Data/config.ini";
+en::ParserIni GameConfig::mIni;
+
+#ifdef ENLIVE_ENABLE_IMGUI
+bool GameConfig::showWindow = false;
 #endif
 
 std::string GameConfig::getS(const std::string & index)

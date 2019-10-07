@@ -9,6 +9,7 @@
 
 #include "GameConfig.hpp"
 #include "GameSingleton.hpp"
+#include "NothingTextSystem.hpp"
 
 class GameState : public en::State
 {
@@ -39,6 +40,9 @@ class GameState : public en::State
 #endif // ENLIVE_DEBUG
 
 	private:
+		en::RandomEngine mPieceGenerator;
+		en::U32 tutorialState;
+		NothingTextSystem mText;
 		en::Time mCursorTime;
 		en::U32 mCursorFrame;
 		sf::Sprite mCursor;
