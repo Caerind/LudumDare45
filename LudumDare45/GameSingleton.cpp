@@ -8,6 +8,8 @@
 #include <Enlivengine/Graphics/DebugDraw.hpp>
 #endif
 
+#include <Enlivengine/Graphics/SFMLResources.hpp>
+
 en::Application* GameSingleton::application;
 
 bool GameSingleton::mFirstIntroDone = false;
@@ -23,22 +25,22 @@ entt::registry GameSingleton::world;
 entt::entity GameSingleton::playerEntity;
 entt::entity GameSingleton::nothingEntity;
 
-en::ResourceId GameSingleton::mFont;
+en::FontPtr GameSingleton::mFont;
 
-en::ResourceId GameSingleton::mNothingTexture;
-en::ResourceId GameSingleton::mEverythingTexture;
-en::ResourceId GameSingleton::mAITexture;
+en::TexturePtr GameSingleton::mNothingTexture;
+en::TexturePtr GameSingleton::mEverythingTexture;
+en::TexturePtr GameSingleton::mAITexture;
 
-en::ResourceId GameSingleton::mChopSound;
-en::ResourceId GameSingleton::mHitSound;
-en::ResourceId GameSingleton::mKnockoutSound;
-en::ResourceId GameSingleton::mSelectSound;
-en::ResourceId GameSingleton::mThrowSound;
-en::ResourceId GameSingleton::mDestrPropsSound;
-en::ResourceId GameSingleton::mNothingWallSound;
-en::ResourceId GameSingleton::mNothingAISound;
-en::ResourceId GameSingleton::mPieceSound;
-en::ResourceId GameSingleton::mPieceGetSound;
+en::SoundId GameSingleton::mChopSound;
+en::SoundId GameSingleton::mHitSound;
+en::SoundId GameSingleton::mKnockoutSound;
+en::SoundId GameSingleton::mSelectSound;
+en::SoundId GameSingleton::mThrowSound;
+en::SoundId GameSingleton::mDestrPropsSound;
+en::SoundId GameSingleton::mNothingWallSound;
+en::SoundId GameSingleton::mNothingAISound;
+en::SoundId GameSingleton::mPieceSound;
+en::SoundId GameSingleton::mPieceGetSound;
 
 std::vector<en::Animation> GameSingleton::mAnimations;
 
@@ -54,26 +56,25 @@ ImGuiEntityEditor<entt::registry> GameSingleton::worldEditor;
 bool GameSingleton::showWindow = false;
 #endif
 
-void GameSingleton::loadResourcesMain(en::Application& application)
+void GameSingleton::loadResourcesMain(en::Application& app)
 {
-	GameSingleton::application = &application;
+	GameSingleton::application = &app;
 
 	// Font
 	const std::string fontPath = "Assets/Fonts/";
-	mFont = application.getFonts().create("sansation", en::FontLoader::loadFromFile(fontPath + "ErasBoldITC.ttf"));
-	application.getFonts().create("pix", en::FontLoader::loadFromFile(fontPath + "EndlessBossBattle.ttf"));
+	mFont = app.getResourceManager().Create<en::Font>("pix", en::FontLoader::FromFile(fontPath + "EndlessBossBattle.ttf"));
 }
 
 void GameSingleton::loadResourcesGame()
 {
 	// Textures
 	const std::string texturePath = "Assets/Textures/";
-	mNothingTexture = application->getTextures().create("nothingtexture", en::TextureLoader::loadFromFile(texturePath + "perso_nothing.png"));
-	mEverythingTexture = application->getTextures().create("everythingtexture", en::TextureLoader::loadFromFile(texturePath + "perso_everything.png"));
-	mAITexture = application->getTextures().create("aitexture", en::TextureLoader::loadFromFile(texturePath + "perso_IA.png"));
-	application->getTextures().create("buble", en::TextureLoader::loadFromFile(texturePath + "buble.png"));
-	application->getTextures().create("coin", en::TextureLoader::loadFromFile(texturePath + "coin.png"));
-	application->getTextures().create("cursor", en::TextureLoader::loadFromFile(texturePath + "cursor.png"));
+	mNothingTexture = application->getResourceManager().Create<en::Texture>("nothingtexture", en::TextureLoader::FromFile(texturePath + "perso_nothing.png"));
+	mEverythingTexture = application->getResourceManager().Create<en::Texture>("everythingtexture", en::TextureLoader::FromFile(texturePath + "perso_everything.png"));
+	mAITexture = application->getResourceManager().Create<en::Texture>("aitexture", en::TextureLoader::FromFile(texturePath + "perso_IA.png"));
+	application->getResourceManager().Create<en::Texture>("buble", en::TextureLoader::FromFile(texturePath + "buble.png"));
+	application->getResourceManager().Create<en::Texture>("coin", en::TextureLoader::FromFile(texturePath + "coin.png"));
+	application->getResourceManager().Create<en::Texture>("cursor", en::TextureLoader::FromFile(texturePath + "cursor.png"));
 
 	// Sound
 	const std::string soundPath = "Assets/Sounds/";
@@ -446,7 +447,7 @@ void GameSingleton::clear()
 #endif
 }
 
-void GameSingleton::playSound(en::ResourceId r)
+void GameSingleton::playSound(en::ResourceID r)
 {
 	if (GameSingleton::soundEnabled)
 	{

@@ -12,11 +12,9 @@ class MenuState : public en::State
 		MenuState(en::StateManager& manager)
 			: en::State(manager)
 		{
-			getApplication().getTextures().create("menubg", en::TextureLoader::loadFromFile("Assets/Textures/background_menu.png"));
-			background.setTexture(getApplication().getTextures().get("menubg"));
+			background.setTexture(getApplication().getResourceManager().Create<en::Texture>("menubg", en::TextureLoader::FromFile("Assets/Textures/background_menu.png")).Get());
 
-			getApplication().getTextures().create("menuplaybutton", en::TextureLoader::loadFromFile("Assets/Textures/PlayButtons.png"));
-			buttonPlay.setTexture(getApplication().getTextures().get("menuplaybutton"));
+			buttonPlay.setTexture(getApplication().getResourceManager().Create<en::Texture>("menuplaybutton", en::TextureLoader::FromFile("Assets/Textures/PlayButtons.png")).Get());
 			buttonPlay.setTextureRect(sf::IntRect(0, 0, 96, 32));
 			buttonPlay.setPosition(512 - 150, 384);
 			buttonPlay.setScale(3.5f, 3.5f);
@@ -29,7 +27,7 @@ class MenuState : public en::State
 			buttonContinue.setScale(3.5f, 3.5f);
 			*/
 
-			buttonSound.setTexture(getApplication().getTextures().get("menuplaybutton"));
+			buttonSound.setTexture(getApplication().getResourceManager().Get<en::Texture>("menuplaybutton").Get());
 			buttonSound.setTextureRect(sf::IntRect(((GameSingleton::soundEnabled) ? 0 : 18), 114, 14, 14));
 			buttonSound.setPosition(512 + 300, 384 + 35);
 			buttonSound.setScale(3.5f, 3.5f);
@@ -37,10 +35,6 @@ class MenuState : public en::State
 
 		bool handleEvent(const sf::Event& event) 
 		{
-			if (event.type == sf::Event::Closed)
-			{
-				getApplication().stop();
-			}
 			if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 			{
 				const sf::Vector2f p((float)event.mouseButton.x, (float)event.mouseButton.y);
@@ -68,6 +62,8 @@ class MenuState : public en::State
 
 		bool update(en::Time dt)
 		{
+			ENLIVE_UNUSED(dt);
+
 			const sf::Vector2f p = static_cast<sf::Vector2f>(sf::Mouse::getPosition(getApplication().getWindow().getHandle()));
 			if (buttonPlay.getGlobalBounds().contains(p))
 			{

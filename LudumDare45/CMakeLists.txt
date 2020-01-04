@@ -1,26 +1,25 @@
-set(PATH_LUDUMDARE45 ${PROJECT_SOURCE_DIR}/LudumDare45)
 set(SRC_LUDUMDARE45
-	${PATH_LUDUMDARE45}/Components.hpp
-	${PATH_LUDUMDARE45}/Components.cpp
-	${PATH_LUDUMDARE45}/EditorComponents.hpp
-    ${PATH_LUDUMDARE45}/EntityPrefab.hpp
-    ${PATH_LUDUMDARE45}/EntityPrefab.cpp
-    ${PATH_LUDUMDARE45}/GameConfig.hpp
-    ${PATH_LUDUMDARE45}/GameConfig.cpp
-    ${PATH_LUDUMDARE45}/GameMap.hpp
-    ${PATH_LUDUMDARE45}/GameMap.cpp
-    ${PATH_LUDUMDARE45}/GameSingleton.hpp
-    ${PATH_LUDUMDARE45}/GameSingleton.cpp
-    ${PATH_LUDUMDARE45}/GameState.hpp
-    ${PATH_LUDUMDARE45}/GameState.cpp
-    ${PATH_LUDUMDARE45}/IntroState.hpp
-    ${PATH_LUDUMDARE45}/MenuState.hpp
-    ${PATH_LUDUMDARE45}/PreGameState.hpp
-    ${PATH_LUDUMDARE45}/NothingTextSystem.hpp
-    ${PATH_LUDUMDARE45}/imgui_entt_entity_editor.hpp
-    ${PATH_LUDUMDARE45}/main.cpp
+	Components.hpp
+	Components.cpp
+	EditorComponents.hpp
+    EntityPrefab.hpp
+    EntityPrefab.cpp
+    GameConfig.hpp
+    GameConfig.cpp
+    GameMap.hpp
+    GameMap.cpp
+    GameSingleton.hpp
+    GameSingleton.cpp
+    GameState.hpp
+    GameState.cpp
+    IntroState.hpp
+    MenuState.hpp
+    PreGameState.hpp
+    NothingTextSystem.hpp
+    imgui_entt_entity_editor.hpp
+    main.cpp
 )
 source_group("" FILES ${SRC_LUDUMDARE45})
 
 add_executable(LudumDare45 ${SRC_LUDUMDARE45})
-target_link_libraries(LudumDare45 sfml-system OpenGL::GL sfml-main sfml-window sfml-graphics sfml-network sfml-audio EnlivengineThirdParty EnlivengineLibrary)
+target_link_libraries(LudumDare45 PRIVATE Enlivengine)

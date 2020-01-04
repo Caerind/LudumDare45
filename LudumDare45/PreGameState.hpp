@@ -12,20 +12,10 @@ class PreGameState : public en::State
 		PreGameState(en::StateManager& manager)
 			: en::State(manager)
 		{
-			getApplication().getTextures().create("atmog", en::TextureLoader::loadFromFile("Assets/Textures/atmog.png"));
-			background.setTexture(getApplication().getTextures().get("atmog"));
+			background.setTexture(getApplication().getResourceManager().Create<en::Texture>("atmog", en::SFMLResourcesLoader<en::Texture>::FromFile("Assets/Textures/atmog.png")).Get());
 
 			accumulator = en::Time::Zero;
 			imageIndex = 0;
-		}
-
-		bool handleEvent(const sf::Event& event)
-		{
-			if (event.type == sf::Event::Closed)
-			{
-				getApplication().stop();
-			}
-			return false;
 		}
 
 		bool update(en::Time dt)

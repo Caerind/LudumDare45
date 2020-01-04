@@ -9,15 +9,15 @@
 #include "GameState.hpp"
 #include "IntroState.hpp"
 
-int main(int argc, char** argv)
+int main()
 {
 	en::LogManager::initialize();
 
 	en::Application app;
 	app.getWindow().create(sf::VideoMode(1024, 768), "StoryOfNothing", sf::Style::Titlebar | sf::Style::Close);
-	app.getWindow().setScreenshotPath("Assets/Screenshots/");
-	app.getWindow().getMainView().setCenter(512.0f, 384.0f);
-	app.getWindow().getMainView().setSize(en::Vector2f(1024, 768));
+	app.getWindow().getMainView().setCenter({ 512.0f, 384.0f });
+	app.getWindow().getMainView().setSize({ 1024.0f, 768.0f });
+	app.getScreenshotSystem().setScreenshotPath("");
 
 	GameSingleton::loadResourcesMain(app);
 	GameSingleton::loadResourcesGame();

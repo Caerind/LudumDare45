@@ -10,21 +10,21 @@
 class NothingTextSystem
 {
 	public:
-		NothingTextSystem(sf::Texture& texture, sf::Font& font)
+		NothingTextSystem(en::ResourcePtr<en::Texture> texture, en::ResourcePtr<en::Font> font)
 		{
 			mRandom.setSeed(87645);
 
-			sf::Vector2f scale{ 5.3334f, 4.f };
+			sf::Vector2f scale{ 5.3334f, 4.0f };
 
-			mBackground.setTexture(texture);
+			mBackground.setTexture(texture.Get());
 			mBackground.setScale(scale);
 
 			en::F32 height = mBackground.getGlobalBounds().height;
 
-			mBackground.setPosition(sf::Vector2f(0.f, 768 - height));
+			mBackground.setPosition(sf::Vector2f(0.f, 768.0f - height));
 
-			mText.setFont(font);
-			mText.setPosition(sf::Vector2f(32.f, 768.f - height * 0.6));
+			mText.setFont(font.Get());
+			mText.setPosition(sf::Vector2f(32.f, 768.f - height * 0.6f));
 			mText.setScale(sf::Vector2f{ 1.f, 1.f });
 			mText.setString("");
 			mText.setCharacterSize(25);

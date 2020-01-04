@@ -27,7 +27,7 @@ class GameSingleton
 
 		static void clear();
 
-		static void playSound(en::ResourceId r);
+		static void playSound(en::ResourceID r);
 
 		static en::Application* application;
 
@@ -44,22 +44,22 @@ class GameSingleton
 		static entt::entity playerEntity;
 		static entt::entity nothingEntity;
 
-		static en::ResourceId mFont;
+		static en::FontPtr mFont;
 
-		static en::ResourceId mNothingTexture;
-		static en::ResourceId mEverythingTexture;
-		static en::ResourceId mAITexture;
+		static en::TexturePtr mNothingTexture;
+		static en::TexturePtr mEverythingTexture;
+		static en::TexturePtr mAITexture;
 
-		static en::ResourceId mChopSound;
-		static en::ResourceId mHitSound;
-		static en::ResourceId mKnockoutSound;
-		static en::ResourceId mSelectSound;
-		static en::ResourceId mThrowSound;
-		static en::ResourceId mDestrPropsSound;
-		static en::ResourceId mNothingWallSound;
-		static en::ResourceId mNothingAISound;
-		static en::ResourceId mPieceSound;
-		static en::ResourceId mPieceGetSound;
+		static en::SoundId mChopSound;
+		static en::SoundId mHitSound;
+		static en::SoundId mKnockoutSound;
+		static en::SoundId mSelectSound;
+		static en::SoundId mThrowSound;
+		static en::SoundId mDestrPropsSound;
+		static en::SoundId mNothingWallSound;
+		static en::SoundId mNothingAISound;
+		static en::SoundId mPieceSound;
+		static en::SoundId mPieceGetSound;
 
 		static std::vector<en::Animation> mAnimations;
 

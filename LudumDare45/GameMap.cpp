@@ -38,16 +38,17 @@ en::Vector2i GameMap::worldToCoords(const en::Vector2f& world)
 {
 	// TODO : 0 -0 issue
 	en::Vector2i c;
-	c.x = ((en::I32)world.x) / mTileSize.x;
-	c.y = ((en::I32)world.y) / mTileSize.y;
+	c.x = static_cast<en::I32>(world.x / mTileSize.x);
+	c.y = static_cast<en::I32>(world.y / mTileSize.y);
 	return c;
 }
 
 en::Vector2f GameMap::coordsToWorld(const en::Vector2i& coords)
 {
+	// TODO : 0 -0 issue
 	en::Vector2f p;
-	p.x = (en::F32)(coords.x * mTileSize.x);
-	p.y = (en::F32)(coords.y * mTileSize.y);
+	p.x = static_cast<en::F32>(coords.x * mTileSize.x);
+	p.y = static_cast<en::F32>(coords.y * mTileSize.y);
 	return p;
 }
 
@@ -81,7 +82,7 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 	xml.getAttribute("height", size.y);
 	mSize = size;
 
-	en::U32 max = size.x * size.y;
+	const en::U32 max = size.x * size.y;
 	mTileGrid.resize(max * 4); // TODO : Why 4 ?
 	mCollisions.resize(max);
 	for (en::U32 i = 0; i < max; i++)
@@ -106,7 +107,7 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 				return;
 			}
 			std::vector<en::U8> byteVector;
-			byteVector.reserve(size.x * size.y * 4);
+			byteVector.reserve(max * 4);
 			for (std::string::iterator i = data.begin(); i != data.end(); ++i)
 			{
 				byteVector.push_back(*i);
@@ -148,7 +149,7 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 					return;
 				}
 				std::vector<en::U8> byteVector;
-				byteVector.reserve(size.x * size.y * 4);
+				byteVector.reserve(max * 4);
 				for (std::string::iterator i = data.begin(); i != data.end(); ++i)
 				{
 					byteVector.push_back(*i);
@@ -193,15 +194,15 @@ std::string GameMap::getCode()
 	data.reserve(mSize.x * mSize.y * 4);
 	ensureUpdateGeometry();
 	en::Vector2i coords;
-	for (coords.y = 0; coords.y < mSize.y; coords.y++)
+	for (coords.y = 0; coords.y < mSize.y; ++coords.y)
 	{
-		for (coords.x = 0; coords.x < mSize.x; coords.x++)
+		for (coords.x = 0; coords.x < mSize.x; ++coords.x)
 		{
 			en::U32 id = mTileGrid[coords.x + coords.y * mSize.x];
-			data.push_back((en::U8)(id));
-			data.push_back((en::U8)(id >> 8));
-			data.push_back((en::U8)(id >> 16));
-			data.push_back((en::U8)(id >> 24));
+			data.push_back(static_cast<en::U8>(id));
+			data.push_back(static_cast<en::U8>(id >> 8));
+			data.push_back(static_cast<en::U8>(id >> 16));
+			data.push_back(static_cast<en::U8>(id >> 24));
 		}
 	}
 	if (!en::Compression::compress64(data))
@@ -243,8 +244,8 @@ bool GameMap::loadFromCode(const std::string& code)
 		if (mTileset != nullptr)
 		{
 			sf::Vertex* vertex(&mVertices[index * 4]);
-			sf::Vector2f pos(mTileset->toPos(gid));
-			en::Vector2f texSize(mTileset->getTileSize());
+			const sf::Vector2f pos(mTileset->toPos(gid));
+			const en::Vector2f texSize(static_cast<en::F32>(mTileset->getTileSize().x), static_cast<en::F32>(mTileset->getTileSize().y));
 			vertex[0].texCoords = pos;
 			vertex[1].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y);
 			vertex[2].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y + texSize.y);
@@ -265,7 +266,7 @@ en::U32 GameMap::getTileId(const en::Vector2i& coords)
 	if (0 <= coords.x && 0 <= coords.y && coords.x < mSize.x && coords.y < mSize.y)
 	{
 		ensureUpdateGeometry();
-		en::U32 index(coords.x + coords.y * mSize.x);
+		const en::U32 index(coords.x + coords.y * mSize.x);
 		if (index < mTileGrid.size())
 		{
 			return mTileGrid[index];
@@ -279,13 +280,13 @@ void GameMap::setTileId(const en::Vector2i& coords, en::U32 id)
 	if (0 <= coords.x && 0 <= coords.y && coords.x < mSize.x && coords.y < mSize.y)
 	{
 		ensureUpdateGeometry();
-		en::U32 index(coords.x + coords.y * mSize.x);
+		const en::U32 index(coords.x + coords.y * mSize.x);
 		mTileGrid[index] = id;
 		if (mTileset != nullptr)
 		{
 			sf::Vertex* vertex(&mVertices[index * 4]);
-			sf::Vector2f pos(mTileset->toPos(id));
-			en::Vector2f texSize(mTileset->getTileSize());
+			const sf::Vector2f pos(mTileset->toPos(id));
+			const en::Vector2f texSize(static_cast<en::F32>(mTileset->getTileSize().x), static_cast<en::F32>(mTileset->getTileSize().y));
 			vertex[0].texCoords = pos;
 			vertex[1].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y);
 			vertex[2].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y + texSize.y);
@@ -313,10 +314,7 @@ void GameMap::setTileset(en::Tileset* tileset)
 {
 	if (mTileset != tileset)
 	{
-		if ((tileset != nullptr && mTileset == nullptr) || (tileset != nullptr && mTileset != nullptr && tileset->getTileSize() != mTileset->getTileSize()))
-		{
-			mGeometryUpdated = false;
-		}
+		mGeometryUpdated = false;
 		mTileset = tileset;
 	}
 }
@@ -383,7 +381,7 @@ void GameMap::updateGeometry()
 	{
 		return;
 	}
-	sf::Vector2f texSize(toSF(en::Vector2f(mTileset->getTileSize())));
+	const en::Vector2f texSize(static_cast<en::F32>(mTileset->getTileSize().x), static_cast<en::F32>(mTileset->getTileSize().y));
 	mVertices.resize(mSize.x * mSize.y * 4);
 	mTileGrid.resize(mSize.x * mSize.y * 4); // TODO : Keep tile id already set in order
 	en::Vector2i coords;
@@ -392,13 +390,13 @@ void GameMap::updateGeometry()
 		for (coords.y = 0; coords.y < mSize.y; coords.y++)
 		{
 			// Get the position of the vertex
-			en::Vector2 pos = coordsToWorld(coords);
 			sf::Vertex* vertex = &mVertices[(coords.x + coords.y * mSize.x) * 4];
-			en::F32 delta = texSize.y - (en::F32)mTileSize.y;
+			const en::Vector2 pos = coordsToWorld(coords);
+			const en::F32 delta = texSize.y - static_cast<en::F32>(mTileSize.y);
 			vertex[0].position = sf::Vector2f(pos.x, pos.y - delta);
-			vertex[1].position = sf::Vector2f(pos.x + mTileSize.x, pos.y - delta);
-			vertex[2].position = sf::Vector2f(pos.x + mTileSize.x, pos.y + mTileSize.y);
-			vertex[3].position = sf::Vector2f(pos.x, pos.y + mTileSize.y);
+			vertex[1].position = sf::Vector2f(pos.x + static_cast<en::F32>(mTileSize.x), pos.y - delta);
+			vertex[2].position = sf::Vector2f(pos.x + static_cast<en::F32>(mTileSize.x), pos.y + static_cast<en::F32>(mTileSize.y));
+			vertex[3].position = sf::Vector2f(pos.x, pos.y + static_cast<en::F32>(mTileSize.y));
 		}
 	}
 	mGeometryUpdated = true;
@@ -419,8 +417,8 @@ void GameMap::ensureUpdateGeometry()
 
 void GameMap::updateRender()
 {
-	sf::Color color = sf::Color(255, 255, 255);
-	en::U32 size = mVertices.getVertexCount();
+	const sf::Color color = sf::Color(255, 255, 255);
+	const en::U32 size = static_cast<en::U32>(mVertices.getVertexCount());
 	for (en::U32 i = 0; i < size; i++)
 	{
 		mVertices[i].color = color;

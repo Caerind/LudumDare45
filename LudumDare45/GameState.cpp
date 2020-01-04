@@ -13,7 +13,7 @@
 
 GameState::GameState(en::StateManager& manager)
 	: en::State(manager)
-	, mText(GameSingleton::application->getTextures().get("buble"), GameSingleton::application->getFonts().get("pix"))
+	, mText(GameSingleton::application->getResourceManager().Get<en::Texture>("buble"), GameSingleton::mFont)
 	, mCursorFrame(0)
 {
 	GameSingleton::clear();
@@ -30,7 +30,7 @@ GameState::GameState(en::StateManager& manager)
 #endif
 
 	// mCursor
-	mCursor.setTexture(getApplication().getTextures().get("cursor"));
+	mCursor.setTexture(getApplication().getResourceManager().Get<en::Texture>("cursor").Get());
 	mCursor.setTextureRect(sf::IntRect(0, 0, 32, 32));
 	mCursor.setOrigin(16, 16);
 	mCursor.setScale(0.3f, 0.3f);
@@ -75,12 +75,6 @@ bool GameState::handleEvent(const sf::Event& event)
 {
 	ENLIVE_PROFILE_FUNCTION();
 
-	if (event.type == sf::Event::Closed)
-	{
-		getApplication().getAudio().stop();
-		getApplication().stop();
-	}
-
 #ifdef ENLIVE_DEBUG
 	devEvent(event);
 #endif
@@ -88,13 +82,13 @@ bool GameState::handleEvent(const sf::Event& event)
 	// Screenshot
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1)
 	{
-		getWindow().screenshot();
+		getApplication().getScreenshotSystem().screenshot(getWindow().getHandle());
 	}
 
 	bool clickHandled = false;
 	const en::Vector2f mPos = getApplication().getWindow().getCursorPositionView(GameSingleton::mView);
 	const en::Vector2f cPos = getAdjustedCursorPos();
-	const en::Vector2f pPos = en::toEN(GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition()) + en::Vector2f(0, -8);
+	const en::Vector2f pPos = en::toEN(GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition()) + en::Vector2f(0.0f, -8.0f);
 	const en::Vector2f d = cPos - pPos;
 
 	if (!clickHandled && event.type == sf::Event::MouseButtonPressed)
@@ -158,7 +152,7 @@ bool GameState::handleEvent(const sf::Event& event)
 				auto& nothingPositionComponent = GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity);
 
 				en::F32 sqrCP = d.getSquaredLength();
-				const en::Vector2f dNothing = en::toEN(nothingPositionComponent.getPosition() + sf::Vector2f(0, -8)) - pPos;
+				const en::Vector2f dNothing = en::toEN(nothingPositionComponent.getPosition() + sf::Vector2f(0.0f, -8.0f)) - pPos;
 				en::F32 sqrNP = dNothing.getSquaredLength();
 				bool validDirection = false;
 				if (sqrNP > 0.1f && sqrCP > 0.1f)
@@ -261,14 +255,9 @@ bool GameState::update(en::Time dt)
 	devUpdate(dt);
 #endif
 
-	auto& playerPlayerComponent = GameSingleton::world.get<PlayerComponent>(GameSingleton::playerEntity);
-	auto& playerHumanComponent = GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity);
-	auto& playerPositionComponent = GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity);
-	auto& playerVelocityComponent = GameSingleton::world.get<VelocityComponent>(GameSingleton::playerEntity);
-
 	auto& nothingNothingComponent = GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity);
 	auto& nothingHumanComponent = GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity);
-	auto& nothingPositionComponent = GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity);
+	//auto& nothingPositionComponent = GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity);
 	auto& nothingVelocityComponent = GameSingleton::world.get<VelocityComponent>(GameSingleton::nothingEntity);
 
 	mText.update(dt);
@@ -342,6 +331,7 @@ bool GameState::update(en::Time dt)
 	for (auto entity : viewPieces)
 	{
 		auto& piece = viewPieces.get<PieceComponent>(entity);
+		ENLIVE_UNUSED(piece);
 		auto& position = viewPieces.get<en::PositionComponent>(entity);
 		const en::Vector2f d = en::toEN(position.getPosition() - playerUpdatePos);
 		if (d.getSquaredLength() < 16.0f * 16.0f)
@@ -353,7 +343,7 @@ bool GameState::update(en::Time dt)
 
 	// Cursor/View animation
 	const en::Vector2f cPos = getAdjustedCursorPos();
-	const en::Vector2f pPos = en::toEN(playerUpdatePos) + en::Vector2f(0, -8);
+	const en::Vector2f pPos = en::toEN(playerUpdatePos) + en::Vector2f(0.0f, -8.0f);
 	const en::Vector2f lPos = en::Vector2f::lerp(cPos, pPos, 0.6f);
 	GameSingleton::mView.setCenter(lPos);
 	mCursor.setPosition(en::toSF(cPos));
@@ -449,6 +439,7 @@ void GameState::render(sf::RenderTarget& target)
 		for (auto entity : view)
 		{
 			const auto& renderable = view.get<en::RenderableComponent>(entity);
+			ENLIVE_UNUSED(renderable);
 			const auto& position = view.get<en::PositionComponent>(entity);
 
 			sf::RenderStates states;
@@ -510,7 +501,7 @@ en::Window& GameState::getWindow()
 en::Vector2f GameState::getAdjustedCursorPos()
 {
 	const en::Vector2f mPos = getApplication().getWindow().getCursorPositionView(GameSingleton::mView);
-	const en::Vector2f pPos = en::toEN(GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition()) + en::Vector2f(0, -8);
+	const en::Vector2f pPos = en::toEN(GameSingleton::world.get<en::PositionComponent>(GameSingleton::playerEntity).getPosition()) + en::Vector2f(0.0f, -8.0f);
 	en::Vector2f delta = mPos - pPos;
 	if (delta.getSquaredLength() > 20 * 20)
 	{
@@ -571,7 +562,7 @@ void GameState::velocities(en::Time dt)
 	auto& nothingNothingComponent = GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity);
 	auto& nothingPositionComponent = GameSingleton::world.get<en::PositionComponent>(GameSingleton::nothingEntity);
 	auto& nothingVelocityComponent = GameSingleton::world.get<VelocityComponent>(GameSingleton::nothingEntity);
-	auto& nothingHumanComponent = GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity);
+	//auto& nothingHumanComponent = GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity);
 
 	// AI
 	auto view = GameSingleton::world.view<VelocityComponent, AIComponent, HumanComponent, en::PositionComponent>();
@@ -595,7 +586,7 @@ void GameState::velocities(en::Time dt)
 				en::Vector2f randomVel;
 				randomVel.x = ai.randomEngine.get<en::F32>(-1.f, 1.f);
 				randomVel.y = ai.randomEngine.get<en::F32>(-1.f, 1.f);
-				velocity.velocity = 0.7f * (delta.normalized() * 0.7 + 0.3f * randomVel);
+				velocity.velocity = 0.7f * (delta.normalized() * 0.7f + 0.3f * randomVel);
 				ai.randomMvtTimer = ai.changeRandomMvtTime;
 			}
 		}
@@ -712,7 +703,7 @@ void GameState::directions()
 		if (entity == GameSingleton::playerEntity)
 		{
 			en::F32 angle = 0.0f;
-			en::Vector2f deltaView = getAdjustedCursorPos() - (en::toEN(playerPositionComponent.getPosition()) + en::Vector2f(0, -8));
+			en::Vector2f deltaView = getAdjustedCursorPos() - (en::toEN(playerPositionComponent.getPosition()) + en::Vector2f(0.0f, -8.0f));
 			if (deltaView.getSquaredLength() < 0.01f)
 			{
 				angle = 45;
@@ -945,13 +936,14 @@ void GameState::movements(en::Time dt)
 				{
 					bool hitAI = false;
 					auto viewAI = GameSingleton::world.view<en::PositionComponent, AIComponent, HumanComponent>();
-					for (auto entity : viewAI)
+					for (auto aiEntity : viewAI)
 					{
-						auto& position = viewAI.get<en::PositionComponent>(entity);
-						auto& ai = viewAI.get<AIComponent>(entity);
-						auto& human = viewAI.get<HumanComponent>(entity);
+						auto& aiPosition = viewAI.get<en::PositionComponent>(aiEntity);
+						auto& ai = viewAI.get<AIComponent>(aiEntity);
+						ENLIVE_UNUSED(ai);
+						auto& human = viewAI.get<HumanComponent>(aiEntity);
 
-						const sf::FloatRect aabb = position.getTransform().transformRect(human.body.getGlobalBounds());
+						const sf::FloatRect aabb = aiPosition.getTransform().transformRect(human.body.getGlobalBounds());
 						if (aabb.contains(sfPos))
 						{
 							human.life -= GameSingleton::aiNothingLife;
@@ -986,15 +978,15 @@ void GameState::movements(en::Time dt)
 
 					bool wasAProps = false;
 					auto viewDestr = GameSingleton::world.view<en::PositionComponent, PropsComponent>();
-					for (auto entity : viewDestr)
+					for (auto propsEntity : viewDestr)
 					{
-						auto& position = viewDestr.get<en::PositionComponent>(entity);
-						auto& props = viewDestr.get<PropsComponent>(entity);
+						auto& propsPosition = viewDestr.get<en::PositionComponent>(propsEntity);
+						auto& props = viewDestr.get<PropsComponent>(propsEntity);
 
 						if (!props.destructed)
 						{
-							const sf::Vector2f& pos = position.getPosition();
-							en::Vector2f d = newPos - en::toEN(pos);
+							const sf::Vector2f& propsPos = propsPosition.getPosition();
+							en::Vector2f d = newPos - en::toEN(propsPos);
 							if (d.getSquaredLength() < 11.5f * 11.5f)
 							{
 								wasAProps = true;
@@ -1003,7 +995,7 @@ void GameState::movements(en::Time dt)
 								if (mPieceGenerator.get<en::U32>(0, 4) == 1)
 								{
 									GameSingleton::playSound(GameSingleton::mPieceSound);
-									EntityPrefab::createPiece(GameSingleton::world, pos.x, pos.y);
+									EntityPrefab::createPiece(GameSingleton::world, propsPos.x, propsPos.y);
 								}
 							}
 						}
