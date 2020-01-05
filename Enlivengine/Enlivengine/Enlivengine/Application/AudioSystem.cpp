@@ -1,21 +1,119 @@
 #include <Enlivengine/Application/AudioSystem.hpp>
 
-#include <Enlivengine/System/Hash.hpp>
-
 namespace en
 {
 
 AudioSystem::AudioSystem(ResourceManager& resourceManager)
-	: mStatus(sf::SoundSource::Playing)
-	, mMusicVolume(100.0f)
-	, mSoundVolume(100.0f)
+	: mGlobalVolume(100.0f)
+	, mGlobalEnabled(true)
+	, mPlaying(true)
+	, mMusicFilenames()
+	, mMusicsVolume(100.0f)
+	, mMusicsEnabled(true)
+	, mMusics()
 	, mResourceManager(resourceManager)
+	, mLoadedSounds()
+	, mSoundsVolume(100.0f)
+	, mSoundsEnabled(true)
+	, mSounds()
 {
 }
 
-MusicId AudioSystem::createMusic(const char* id, const std::string& filename)
+F32 AudioSystem::GetGlobalVolume() const
 {
-	MusicId index(Hash::CRC32(id));
+	return mGlobalVolume;
+}
+
+void AudioSystem::SetGlobalVolume(F32 volume)
+{
+	mGlobalVolume = volume;
+	sf::Listener::setGlobalVolume(volume);
+}
+
+bool AudioSystem::IsEnabled() const
+{
+	return mGlobalEnabled;
+}
+
+void AudioSystem::SetEnabled(bool enabled)
+{
+	mGlobalEnabled = enabled;
+	UpdateMusicsVolume();
+	UpdateSoundsVolume();
+}
+
+void AudioSystem::Play()
+{
+	mPlaying = true;
+	PlayMusics();
+	PlaySounds();
+}
+
+void AudioSystem::Pause()
+{
+	mPlaying = false;
+	PauseMusics();
+	PauseSounds();
+}
+
+void AudioSystem::Stop()
+{
+	StopMusics();
+	StopSounds();
+}
+
+bool AudioSystem::IsPlaying() const
+{
+	return mPlaying;
+}
+
+bool AudioSystem::IsInactive() const
+{
+	return (GetCurrentMusicsCount() + GetCurrentSoundsCount()) == 0;
+}
+
+void AudioSystem::Clear()
+{
+	ReleaseSounds();
+}
+
+F32 AudioSystem::GetMusicVolume() const
+{
+	return mMusicsVolume;
+}
+
+void AudioSystem::SetMusicVolume(F32 volume)
+{
+	mMusicsVolume = volume;
+	UpdateMusicsVolume();
+}
+
+bool AudioSystem::AreMusicsEnabled() const
+{
+	return mMusicsEnabled;
+}
+
+void AudioSystem::SetMusicsEnabled(bool enabled)
+{
+	mMusicsEnabled = enabled;
+	UpdateMusicsVolume();
+}
+
+F32 AudioSystem::GetCurrentMusicsVolume() const
+{
+	if (!mGlobalEnabled || !mMusicsEnabled)
+	{
+		return 0.0f;
+	}
+	else
+	{
+		return mMusicsVolume;
+	}
+}
+
+MusicId AudioSystem::PrepareMusic(const char* id, const std::string& filename)
+{
+	MusicId index(priv::StringToResourceID(id));
 	if (mMusicFilenames.find(index) == mMusicFilenames.end())
 	{
 		mMusicFilenames[index] = filename;
@@ -23,168 +121,267 @@ MusicId AudioSystem::createMusic(const char* id, const std::string& filename)
 	return index;
 }
 
-AudioSystem::MusicPtr AudioSystem::playMusic(MusicId id, bool loop)
+AudioSystem::MusicPtr AudioSystem::PlayMusic(MusicId id, bool loop /*= true*/)
 {
-    if (mStatus != sf::SoundSource::Stopped && mMusicFilenames.find(id) != mMusicFilenames.end() && mMusics.size() < MAX_MUSIC)
-    {
+	if (mMusicFilenames.find(id) != mMusicFilenames.end() && mMusics.size() < MAX_MUSIC)
+	{
 		MusicPtr m(std::make_shared<sf::Music>());
 		mMusics.push_back(m);
 		m->openFromFile(mMusicFilenames[id]);
-        m->setLoop(loop);
-        m->setVolume(mMusicVolume);
-        m->play();
-        if (mStatus == sf::SoundSource::Paused)
-        {
-            m->pause();
-        }
-        return m;
-    }
-    return nullptr;
-}
+		m->setLoop(loop);
+		m->setVolume(GetCurrentMusicsVolume());
+		m->play();
+		if (!mPlaying)
+		{
+			m->pause();
+		}
+		return m;
+	}
 
-AudioSystem::MusicPtr AudioSystem::playMusic(const char* id, bool loop)
-{
-	return playMusic(Hash::CRC32(id), loop);
-}
-
-SoundId AudioSystem::createSound(const char* id, const std::string& filename)
-{
-	return mResourceManager.Create(id, SoundBufferLoader::FromFile(filename)).GetID();
-}
-
-AudioSystem::SoundPtr AudioSystem::playSound(SoundId id)
-{
-	if (mStatus != sf::SoundSource::Stopped && mResourceManager.Has(id) && mSounds.size() < MAX_SOUND)
-    {
-		SoundPtr s(std::make_shared<sf::Sound>());
-        mSounds.push_back(s);
-		s->setBuffer(mResourceManager.Get<en::SoundBuffer>(id).Get());
-        s->setVolume(mSoundVolume);
-        s->play();
-        if (mStatus == sf::SoundSource::Paused)
-        {
-            s->pause();
-        }
-        return s;
-    }
 	return nullptr;
 }
 
-AudioSystem::SoundPtr AudioSystem::playSound(const char* id)
+AudioSystem::MusicPtr AudioSystem::PlayMusic(const char* id, bool loop /*= true*/)
 {
-	return playSound(Hash::CRC32(id));
+	return PlayMusic(priv::StringToResourceID(id), loop);
 }
 
-void AudioSystem::play()
+U32 AudioSystem::GetCurrentMusicsCount() const
 {
-    if (mStatus == sf::SoundSource::Paused)
-    {
-        update();
-        for (auto itr = mMusics.begin(); itr != mMusics.end(); ++itr)
-        {
-            (*itr)->play();
-        }
-        for (auto itr = mSounds.begin(); itr != mSounds.end(); ++itr)
-        {
-            (*itr)->play();
-        }
-        mStatus = sf::SoundSource::Playing;
-    }
+	return static_cast<U32>(mMusics.size());
 }
 
-void AudioSystem::pause()
+void AudioSystem::PlayMusics()
 {
-    if (mStatus == sf::SoundSource::Playing)
-    {
-        update();
-        for (auto itr = mMusics.begin(); itr != mMusics.end(); ++itr)
-        {
-            (*itr)->pause();
-        }
-        for (auto itr = mSounds.begin(); itr != mSounds.end(); ++itr)
-        {
-            (*itr)->pause();
-        }
-        mStatus = sf::SoundSource::Paused;
-    }
+	const size_t size = mMusics.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mMusics[i]->play();
+	}
 }
 
-void AudioSystem::stop()
+void AudioSystem::PauseMusics()
 {
-    if (mStatus != sf::SoundSource::Stopped)
-    {
-        mMusics.clear();
-        mSounds.clear();
-    }
+	const size_t size = mMusics.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mMusics[i]->pause();
+	}
 }
 
-void AudioSystem::update()
+void AudioSystem::StopMusics()
 {
-    for (auto itr = mMusics.begin(); itr != mMusics.end();)
-    {
-        if (mStatus != sf::SoundSource::Stopped && (*itr)->getStatus() == sf::SoundSource::Stopped)
-        {
-            itr = mMusics.erase(itr);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
-    for (auto itr = mSounds.begin(); itr != mSounds.end();)
-    {
-        if (mStatus != sf::SoundSource::Stopped && (*itr)->getStatus() == sf::SoundSource::Stopped)
-        {
-            itr = mSounds.erase(itr);
-        }
-        else
-        {
-            ++itr;
-        }
-    }
+	mMusics.clear();
 }
 
-void AudioSystem::setGlobalVolume(F32 volume)
+F32 AudioSystem::GetSoundVolume() const
 {
-    sf::Listener::setGlobalVolume(volume);
+	return mSoundsVolume;
 }
 
-void AudioSystem::setMusicVolume(F32 volume)
+void AudioSystem::SetSoundVolume(F32 volume)
 {
-    mMusicVolume = volume;
-    for (auto itr = mMusics.begin(); itr != mMusics.end(); ++itr)
-    {
-        (*itr)->setVolume(volume);
-    }
+	mSoundsVolume = volume;
+	UpdateSoundsVolume();
 }
 
-void AudioSystem::setSoundVolume(F32 volume)
+bool AudioSystem::AreSoundsEnabled() const
 {
-    mSoundVolume = volume;
-    for (auto itr = mSounds.begin(); itr != mSounds.end(); ++itr)
-    {
-        (*itr)->setVolume(volume);
-    }
+	return mSoundsEnabled;
 }
 
-F32 AudioSystem::getGlobalVolume() const
+void AudioSystem::SetSoundsEnabled(bool enabled)
 {
-	return sf::Listener::getGlobalVolume();
+	mSoundsEnabled = enabled;
+	UpdateSoundsVolume();
 }
 
-F32 AudioSystem::getMusicVolume() const
+F32 AudioSystem::GetCurrentSoundsVolume() const
 {
-    return mMusicVolume;
+	if (!mGlobalEnabled || !mSoundsEnabled)
+	{
+		return 0.0f;
+	}
+	else
+	{
+		return mSoundsVolume;
+	}
 }
 
-F32 AudioSystem::getSoundVolume() const
+SoundId AudioSystem::PrepareSound(const char* id, const std::string& filename)
 {
-    return mSoundVolume;
+	const SoundBufferPtr soundBuffer = mResourceManager.Create(id, SoundBufferLoader::FromFile(filename));
+	if (soundBuffer.IsValid())
+	{
+		const SoundId soundId = soundBuffer.GetID();
+		if (!IsSoundLoaded(soundId))
+		{
+			mLoadedSounds.push_back(soundId);
+		}
+		return soundId;
+	}
+	else
+	{
+		return InvalidResourceID;
+	}
 }
 
-sf::SoundSource::Status AudioSystem::getStatus() const
+bool AudioSystem::IsSoundLoaded(SoundId id) const
 {
-    return mStatus;
+	const size_t size = mLoadedSounds.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		if (mLoadedSounds[i] == id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool AudioSystem::IsSoundLoaded(const char* id) const
+{
+	return IsSoundLoaded(priv::StringToResourceID(id));
+}
+
+U32 AudioSystem::GetLoadedSoundsCount() const
+{
+	return static_cast<U32>(mLoadedSounds.size());
+}
+
+AudioSystem::SoundPtr AudioSystem::PlaySound(SoundId id)
+{
+	if (IsSoundLoaded(id) && mResourceManager.Has(id) && mSounds.size() < MAX_SOUND)
+	{
+		SoundPtr s(std::make_shared<sf::Sound>());
+		mSounds.push_back(s);
+		s->setBuffer(mResourceManager.Get<en::SoundBuffer>(id).Get());
+		s->setVolume(GetCurrentSoundsVolume());
+		s->play();
+		if (!mPlaying)
+		{
+			s->pause();
+		}
+		return s;
+	}
+
+	return nullptr;
+}
+
+AudioSystem::SoundPtr AudioSystem::PlaySound(const char* id)
+{
+	return PlaySound(priv::StringToResourceID(id));
+}
+
+U32 AudioSystem::GetCurrentSoundsCount() const
+{
+	return static_cast<U32>(mLoadedSounds.size());
+}
+
+void AudioSystem::ReleaseSound(SoundId id)
+{
+	const size_t size = mLoadedSounds.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		if (mLoadedSounds[i] == id)
+		{
+			mResourceManager.Release(id);
+			mLoadedSounds.erase(mLoadedSounds.begin() + i);
+			return;
+		}
+	}
+}
+
+void AudioSystem::ReleaseSound(const char* id)
+{
+	ReleaseSound(priv::StringToResourceID(id));
+}
+
+void AudioSystem::PlaySounds()
+{
+	const size_t size = mSounds.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mSounds[i]->play();
+	}
+}
+
+void AudioSystem::PauseSounds()
+{
+	const size_t size = mSounds.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mSounds[i]->pause();
+	}
+}
+
+void AudioSystem::StopSounds()
+{
+	mSounds.clear();
+}
+
+void AudioSystem::ReleaseSounds()
+{
+	const size_t size = mLoadedSounds.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mResourceManager.Release(mLoadedSounds[i]);
+	}
+	mLoadedSounds.clear();
+}
+
+void AudioSystem::Update()
+{
+	if (!mPlaying)
+		return;
+
+	size_t musicsSize = mMusics.size();
+	for (size_t i = 0; i < musicsSize; )
+	{
+		if (mMusics[i]->getStatus() == sf::SoundSource::Stopped)
+		{
+			mMusics.erase(mMusics.begin() + i);
+			musicsSize--;
+		}
+		else
+		{
+			i++;
+		}
+	}
+
+	size_t soundsSize = mSounds.size();
+	for (size_t i = 0; i < soundsSize; )
+	{
+		if (mSounds[i]->getStatus() == sf::SoundSource::Stopped)
+		{
+			mSounds.erase(mSounds.begin() + i);
+			soundsSize--;
+		}
+		else
+		{
+			i++;
+		}
+	}
+}
+
+void AudioSystem::UpdateMusicsVolume()
+{
+	const F32 currentVolume = GetCurrentMusicsVolume();
+	const size_t size = mMusics.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mMusics[i]->setVolume(currentVolume);
+	}
+}
+
+void AudioSystem::UpdateSoundsVolume()
+{
+	const F32 currentVolume = GetCurrentSoundsVolume();
+	const size_t size = mSounds.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		mSounds[i]->setVolume(currentVolume);
+	}
 }
 
 } // namespace en

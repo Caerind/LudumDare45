@@ -60,7 +60,7 @@ public:
 		}
 		if (event.type == sf::Event::MouseButtonPressed)
 		{
-			getApplication().getAudio().playSound("click");
+			getApplication().getAudio().PlaySound("click");
 			createEntity(getApplication().getWindow().getCursorPosition().x, getApplication().getWindow().getCursorPosition().y);
 		}
 		if (event.type == sf::Event::KeyPressed)

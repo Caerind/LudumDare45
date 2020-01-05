@@ -20,44 +20,79 @@ class AudioSystem
 {
     public:
         using MusicPtr = std::shared_ptr<sf::Music>;
+		using MusicPtrList = std::vector<MusicPtr>;
+
         using SoundPtr = std::shared_ptr<sf::Sound>;
+		using SoundPtrList = std::vector<SoundPtr>;
 
     public:
         AudioSystem(ResourceManager& resourceManager);
 
-		MusicId createMusic(const char* id, const std::string& filename);
-		MusicPtr playMusic(MusicId id, bool loop = true);
-		MusicPtr playMusic(const char* id, bool loop = true);
+		F32 GetGlobalVolume() const;
+		void SetGlobalVolume(F32 volume);
+		bool IsEnabled() const;
+		void SetEnabled(bool enabled);
+		void Play();
+		void Pause();
+		void Stop(); // Stop everything, but keep the same play/pause state
+		bool IsPlaying() const;
+		bool IsInactive() const; // No sounds and no musics
+		void Clear();
 
-		SoundId createSound(const char* id, const std::string& filename);
-        SoundPtr playSound(SoundId id);
-		SoundPtr playSound(const char* id);
+		F32 GetMusicVolume() const;
+		void SetMusicVolume(F32 volume);
+		bool AreMusicsEnabled() const;
+		void SetMusicsEnabled(bool enabled);
+		F32 GetCurrentMusicsVolume() const;
+		MusicId PrepareMusic(const char* id, const std::string& filename);
+		MusicPtr PlayMusic(MusicId id, bool loop = true);
+		MusicPtr PlayMusic(const char* id, bool loop = true);
+		U32 GetCurrentMusicsCount() const;
+		void PlayMusics();
+		void PauseMusics();
+		void StopMusics();
 
-        void play();
-        void pause();
-        void stop();
+		F32 GetSoundVolume() const;
+		void SetSoundVolume(F32 volume);
+		bool AreSoundsEnabled() const;
+		void SetSoundsEnabled(bool enabled);
+		F32 GetCurrentSoundsVolume() const;
+		SoundId PrepareSound(const char* id, const std::string& filename);
+		bool IsSoundLoaded(SoundId id) const;
+		bool IsSoundLoaded(const char* id) const;
+		U32 GetLoadedSoundsCount() const;
+		SoundPtr PlaySound(SoundId id);
+		SoundPtr PlaySound(const char* id);
+		U32 GetCurrentSoundsCount() const;
+		void ReleaseSound(SoundId id);
+		void ReleaseSound(const char* id);
+		void PlaySounds();
+		void PauseSounds();
+		void StopSounds();
+		void ReleaseSounds();
 
-        void update();
+	private:
+		friend class Application;
+		void Update();
 
-        void setGlobalVolume(F32 volume);
-        void setMusicVolume(F32 volume);
-        void setSoundVolume(F32 volume);
-        F32 getGlobalVolume() const;
-        F32 getMusicVolume() const;
-        F32 getSoundVolume() const;
+		void UpdateMusicsVolume();
+		void UpdateSoundsVolume();
 
-        sf::SoundSource::Status getStatus() const;
-
-    private:
-		std::vector<MusicPtr> mMusics;
-		std::vector<SoundPtr> mSounds;
-        sf::SoundSource::Status mStatus;
-
-        F32 mMusicVolume;
-		F32 mSoundVolume;
+	private:
+		F32 mGlobalVolume;
+		bool mGlobalEnabled;
+		bool mPlaying;
 
 		std::unordered_map<MusicId, std::string> mMusicFilenames;
+		F32 mMusicsVolume;
+		bool mMusicsEnabled;
+		MusicPtrList mMusics;
+
 		ResourceManager& mResourceManager;
+		std::vector<SoundId> mLoadedSounds;
+		F32 mSoundsVolume;
+		bool mSoundsEnabled;
+		SoundPtrList mSounds;
 
 		static const U32 MAX_MUSIC = 16;
 		static const U32 MAX_SOUND = 240;

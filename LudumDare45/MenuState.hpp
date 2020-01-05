@@ -28,7 +28,7 @@ class MenuState : public en::State
 			*/
 
 			buttonSound.setTexture(getApplication().getResourceManager().Get<en::Texture>("menuplaybutton").Get());
-			buttonSound.setTextureRect(sf::IntRect(((GameSingleton::soundEnabled) ? 0 : 18), 114, 14, 14));
+			buttonSound.setTextureRect(sf::IntRect(((getApplication().getAudio().IsEnabled()) ? 0 : 18), 114, 14, 14));
 			buttonSound.setPosition(512 + 300, 384 + 35);
 			buttonSound.setScale(3.5f, 3.5f);
 		}
@@ -50,10 +50,10 @@ class MenuState : public en::State
 				}*/
 				else if (buttonSound.getGlobalBounds().contains(p))
 				{
-					GameSingleton::soundEnabled = !GameSingleton::soundEnabled;
-					if (!GameSingleton::soundEnabled)
+					getApplication().getAudio().SetEnabled(!getApplication().getAudio().IsEnabled());
+					if (!getApplication().getAudio().IsEnabled())
 					{
-						getApplication().getAudio().stop();
+						getApplication().getAudio().Stop();
 					}
 				}
 			}
@@ -85,7 +85,7 @@ class MenuState : public en::State
 			}
 			*/
 
-			if (GameSingleton::soundEnabled)
+			if (getApplication().getAudio().IsEnabled())
 			{
 				buttonSound.setTextureRect(sf::IntRect(0, 114, 14, 14));
 			}

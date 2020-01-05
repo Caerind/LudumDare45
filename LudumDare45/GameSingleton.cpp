@@ -15,8 +15,6 @@ en::Application* GameSingleton::application;
 bool GameSingleton::mFirstIntroDone = false;
 bool GameSingleton::mFirstThrowNothingDone = false;
 
-bool GameSingleton::soundEnabled = true;
-
 en::Tileset GameSingleton::mTileset;
 GameMap GameSingleton::mMap;
 en::View GameSingleton::mView;
@@ -78,16 +76,16 @@ void GameSingleton::loadResourcesGame()
 
 	// Sound
 	const std::string soundPath = "Assets/Sounds/";
-	mChopSound = application->getAudio().createSound("chop", soundPath + "Chop.wav");
-	mHitSound = application->getAudio().createSound("hit", soundPath + "Hit.wav");
-	mKnockoutSound = application->getAudio().createSound("knockout", soundPath + "Knockout.wav");
-	mSelectSound = application->getAudio().createSound("select", soundPath + "Select.wav");
-	mThrowSound = application->getAudio().createSound("throw", soundPath + "Throw.wav");
-	mDestrPropsSound = application->getAudio().createSound("props", soundPath + "Props.wav");
-	mNothingWallSound = application->getAudio().createSound("nwall", soundPath + "Nwall.wav");
-	mNothingAISound = application->getAudio().createSound("nai", soundPath + "Nia.wav");
-	mPieceSound = application->getAudio().createSound("piece", soundPath + "Piece.wav");
-	mPieceGetSound = application->getAudio().createSound("pieceGet", soundPath + "PieceGet.wav");
+	mChopSound = application->getAudio().PrepareSound("chop", soundPath + "Chop.wav");
+	mHitSound = application->getAudio().PrepareSound("hit", soundPath + "Hit.wav");
+	mKnockoutSound = application->getAudio().PrepareSound("knockout", soundPath + "Knockout.wav");
+	mSelectSound = application->getAudio().PrepareSound("select", soundPath + "Select.wav");
+	mThrowSound = application->getAudio().PrepareSound("throw", soundPath + "Throw.wav");
+	mDestrPropsSound = application->getAudio().PrepareSound("props", soundPath + "Props.wav");
+	mNothingWallSound = application->getAudio().PrepareSound("nwall", soundPath + "Nwall.wav");
+	mNothingAISound = application->getAudio().PrepareSound("nai", soundPath + "Nia.wav");
+	mPieceSound = application->getAudio().PrepareSound("piece", soundPath + "Piece.wav");
+	mPieceGetSound = application->getAudio().PrepareSound("pieceGet", soundPath + "PieceGet.wav");
 
 	// Tileset & Map
 	GameSingleton::mTileset.setFirstGid(1);
@@ -445,18 +443,6 @@ void GameSingleton::clear()
 #ifdef ENLIVE_ENABLE_IMGUI
 	currentEntity = entt::null;
 #endif
-}
-
-void GameSingleton::playSound(en::ResourceID r)
-{
-	if (GameSingleton::soundEnabled)
-	{
-		en::AudioSystem::SoundPtr soundPtr = application->getAudio().playSound(r);
-		if (soundPtr != nullptr)
-		{
-			soundPtr->setVolume(40.0f);
-		}
-	}
 }
 
 #ifdef ENLIVE_ENABLE_IMGUI

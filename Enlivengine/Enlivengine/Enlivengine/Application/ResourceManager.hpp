@@ -16,7 +16,7 @@ constexpr ResourceID InvalidResourceID = U32_Max;
 namespace priv
 {
 
-ResourceID StringToResourceID(const std::string& str);
+ResourceID StringToResourceID(const char* str);
 
 class BaseResource
 {
@@ -55,7 +55,6 @@ public:
 	T& Get();
 	const T& Get() const;
 
-	const std::string& GetIdentifier() const;
 	void ReleaseFromManager();
 
 private:
@@ -105,17 +104,15 @@ public:
 	ResourceManager(const ResourceManager&) = delete;
 	ResourceManager& operator=(const ResourceManager&) = delete;
 
-	template <typename T> ResourcePtr<T> Create(const std::string& str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy = ResourceKnownStrategy::Reuse);
-	template <typename T> ResourcePtr<T> Get(const std::string& str);
+	template <typename T> ResourcePtr<T> Create(const char* str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy = ResourceKnownStrategy::Reuse);
+	template <typename T> ResourcePtr<T> Get(const char* str);
 	template <typename T> ResourcePtr<T> Get(ResourceID id);
 
-	bool Has(const std::string& str) const;
+	bool Has(const char* str) const;
 	bool Has(ResourceID id) const;
 
-	void Release(const std::string& str);
+	void Release(const char* str);
 	void Release(ResourceID id);
-
-	const std::string& GetIdentifier(ResourceID id) const;
 
 	void ReleaseAll();
 
@@ -128,7 +125,6 @@ private:
 
 private:
 	std::unordered_map<ResourceID, std::unique_ptr<priv::BaseResource>> mResources;
-	std::unordered_map<ResourceID, std::string> mResourceStrings;
 };
 
 } // namespace en

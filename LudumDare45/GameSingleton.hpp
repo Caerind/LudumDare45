@@ -27,14 +27,10 @@ class GameSingleton
 
 		static void clear();
 
-		static void playSound(en::ResourceID r);
-
 		static en::Application* application;
 
 		static bool mFirstIntroDone;
 		static bool mFirstThrowNothingDone;
-
-		static bool soundEnabled;
 
 		static en::Tileset mTileset;
 		static GameMap mMap;

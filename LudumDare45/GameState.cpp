@@ -49,13 +49,15 @@ GameState::GameState(en::StateManager& manager)
 	}
 
 	// Audio
-	if (GameSingleton::soundEnabled)
 	{
-		getApplication().getAudio().setGlobalVolume(50.0f);
+		getApplication().getAudio().SetGlobalVolume(50.0f);
 
-		// Music
-		getApplication().getAudio().createMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
-		getApplication().getAudio().playMusic("mainTheme");
+		// Musics
+		getApplication().getAudio().PrepareMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
+		getApplication().getAudio().PlayMusic("mainTheme");
+
+		// Sounds
+		getApplication().getAudio().SetSoundVolume(40.0f);
 	}
 
 	// View
@@ -108,7 +110,7 @@ bool GameState::handleEvent(const sf::Event& event)
 						door.enabled = true;
 					}
 				}
-				GameSingleton::playSound(GameSingleton::mThrowSound);
+				getApplication().getAudio().PlaySound(GameSingleton::mThrowSound);
 				GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity).playAnimOnce(HumanComponent::Animation::Throw);
 				GameSingleton::world.get<PlayerComponent>(GameSingleton::playerEntity).chopping = false;
 				GameSingleton::world.get<en::RenderableComponent>(GameSingleton::nothingEntity).z = 0;
@@ -120,7 +122,7 @@ bool GameState::handleEvent(const sf::Event& event)
 				}
 				else
 				{
-					GameSingleton::playSound(GameSingleton::mKnockoutSound);
+					getApplication().getAudio().PlaySound(GameSingleton::mKnockoutSound);
 					GameSingleton::world.get<VelocityComponent>(GameSingleton::nothingEntity).velocity = en::Vector2f::zero;
 					GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).throwTimer = en::Time::Zero;
 					GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity).playAnimOnce(HumanComponent::Animation::KO);
@@ -133,7 +135,7 @@ bool GameState::handleEvent(const sf::Event& event)
 			en::U32 action = 0;
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
-				GameSingleton::playSound(GameSingleton::mHitSound);
+				getApplication().getAudio().PlaySound(GameSingleton::mHitSound);
 				GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity).playAnimOnce(HumanComponent::Animation::HitIdle);
 				action = 0;
 
@@ -175,7 +177,7 @@ bool GameState::handleEvent(const sf::Event& event)
 									mText.handleEvent(NothingTextSystem::Event::Tutorial3);
 									tutorialState++;
 								}
-								GameSingleton::playSound(GameSingleton::mKnockoutSound);
+								getApplication().getAudio().PlaySound(GameSingleton::mKnockoutSound);
 								GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).playAnimLoop(HumanComponent::Animation::KO);
 								GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).hits = 0;
 								GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).koTimer = en::seconds(5.f);
@@ -189,7 +191,7 @@ bool GameState::handleEvent(const sf::Event& event)
 					}
 					if (action == 1 && GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).isKO() && GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).life >= 0.12f)
 					{
-						GameSingleton::playSound(GameSingleton::mChopSound);
+						getApplication().getAudio().PlaySound(GameSingleton::mChopSound);
 						GameSingleton::world.get<HumanComponent>(GameSingleton::playerEntity).playAnimOnce(HumanComponent::Animation::Chop);
 						GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).playAnimLoop(HumanComponent::Animation::Chopped);
 						GameSingleton::world.get<PlayerComponent>(GameSingleton::playerEntity).chopping = true;
@@ -238,7 +240,7 @@ bool GameState::handleEvent(const sf::Event& event)
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
 	{
 		GameSingleton::clear();
-		getApplication().getAudio().stop();
+		getApplication().getAudio().Stop();
 
 		getApplication().clearStates();
 		getApplication().pushState<MenuState>();
@@ -277,7 +279,7 @@ bool GameState::update(en::Time dt)
 				doorComponent.cooldownSpawnTimer = en::seconds(en::Random::get<en::F32>(15.0f, 25.0f));
 				const sf::Vector2f& p = positionComponent.getPosition();
 				EntityPrefab::createAI(GameSingleton::world, p.x, p.y + 16.0f);
-				//GameSingleton::playSound(GameSingleton::mSelectSound);
+				//getApplication().getAudio().PlaySound(GameSingleton::mSelectSound);
 			}
 		}
 	}
@@ -311,7 +313,7 @@ bool GameState::update(en::Time dt)
 
 		if (nothingNothingComponent.throwTimer < en::Time::Zero)
 		{
-			GameSingleton::playSound(GameSingleton::mKnockoutSound);
+			getApplication().getAudio().PlaySound(GameSingleton::mKnockoutSound);
 			nothingHumanComponent.playAnimOnce(HumanComponent::Animation::KO);
 			nothingNothingComponent.koTimer = en::seconds(0.2f);
 			nothingVelocityComponent.velocity = en::Vector2f::zero;
@@ -336,7 +338,7 @@ bool GameState::update(en::Time dt)
 		const en::Vector2f d = en::toEN(position.getPosition() - playerUpdatePos);
 		if (d.getSquaredLength() < 16.0f * 16.0f)
 		{
-			GameSingleton::playSound(GameSingleton::mPieceGetSound);
+			getApplication().getAudio().PlaySound(GameSingleton::mPieceGetSound);
 			GameSingleton::world.destroy(entity);
 		}
 	}
@@ -597,7 +599,7 @@ void GameState::velocities(en::Time dt)
 
 			if (ai.cooldownHitTimer <= en::Time::Zero)
 			{
-				GameSingleton::playSound(GameSingleton::mHitSound);
+				getApplication().getAudio().PlaySound(GameSingleton::mHitSound);
 				ai.cooldownHitTimer = en::seconds(0.5f);
 				human.playAnimOnce(HumanComponent::Animation::HitIdle);
 
@@ -952,8 +954,8 @@ void GameState::movements(en::Time dt)
 					}
 					if (hitAI)
 					{
-						GameSingleton::playSound(GameSingleton::mNothingAISound);
-						GameSingleton::playSound(GameSingleton::mKnockoutSound);
+						getApplication().getAudio().PlaySound(GameSingleton::mNothingAISound);
+						getApplication().getAudio().PlaySound(GameSingleton::mKnockoutSound);
 						velocity.velocity = en::Vector2f::zero;
 						GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).playAnimLoop(HumanComponent::Animation::KO);
 						GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).body.setScale(sf::Vector2f(1.0f, 1.0f));
@@ -968,7 +970,7 @@ void GameState::movements(en::Time dt)
 			{
 				if (entity == GameSingleton::nothingEntity && GameSingleton::world.get<NothingComponent>(GameSingleton::nothingEntity).isThrowing())
 				{
-					GameSingleton::playSound(GameSingleton::mKnockoutSound);
+					getApplication().getAudio().PlaySound(GameSingleton::mKnockoutSound);
 					velocity.velocity = en::Vector2f::zero;
 					GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).playAnimLoop(HumanComponent::Animation::KO);
 					GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).body.setScale(sf::Vector2f(1.0f, 1.0f));
@@ -994,7 +996,7 @@ void GameState::movements(en::Time dt)
 
 								if (mPieceGenerator.get<en::U32>(0, 4) == 1)
 								{
-									GameSingleton::playSound(GameSingleton::mPieceSound);
+									getApplication().getAudio().PlaySound(GameSingleton::mPieceSound);
 									EntityPrefab::createPiece(GameSingleton::world, propsPos.x, propsPos.y);
 								}
 							}
@@ -1002,12 +1004,12 @@ void GameState::movements(en::Time dt)
 					}
 					if (wasAProps)
 					{
-						GameSingleton::playSound(GameSingleton::mDestrPropsSound);
+						getApplication().getAudio().PlaySound(GameSingleton::mDestrPropsSound);
 						GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).life -= GameSingleton::nothingPropsLife;
 					}
 					else
 					{
-						GameSingleton::playSound(GameSingleton::mNothingWallSound);
+						getApplication().getAudio().PlaySound(GameSingleton::mNothingWallSound);
 						GameSingleton::world.get<HumanComponent>(GameSingleton::nothingEntity).life -= GameSingleton::nothingMurLife;
 					}
 

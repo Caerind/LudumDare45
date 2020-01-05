@@ -62,7 +62,8 @@ AudioSystem& Application::getAudio()
 
 void Application::stop()
 {
-	mAudioSystem.stop();
+	mAudioSystem.Stop();
+	mAudioSystem.Clear();
 
 #ifdef ENLIVE_ENABLE_IMGUI
 	if (mRunning)
@@ -209,11 +210,11 @@ void Application::events()
 		// Might have used Signal of the Window, but clearer like this
 		if (event.type == sf::Event::GainedFocus)
 		{
-			mAudioSystem.play();
+			mAudioSystem.Play();
 		}
 		if (event.type == sf::Event::LostFocus)
 		{
-			mAudioSystem.pause();
+			mAudioSystem.Pause();
 		}
 
 #ifdef ENLIVE_ENABLE_IMGUI
@@ -235,7 +236,7 @@ void Application::events()
 void Application::preUpdate()
 {
 	ENLIVE_PROFILE_FUNCTION();
-	mAudioSystem.update();
+	mAudioSystem.Update();
 }
 
 void Application::update(Time dt)

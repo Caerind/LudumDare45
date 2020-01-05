@@ -6,9 +6,9 @@ namespace en
 namespace priv
 {
 
-ResourceID StringToResourceID(const std::string& str)
+ResourceID StringToResourceID(const char* str)
 {
-	return Hash::CRC32(str.c_str());
+	return Hash::CRC32(str);
 }
 
 BaseResource::BaseResource()
@@ -38,7 +38,7 @@ ResourceManager::ResourceManager()
 {
 }
 
-bool ResourceManager::Has(const std::string& str) const
+bool ResourceManager::Has(const char* str) const
 {
 	return Has(priv::StringToResourceID(str));
 }
@@ -48,7 +48,7 @@ bool ResourceManager::Has(ResourceID id) const
 	return mResources.find(id) != mResources.end();
 }
 
-void ResourceManager::Release(const std::string& str)
+void ResourceManager::Release(const char* str)
 {
 	Release(priv::StringToResourceID(str));
 }
@@ -59,22 +59,12 @@ void ResourceManager::Release(ResourceID id)
 	if (itr != mResources.end())
 	{
 		mResources.erase(itr);
-
-		const auto itrString = mResourceStrings.find(id);
-		assert(itrString != mResourceStrings.end());
-		mResourceStrings.erase(itrString);
 	}
-}
-
-const std::string& ResourceManager::GetIdentifier(ResourceID id) const
-{
-	return mResourceStrings.at(id);
 }
 
 void ResourceManager::ReleaseAll()
 {
 	mResources.clear();
-	mResourceStrings.clear();
 }
 
 U32 ResourceManager::Count() const
