@@ -6,9 +6,9 @@
 
 #include <Enlivengine/Graphics/ScreenshotSystem.hpp>
 
+#include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Application/Window.hpp>
 #include <Enlivengine/Application/StateManager.hpp>
-#include <Enlivengine/Application/AudioSystem.hpp>
 
 namespace en
 {
@@ -26,7 +26,6 @@ class Application
 
 		template <typename State, typename ... Args>
 		void start(Args&& ... args);
-
 		void stop();
 
 		template <typename T, typename ... Args>

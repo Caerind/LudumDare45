@@ -13,18 +13,95 @@
 namespace en
 {
 
-using MusicId = U32;
-using SoundId = U32;
+class AudioSystem;
 
-class AudioSystem
+using MusicID = U32;
+constexpr MusicID InvalidMusicID = U32_Max;
+constexpr U32 InvalidMusicUID = U32_Max;
+
+// It's recommend to not use Music directly
+// Use the AudioSystem + MusicPtr
+class Music : public sf::Music
 {
     public:
-        using MusicPtr = std::shared_ptr<sf::Music>;
-		using MusicPtrList = std::vector<MusicPtr>;
+	    Music(MusicID musicID, const std::string& filename);
 
-        using SoundPtr = std::shared_ptr<sf::Sound>;
-		using SoundPtrList = std::vector<SoundPtr>;
+		bool IsValid() const;
+		MusicID GetMusicID() const;
+		U32 GetUID() const;
 
+	private:
+		MusicID mMusicID;
+		U32 mMusicUID;
+
+		static U32 sMusicUIDGenerator;
+};
+
+// This class is a Ptr to a music managed by the AudioSystem
+class MusicPtr
+{
+    public:
+	    MusicPtr(AudioSystem* audioSystem = nullptr, MusicID musicID = InvalidMusicID, U32 musicUID = InvalidMusicUID);
+
+		bool IsValid() const;
+		MusicID GetMusicID() const;
+		U32 GetUID() const;
+
+    private:
+		Music* GetMusic();
+		const Music* GetMusic() const;
+
+    private:
+		AudioSystem* mAudioSystem;
+		MusicID mMusicID;
+		U32 mMusicUID;
+};
+
+using SoundID = U32;
+constexpr SoundID InvalidSoundID = U32_Max;
+constexpr U32 InvalidSoundUID = U32_Max;
+
+// It's recommend to not use Sound directly
+// Use the AudioSystem + SoundPtr
+class Sound : public sf::Sound
+{
+    public:
+		Sound(SoundBufferPtr soundBuffer);
+
+		bool IsValid() const;
+		SoundID GetSoundID() const;
+		U32 GetUID() const;
+
+    private:
+	    SoundID mSoundID;
+		U32 mSoundUID;
+
+		static U32 sSoundUIDGenerator;
+};
+
+// This class is a Ptr to a sound managed by the AudioSystem
+class SoundPtr
+{
+    public:
+	    SoundPtr(AudioSystem* audioSystem = nullptr, SoundID soundID = InvalidSoundID, U32 soundUID = InvalidSoundUID);
+
+		bool IsValid() const;
+		SoundID GetSoundID() const;
+		U32 GetUID() const;
+
+    private:
+		Sound* GetSound();
+		const Sound* GetSound() const;
+
+    private:
+		AudioSystem* mAudioSystem;
+		SoundID mSoundID;
+		U32 mSoundUID;
+};
+
+// Class that smartly manage audio sources
+class AudioSystem
+{
     public:
         AudioSystem(ResourceManager& resourceManager);
 
@@ -44,8 +121,8 @@ class AudioSystem
 		bool AreMusicsEnabled() const;
 		void SetMusicsEnabled(bool enabled);
 		F32 GetCurrentMusicsVolume() const;
-		MusicId PrepareMusic(const char* id, const std::string& filename);
-		MusicPtr PlayMusic(MusicId id, bool loop = true);
+		MusicID PrepareMusic(const char* id, const std::string& filename);
+		MusicPtr PlayMusic(MusicID id, bool loop = true);
 		MusicPtr PlayMusic(const char* id, bool loop = true);
 		U32 GetCurrentMusicsCount() const;
 		void PlayMusics();
@@ -57,14 +134,14 @@ class AudioSystem
 		bool AreSoundsEnabled() const;
 		void SetSoundsEnabled(bool enabled);
 		F32 GetCurrentSoundsVolume() const;
-		SoundId PrepareSound(const char* id, const std::string& filename);
-		bool IsSoundLoaded(SoundId id) const;
+		SoundID PrepareSound(const char* id, const std::string& filename);
+		bool IsSoundLoaded(SoundID id) const;
 		bool IsSoundLoaded(const char* id) const;
 		U32 GetLoadedSoundsCount() const;
-		SoundPtr PlaySound(SoundId id);
+		SoundPtr PlaySound(SoundID id);
 		SoundPtr PlaySound(const char* id);
 		U32 GetCurrentSoundsCount() const;
-		void ReleaseSound(SoundId id);
+		void ReleaseSound(SoundID id);
 		void ReleaseSound(const char* id);
 		void PlaySounds();
 		void PauseSounds();
@@ -75,6 +152,14 @@ class AudioSystem
 		friend class Application;
 		void Update();
 
+		friend class MusicPtr;
+		en::Music* GetMusicInternal(U32 musicUID);
+		const en::Music* GetMusicInternal(U32 musicUID) const;
+
+		friend class SoundPtr;
+		en::Sound* GetSoundInternal(U32 soundUID);
+		const en::Sound* GetSoundInternal(U32 soundUID) const;
+
 		void UpdateMusicsVolume();
 		void UpdateSoundsVolume();
 
@@ -83,19 +168,19 @@ class AudioSystem
 		bool mGlobalEnabled;
 		bool mPlaying;
 
-		std::unordered_map<MusicId, std::string> mMusicFilenames;
+		std::unordered_map<MusicID, std::string> mMusicFilenames;
 		F32 mMusicsVolume;
 		bool mMusicsEnabled;
-		MusicPtrList mMusics;
+		std::vector<Music*> mMusics;
 
 		ResourceManager& mResourceManager;
-		std::vector<SoundId> mLoadedSounds;
+		std::vector<SoundID> mLoadedSounds;
 		F32 mSoundsVolume;
 		bool mSoundsEnabled;
-		SoundPtrList mSounds;
+		std::vector<Sound*> mSounds;
 
-		static const U32 MAX_MUSIC = 16;
-		static const U32 MAX_SOUND = 240;
+		static constexpr U32 MAX_MUSICS = 16;
+		static constexpr U32 MAX_SOUNDS = 240;
 };
 
 } // namespace en

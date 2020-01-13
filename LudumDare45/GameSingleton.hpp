@@ -4,10 +4,10 @@
 #include <Enlivengine/System/Config.hpp>
 #include <Enlivengine/Application/Application.hpp>
 #include <Enlivengine/Application/ResourceManager.hpp>
+#include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Graphics/SFMLResources.hpp>
 #include <Enlivengine/Graphics/Tileset.hpp>
 #include <Enlivengine/Graphics/Animation.hpp>
-#include <Enlivengine/Application/AudioSystem.hpp>
 #include <entt/entt.hpp>
 
 #include "GameConfig.hpp"
@@ -46,16 +46,16 @@ class GameSingleton
 		static en::TexturePtr mEverythingTexture;
 		static en::TexturePtr mAITexture;
 
-		static en::SoundId mChopSound;
-		static en::SoundId mHitSound;
-		static en::SoundId mKnockoutSound;
-		static en::SoundId mSelectSound;
-		static en::SoundId mThrowSound;
-		static en::SoundId mDestrPropsSound;
-		static en::SoundId mNothingWallSound;
-		static en::SoundId mNothingAISound;
-		static en::SoundId mPieceSound;
-		static en::SoundId mPieceGetSound;
+		static en::SoundID mChopSound;
+		static en::SoundID mHitSound;
+		static en::SoundID mKnockoutSound;
+		static en::SoundID mSelectSound;
+		static en::SoundID mThrowSound;
+		static en::SoundID mDestrPropsSound;
+		static en::SoundID mNothingWallSound;
+		static en::SoundID mNothingAISound;
+		static en::SoundID mPieceSound;
+		static en::SoundID mPieceGetSound;
 
 		static std::vector<en::Animation> mAnimations;
 

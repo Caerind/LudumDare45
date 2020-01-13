@@ -29,16 +29,16 @@ en::TexturePtr GameSingleton::mNothingTexture;
 en::TexturePtr GameSingleton::mEverythingTexture;
 en::TexturePtr GameSingleton::mAITexture;
 
-en::SoundId GameSingleton::mChopSound;
-en::SoundId GameSingleton::mHitSound;
-en::SoundId GameSingleton::mKnockoutSound;
-en::SoundId GameSingleton::mSelectSound;
-en::SoundId GameSingleton::mThrowSound;
-en::SoundId GameSingleton::mDestrPropsSound;
-en::SoundId GameSingleton::mNothingWallSound;
-en::SoundId GameSingleton::mNothingAISound;
-en::SoundId GameSingleton::mPieceSound;
-en::SoundId GameSingleton::mPieceGetSound;
+en::SoundID GameSingleton::mChopSound;
+en::SoundID GameSingleton::mHitSound;
+en::SoundID GameSingleton::mKnockoutSound;
+en::SoundID GameSingleton::mSelectSound;
+en::SoundID GameSingleton::mThrowSound;
+en::SoundID GameSingleton::mDestrPropsSound;
+en::SoundID GameSingleton::mNothingWallSound;
+en::SoundID GameSingleton::mNothingAISound;
+en::SoundID GameSingleton::mPieceSound;
+en::SoundID GameSingleton::mPieceGetSound;
 
 std::vector<en::Animation> GameSingleton::mAnimations;
 

@@ -41,10 +41,10 @@ public:
 		mAsteroidTexture = getApplication().getResourceManager().Create("asteroids", en::TextureLoader::FromFile("Assets/Textures/asteroids.png"));
 		mFont = getApplication().getResourceManager().Create("font", en::FontLoader::FromFile("Assets/Fonts/ErasBoldITC.ttf"));
 
-		getApplication().getAudio().createMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
-		getApplication().getAudio().playMusic("mainTheme");
+		getApplication().getAudio().PrepareMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
+		getApplication().getAudio().PlayMusic("mainTheme");
 
-		getApplication().getAudio().createSound("click", "Assets/Sounds/click.wav");
+		getApplication().getAudio().PrepareSound("click", "Assets/Sounds/click.wav");
 
 		getApplication().getWindow().create(sf::VideoMode(1024, 768), "EngineExample");
 
