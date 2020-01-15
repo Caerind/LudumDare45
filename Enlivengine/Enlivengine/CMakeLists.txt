@@ -93,6 +93,8 @@ set(SRC_APPLICATION
 	Enlivengine/Application/Application.hpp
 	Enlivengine/Application/AudioSystem.cpp
 	Enlivengine/Application/AudioSystem.hpp
+	Enlivengine/Application/ImGuiToolManager.cpp
+	Enlivengine/Application/ImGuiToolManager.hpp
 	Enlivengine/Application/ResourceManager.cpp
 	Enlivengine/Application/ResourceManager.hpp
 	Enlivengine/Application/ResourceManager.inl
@@ -108,12 +110,23 @@ set(SRC_CORE
 )
 source_group("Core" FILES ${SRC_CORE})
 
+set(SRC_TOOLS
+	Enlivengine/Tools/ImGuiDemoWindow.cpp
+	Enlivengine/Tools/ImGuiDemoWindow.hpp
+	Enlivengine/Tools/ImGuiEntt.cpp
+	Enlivengine/Tools/ImGuiEntt.hpp
+	Enlivengine/Tools/ImGuiProfiler.cpp
+	Enlivengine/Tools/ImGuiProfiler.hpp
+)
+source_group("Tools" FILES ${SRC_TOOLS})
+
 add_library(Enlivengine STATIC
 	${SRC_SYSTEM} 
 	${SRC_MATH} 
 	${SRC_GRAPHICS}
 	${SRC_APPLICATION}
 	${SRC_CORE}
+	${SRC_TOOLS}
 )
 if (MSVC)
 	target_compile_options(Enlivengine PRIVATE /W4 /WX)

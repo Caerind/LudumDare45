@@ -44,7 +44,6 @@ class Application
 		void update(Time dt);
 		void postUpdate();
 		void render();
-		void ImGuiMain();
 
 	private:
 		StateManager mStates;
@@ -62,13 +61,7 @@ class Application
 		Clock mTotalDuration;
 
 #ifdef ENLIVE_ENABLE_IMGUI
-		bool mShowImGui;
-
 		ImGuiLogger mLogger;
-
-#ifdef ENLIVE_ENABLE_PROFILE
-		ImGuiProfiler mProfiler;
-#endif
 #endif // ENLIVE_ENABLE_IMGUI
 };
 

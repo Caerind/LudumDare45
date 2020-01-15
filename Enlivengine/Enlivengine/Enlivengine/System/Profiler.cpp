@@ -4,443 +4,161 @@
 
 #include <Enlivengine/System/Assert.hpp>
 
-#include <imgui/imgui.h>
-
-#include <string>
-
 namespace en
 {
 
-bool Profiler::mEnabled = true;
-U32 Profiler::mFrameNumber = 0;
-ProfilerFrame Profiler::mProfilerFrame;
-std::vector<ProfilerDisplay*> Profiler::mProfilerDisplays;
-
-ProfilerFunctionCall::ProfilerFunctionCall(const char* name, U32 id, U32 parent)
-	: mId(id)
-	, mName(name)
-	, mParent(parent)
-{
+Time ProfilerTask::GetDuration() const
+{ 
+	return end - start;
 }
 
-void ProfilerFunctionCall::begin(U32 level)
+Time ProfilerFrame::GetDuration() const
 {
-	mLevel = level;
-	mBegin = Time::now();
+	return end - start;
 }
 
-void ProfilerFunctionCall::end()
+F32 ProfilerFrame::GetPercent(const Time& subDuration) const
 {
-	mEnd = Time::now();
+	return (100.f * subDuration.asMicroseconds()) / (1.0f * GetDuration().asMicroseconds());
 }
 
-U32 ProfilerFunctionCall::getId() const
+U32 ProfilerFrame::GetMaxDepth() const
 {
-	return mId;
-}
-
-const char* ProfilerFunctionCall::getName() const
-{
-	return mName;
-}
-
-U32 ProfilerFunctionCall::getParent() const
-{
-	return mParent;
-}
-
-const Time& ProfilerFunctionCall::getBegin() const
-{
-	return mBegin;
-}
-
-const Time& ProfilerFunctionCall::getEnd() const
-{
-	return mEnd;
-}
-
-Time ProfilerFunctionCall::getDuration() const
-{
-	return mEnd - mBegin;
-}
-
-F32 ProfilerFunctionCall::getPercent(const Time& frameDuration) const
-{
-	return (100.f * getDuration().asMicroseconds()) / (1.0f * frameDuration.asMicroseconds());
-}
-
-U32 ProfilerFunctionCall::getLevel() const
-{
-	return mLevel;
-}
-
-void ProfilerFunctionCall::addChild(U32 childId)
-{
-	mChildren.push_back(childId);
-}
-
-const std::vector<U32>& ProfilerFunctionCall::getChilren() const
-{
-	return mChildren;
-}
-
-bool ProfilerFunctionCall::hasChildren() const
-{
-	return !mChildren.empty();
-}
-
-bool ProfilerFunctionCall::isChild(U32 id) const
-{
-	for (U32 i = 0; i < mChildren.size(); ++i)
+	U32 maxDepth = 0;
+	const size_t size = tasks.size();
+	for (size_t i = 0; i < size; ++i)
 	{
-		if (mChildren[i] == id)
+		if (tasks[i].depth > maxDepth)
 		{
-			return true;
+			maxDepth = tasks[i].depth;
 		}
 	}
-	return false;
-}
-
-ProfilerFrame::ProfilerFrame()
-{
-}
-
-void ProfilerFrame::begin(U32 frameNumber)
-{
-	// Clear data
-	mCalls.clear();
-	mCurrent = nullptr;
-	mLevel = 0;
-	mIdCounter = 1;
-	mFrameNumber = frameNumber;
-
-	mBegin = Time::now();
-}
-
-void ProfilerFrame::end(bool importantFrame)
-{
-	assert(mCurrent == nullptr); // A function hasn't been closed
-	mImportant = importantFrame;
-	mEnd = Time::now();
-}
-
-void ProfilerFrame::beginFunction(const char* name)
-{
-	if (mCurrent == nullptr)
-	{
-		mCalls.emplace_back(name, mIdCounter++);
-		mLevel = 0;
-	}
-	else
-	{
-		U32 id = mIdCounter++;
-		mCurrent->addChild(id);
-		mCalls.emplace_back(name, id, mCurrent->getId());
-		mLevel++;
-	}
-
-	mCurrent = &mCalls.back();
-
-	assert(mCurrent != nullptr);
-
-	mCurrent->begin(mLevel);
-}
-
-void ProfilerFrame::endFunction()
-{
-	assert(mCurrent != nullptr);
-
-	mCurrent->end();
-
-	U32 parentId = mCurrent->getParent();
-	if (parentId == 0)
-	{
-		mCurrent = nullptr;
-		mLevel = 0;
-	}
-	else
-	{
-		for (U32 i = 0; i < mCalls.size(); ++i)
-		{
-			if (mCalls[i].getId() == parentId)
-			{
-				mCurrent = &mCalls[i];
-				mLevel--;
-				return;
-			}
-		}
-	}
-}
-
-const Time& ProfilerFrame::getBegin() const
-{
-	return mBegin;
-}
-
-const Time& ProfilerFrame::getEnd() const
-{
-	return mEnd;
-}
-
-Time ProfilerFrame::getDuration() const
-{
-	return mEnd - mBegin;
-}
-
-const std::vector<ProfilerFunctionCall>& ProfilerFrame::getCalls() const
-{
-	return mCalls;
-}
-
-U32 ProfilerFrame::getFrameNumber() const
-{
-	return mFrameNumber;
-}
-
-bool ProfilerFrame::isImportant() const
-{
-	return mImportant;
-}
-
-ProfilerDisplay::ProfilerDisplay()
-	: mConnected(false)
-{
-	connect();
-}
-
-ProfilerDisplay::~ProfilerDisplay()
-{
-	if (isConnected())
-	{
-		disconnect();
-	}
-}
-
-void ProfilerDisplay::connect()
-{
-	if (mConnected)
-	{
-		return;
-	}
-	mConnected = true;
-	Profiler::connectDisplay(this);
-}
-
-void ProfilerDisplay::disconnect()
-{
-	if (!mConnected)
-	{
-		return;
-	}
-	mConnected = false;
-	Profiler::disconnectDisplay(this);
-}
-
-bool ProfilerDisplay::isConnected() const
-{
-	return mConnected;
-}
-
-void Profiler::beginFrame()
-{
-	mProfilerFrame.begin(mFrameNumber++);
-}
-
-void Profiler::endFrame(bool importantFrame)
-{
-	mProfilerFrame.end(importantFrame);
-	for (U32 i = 0; i < mProfilerDisplays.size(); ++i)
-	{
-		mProfilerDisplays[i]->displayFrame(mProfilerFrame);
-	}
-}
-
-void Profiler::beginFunction(const char* name)
-{
-	mProfilerFrame.beginFunction(name);
-}
-
-void Profiler::endFunction()
-{
-	mProfilerFrame.endFunction();
-}
-
-void Profiler::connectDisplay(ProfilerDisplay* display)
-{
-	if (display == nullptr)
-	{
-		return;
-	}
-	for (U32 i = 0; i < mProfilerDisplays.size(); ++i)
-	{
-		if (mProfilerDisplays[i] == display)
-		{
-			return;
-		}
-	}
-	mProfilerDisplays.push_back(display);
-}
-
-void Profiler::disconnectDisplay(ProfilerDisplay* display)
-{
-	for (auto itr = mProfilerDisplays.begin(); itr != mProfilerDisplays.end(); ++itr)
-	{
-		if (display == *itr)
-		{
-			mProfilerDisplays.erase(itr);
-			return;
-		}
-	}
+	return maxDepth;
 }
 
 Profile::Profile(const char* functionName)
 {
-	Profiler::beginFunction(functionName);
+	Profiler::GetInstance().StartFunction(functionName);
 }
 
 Profile::~Profile()
 {
-	Profiler::endFunction();
+	Profiler::GetInstance().EndFunction();
 }
 
-ConsoleProfiler::ConsoleProfiler()
-	: ProfilerDisplay()
+Profiler& Profiler::GetInstance()
 {
+	static Profiler instance;
+	return instance;
 }
 
-ConsoleProfiler::~ConsoleProfiler()
+void Profiler::SetFrameCapacity(U32 capacity)
 {
-	if (isConnected())
+	mProfilerFrames.reserve(capacity);
+}
+
+U32 Profiler::GetFrameCapacity() const
+{
+	return static_cast<U32>(mProfilerFrames.capacity());
+}
+
+void Profiler::CaptureFrames(U32 nbFrames)
+{
+	if (nbFrames > 0)
 	{
-		disconnect();
+		mCapturing = true;
+		mCapturingFrames = nbFrames;
+		mProfilerFrames.clear();
+		mProfilerFrames.resize(nbFrames);
 	}
 }
 
-void ConsoleProfiler::displayFrame(const ProfilerFrame& frame)
+bool Profiler::IsCapturing() const
+{
+	return mCapturing;
+}
+
+const std::vector<ProfilerFrame>& Profiler::GetProfilerFrames() const
+{
+	assert(!IsCapturing());
+	return mProfilerFrames;
+}
+
+void Profiler::StartFrame(U32 frameNumber)
+{
+	mDepthCounter = 0;
+	mCurrentFrame.frame = frameNumber;
+	mCurrentFrame.start = Time::now();
+	mCurrentFrame.end = mCurrentFrame.start;
+	mCurrentFrame.tasks.clear();
+	mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+}
+
+void Profiler::EndFrame()
+{
+	assert(mDepthCounter == 0);
+	if (IsCapturing())
+	{
+		mCurrentFrame.end = Time::now();
+		const U32 index = static_cast<U32>(mProfilerFrames.size()) - mCapturingFrames;
+		mProfilerFrames[index] = std::move(mCurrentFrame);
+		mCapturingFrames--;
+		if (mCapturingFrames == 0)
+		{
+			mCapturing = false;
+		}
+	}
+}
+
+void Profiler::StartFunction(const char* name)
+{
+	ProfilerTask task;
+	task.name = name;
+	task.start = Time::now();
+	task.depth = mDepthCounter++;
+	mCurrentFrame.tasks.push_back(task);
+}
+
+void Profiler::EndFunction()
+{
+	mCurrentFrame.tasks.back().end = Time::now();
+	mDepthCounter--;
+}
+
+Profiler::Profiler()
+	: mCapturing(false)
+	, mCapturingFrames(0)
+	, mCurrentFrame()
+	, mProfilerFrames()
+{
+	SetFrameCapacity(kDefaultFramesCapacity);
+	mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+}
+
+/*
+void ConsoleProfiler::DisplayFrame(const ProfilerFrame& frame)
 {
 	ENLIVE_PROFILE_FUNCTION();
 
-    #ifdef _MSC_VER
+	// TODO : Move this elsewhere ?
+    #ifdef ENLIVE_COMPILER_MSVC
         system("cls");
 	#else
         printf("\e[1;1H\e[2J"); // Should work on ANSI
 	#endif
 
-	printf("Frame %u, duration : %I64dus\n", frame.getFrameNumber(), frame.getDuration().asMicroseconds());
-	for (const auto& fc : frame.getCalls())
+	printf("Frame %u, duration : %I64dus\n", frame.frame, frame.GetDuration().asMicroseconds());
+	for (const auto& task : frame.tasks)
 	{
-		U32 level = fc.getLevel();
-		for (U32 i = 0; i < level; ++i)
+		const U32 depth = task.depth;
+		for (U32 i = 0; i < depth; ++i)
 		{
 			printf("  ");
 		}
-		printf("-%s, duration : %I64dus, percent : %f\n", fc.getName(), fc.getDuration().asMicroseconds(), fc.getPercent(frame.getDuration()));
+		printf("-%s, duration : %I64dus, percent : %f\n", task.name, task.GetDuration().asMicroseconds(), frame.GetPercent(task.GetDuration()));
 	}
 }
-
-
-ImGuiProfiler::ImGuiProfiler()
-	: ProfilerDisplay()
-	, mPaused(false)
-	, mImportant(true)
-{
-}
-
-ImGuiProfiler::~ImGuiProfiler()
-{
-	disconnect();
-}
-
-void ImGuiProfiler::displayFrame(const ProfilerFrame& frame)
-{
-	if (!mPaused)
-	{
-		if (!mImportant || (mImportant && frame.isImportant()))
-		{
-			mFrame = frame;
-		}
-	}
-}
-
-void ImGuiProfiler::pause()
-{
-	mPaused = true;
-}
-
-void ImGuiProfiler::play()
-{
-	mPaused = false;
-}
-
-void ImGuiProfiler::draw()
-{
-	ENLIVE_PROFILE_FUNCTION();
-
-	if (!ImGui::Begin("Profiler"))
-	{
-		ImGui::End();
-		return;
-	}
-
-	if (!mPaused && ImGui::Button("Pause"))
-	{
-		mPaused = true;
-	}
-	else if (mPaused && ImGui::Button("Play"))
-	{
-		mPaused = false;
-	}
-	ImGui::SameLine();
-	if (!mImportant && ImGui::Button("Important frames"))
-	{
-		mImportant = true;
-	}
-	else if (mImportant && ImGui::Button("All frames"))
-	{
-		mImportant = false;
-	}
-
-	ImGui::Text("Frame %d, duration : %d us", mFrame.getFrameNumber(), mFrame.getDuration().asMicroseconds());
-
-	ImGui::BeginChild("Scrolling", ImVec2(0, -ImGui::GetItemsLineHeightWithSpacing()), true, ImGuiWindowFlags_HorizontalScrollbar);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-
-	const std::vector<ProfilerFunctionCall>& calls(mFrame.getCalls());
-	for (U32 i = 0; i < calls.size(); i++)
-	{
-		if (calls[i].getLevel() == 0)
-		{
-			drawFunctionCall(calls[i]);
-		}
-	}
-
-	ImGui::PopStyleVar();
-	ImGui::EndChild();
-
-	ImGui::End();
-}
-
-void ImGuiProfiler::drawFunctionCall(const ProfilerFunctionCall& fc)
-{
-	const std::vector<ProfilerFunctionCall>& calls(mFrame.getCalls());
-
-	const std::string str = std::string(fc.getName()) + ", duration : " + std::to_string(fc.getDuration().asMicroseconds()) + "us, percent : " + std::to_string(fc.getPercent(mFrame.getDuration()));
-
-	if (ImGui::TreeNode(str.c_str()))
-	{
-		if (fc.hasChildren())
-		{
-			for (U32 i = 0; i < calls.size(); i++)
-			{
-				if (calls[i].getParent() == fc.getId())
-				{
-					drawFunctionCall(calls[i]);
-				}
-			}
-		}
-		ImGui::TreePop();
-	}
-}
+*/
 
 } // namespace en
 

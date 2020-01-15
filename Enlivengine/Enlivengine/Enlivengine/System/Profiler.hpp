@@ -1,10 +1,9 @@
 #pragma once
 
-#include <Enlivengine/System/Config.hpp>
+#include <Enlivengine/System/PrimitiveTypes.hpp>
 
 #ifdef ENLIVE_ENABLE_PROFILE
 
-#include <Enlivengine/System/PrimitiveTypes.hpp>
 #include <Enlivengine/System/CompilerTraits.hpp>
 #include <Enlivengine/System/Time.hpp>
 
@@ -13,154 +12,75 @@
 namespace en
 {
 
-class ProfilerFunctionCall
+struct ProfilerTask
 {
-	public:
-		ProfilerFunctionCall(const char* name, U32 id, U32 parent = 0);
+	const char* name;
+	Time start;
+	Time end;
+	U32 depth;
+	// TODO : Color color;
 
-		void begin(U32 level);
-		void end();
-
-		U32 getId() const;
-		const char* getName() const;
-		U32 getParent() const;
-		const Time& getBegin() const;
-		const Time& getEnd() const;
-		Time getDuration() const;
-		F32 getPercent(const Time& frameDuration) const;
-		U32 getLevel() const;
-
-		void addChild(U32 childId);
-		const std::vector<U32>& getChilren() const;
-		bool hasChildren() const;
-		bool isChild(U32 id) const;
-
-	private:
-		U32 mId;
-	    const char* mName;
-		U32 mParent;
-		Time mBegin;
-		Time mEnd;
-		U32 mLevel;
-		std::vector<U32> mChildren;
+	Time GetDuration() const;
 };
 
-class ProfilerFrame
+struct ProfilerFrame
 {
-	public:
-		ProfilerFrame();
+	U32 frame;
+	Time start;
+	Time end;
+	std::vector<ProfilerTask> tasks;
 
-		void begin(U32 frameNumber);
-		void end(bool important);
-
-		void beginFunction(const char* name);
-		void endFunction();
-
-		const Time& getBegin() const;
-		const Time& getEnd() const;
-		Time getDuration() const;
-		const std::vector<ProfilerFunctionCall>& getCalls() const;
-		U32 getFrameNumber() const;
-		bool isImportant() const;
-
-	private:
-		Time mBegin;
-		Time mEnd;
-		U32 mLevel;
-		U32 mFrameNumber;
-		bool mImportant;
-
-		U32 mIdCounter;
-
-		ProfilerFunctionCall* mCurrent;
-		std::vector<ProfilerFunctionCall> mCalls;
-};
-
-class ProfilerDisplay
-{
-	public:
-		ProfilerDisplay();
-		virtual ~ProfilerDisplay();
-
-		void connect();
-		void disconnect();
-		bool isConnected() const;
-
-		virtual void displayFrame(const ProfilerFrame& frame) = 0;
-
-	private:
-		bool mConnected;
-};
-
-class Profiler
-{
-	public:
-		Profiler() = delete;
-		~Profiler() = delete; 
-
-		static void beginFrame();
-		static void endFrame(bool keepFrame = true);
-
-		static void enable() { mEnabled = true; }
-		static void disable() { mEnabled = false; }
-		static bool isEnabled() { return mEnabled; }
-
-		static void beginFunction(const char* name);
-		static void endFunction();
-
-		static void connectDisplay(ProfilerDisplay* display);
-		static void disconnectDisplay(ProfilerDisplay* display);
-
-	private:
-		static bool mEnabled;
-		static U32 mFrameNumber;
-		static ProfilerFrame mProfilerFrame;
-		static std::vector<ProfilerDisplay*> mProfilerDisplays;
+	Time GetDuration() const;
+	F32 GetPercent(const Time& subDuration) const;
+	U32 GetMaxDepth() const;
 };
 
 class Profile
 {
-	public:
-		Profile(const char* functionName);
-		~Profile();
+public:
+	Profile(const char* functionName);
+	~Profile();
+};
+
+class Profiler
+{
+public:
+	static Profiler& GetInstance();
+
+	void SetFrameCapacity(U32 capacity);
+	U32 GetFrameCapacity() const;
+
+	void CaptureFrames(U32 nbFrames);
+	bool IsCapturing() const;
+
+	const std::vector<ProfilerFrame>& GetProfilerFrames() const;
+
+private:
+	friend class Application;
+	void StartFrame(U32 frameNumber);
+	void EndFrame();
+
+	friend class Profile;
+	void StartFunction(const char* name);
+	void EndFunction();
+
+	static constexpr U32 kDefaultFramesCapacity{ 10 };
+	static constexpr U32 kProfilesPerFrameCapacity{ 256 };
+	Profiler();
+
+private:
+	// Working data
+	bool mCapturing;
+	U32 mCapturingFrames;
+	U32 mDepthCounter;
+	ProfilerFrame mCurrentFrame;
+
+	// Stored data
+	std::vector<ProfilerFrame> mProfilerFrames;
 };
 
 #define ENLIVE_PROFILE_FUNCTION() en::Profile functionProfile(ENLIVE_FUNCTION);
 #define ENLIVE_PROFILE_SCOPE(name) en::Profile scope##name(#name);
-
-// TODO : Separate to another thread because it slow the run quite a lot
-class ConsoleProfiler : public ProfilerDisplay
-{
-public:
-	ConsoleProfiler();
-	virtual ~ConsoleProfiler();
-
-	virtual void displayFrame(const ProfilerFrame& frame);
-};
-
-#ifdef ENLIVE_ENABLE_IMGUI
-class ImGuiProfiler : public ProfilerDisplay
-{
-public:
-	ImGuiProfiler();
-	virtual ~ImGuiProfiler();
-
-	virtual void displayFrame(const ProfilerFrame& frame);
-
-	void pause();
-	void play();
-
-	void draw();
-
-private:
-	void drawFunctionCall(const ProfilerFunctionCall& fc);
-
-private:
-	ProfilerFrame mFrame;
-	bool mPaused;
-	bool mImportant;
-};
-#endif // ENLIVE_ENABLE_IMGUI
 
 } // namespace en
 

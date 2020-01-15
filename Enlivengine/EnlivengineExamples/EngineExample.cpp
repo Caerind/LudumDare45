@@ -83,7 +83,7 @@ public:
 		if (mShowMetrics)
 		{
 			ImGui::Begin("Metrics");
-			ImGui::Text("Entities : %d", registry.size());
+			ImGui::Text("Entities : %d", mRegistry.size());
 			ImGui::Text("Mouse X : %d", (int)getApplication().getWindow().getCursorPosition().x);
 			ImGui::Text("Mouse Y : %d", (int)getApplication().getWindow().getCursorPosition().y);
 			ImGui::Text("View X : %d", (int)getApplication().getWindow().getMainView().getCenter().x);

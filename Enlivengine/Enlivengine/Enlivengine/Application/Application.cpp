@@ -8,8 +8,10 @@
 #endif // ENLIVE_DEBUG
 
 #ifdef ENLIVE_ENABLE_IMGUI
-#include <imgui/imgui.h>
-#include <imgui-sfml/imgui-SFML.h>
+#include <Enlivengine/Application/ImGuiToolManager.hpp>
+#include <Enlivengine/Tools/ImGuiEntt.hpp>
+#include <Enlivengine/Tools/ImGuiProfiler.hpp>
+#include <Enlivengine/Tools/ImGuiDemoWindow.hpp>
 #endif // ENLIVE_ENABLE_IMGUI
 
 namespace en
@@ -29,11 +31,12 @@ Application::Application()
 
 	mWindowClosedSlot.connect(mWindow.onWindowClosed, [this](const en::Window*) { stop(); });
 
-	#ifdef ENLIVE_ENABLE_IMGUI
-	ImGui::SFML::Init(mWindow.getHandle());
-	ImGui::StyleColorsClassic();
-	mShowImGui = true;
-	#endif
+#ifdef ENLIVE_ENABLE_IMGUI
+	ImGuiToolManager::GetInstance().Initialize(mWindow);
+	ImGuiProfiler::GetInstance().Register();
+	ImGuiEntt::GetInstance().Register();
+	ImGuiDemoWindow::GetInstance().Register();
+#endif
 }
 
 Application::~Application()
@@ -66,10 +69,7 @@ void Application::stop()
 	mAudioSystem.Clear();
 
 #ifdef ENLIVE_ENABLE_IMGUI
-	if (mRunning)
-	{
-		ImGui::SFML::Shutdown();
-	}
+	ImGuiToolManager::GetInstance().Shutdown();
 #endif
 
 	if (mWindow.isOpen())
@@ -119,8 +119,7 @@ void Application::run()
 	while (mRunning)
 	{
 #ifdef ENLIVE_ENABLE_PROFILE
-		Profiler::beginFrame();
-		bool importantFrame = false;
+		Profiler::GetInstance().StartFrame(mTotalFrames);
 #endif
 
 		// Time
@@ -144,19 +143,8 @@ void Application::run()
 		{
 			accumulator -= TimePerFrame;
 
-#ifdef ENLIVE_ENABLE_PROFILE
-			importantFrame = true;
-#endif
-
 #ifdef ENLIVE_ENABLE_IMGUI
-			if (mRunning)
-			{
-				ImGui::SFML::Update(mWindow.getHandle(), toSF(TimePerFrame));
-				if (mShowImGui)
-				{
-					ImGuiMain();
-				}
-			}
+			ImGuiToolManager::GetInstance().Update(mWindow, TimePerFrame);
 #endif
 
 			preUpdate();
@@ -164,10 +152,7 @@ void Application::run()
 			postUpdate();
 
 #ifdef ENLIVE_ENABLE_IMGUI
-			if (mRunning)
-			{
-				ImGui::Render();
-			}
+			ImGuiToolManager::GetInstance().Render();
 #endif
 		}
 
@@ -195,7 +180,7 @@ void Application::run()
 		}
 
 #ifdef ENLIVE_ENABLE_PROFILE
-		Profiler::endFrame(importantFrame);
+		Profiler::GetInstance().EndFrame();
 #endif
 	}
 }
@@ -218,15 +203,7 @@ void Application::events()
 		}
 
 #ifdef ENLIVE_ENABLE_IMGUI
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Menu)
-		{
-			mShowImGui = !mShowImGui;
-		}
-
-		if (mShowImGui && mRunning)
-		{
-			ImGui::SFML::ProcessEvent(event);
-		}
+		ImGuiToolManager::GetInstance().HandleEvent(event);
 #endif	
 
 		mStates.handleEvent(event);
@@ -263,99 +240,10 @@ void Application::render()
 #endif // ENLIVE_DEBUG
 
 #ifdef ENLIVE_ENABLE_IMGUI
-	if (mShowImGui && mRunning)
-	{
-		mWindow.getHandle().resetGLStates();
-		ImGui::SFML::Render(mWindow.getHandle());
-	}
-#endif	
+	ImGuiToolManager::GetInstance().RenderFrame(mWindow);
+#endif // ENLIVE_ENABLE_IMGUI
 
 	mWindow.display();
-}
-
-void Application::ImGuiMain()
-{
-#ifdef ENLIVE_ENABLE_IMGUI
-	static bool bDemo = false;
-	static bool bStyleEditor = false;
-	static bool bLogger = false;
-	static bool bProfiler = false;
-
-	if (ImGui::BeginMainMenuBar())
-	{
-		if (ImGui::BeginMenu("File"))
-		{
-			bool todo = true;
-			ImGui::MenuItem("TODO", NULL, &todo);
-			/*
-			if (ImGui::MenuItem("Save")) FileIO::SaveToFile(mData.GetFilename(), mData);
-			ImGui::MenuItem("Save...", NULL, &bFileSaveAs);
-			if (ImGui::MenuItem("Close")) mData.Clear();
-			ImGui::Spacing();
-			bool continuousSave = mData.IsContinuousSave();
-			ImGui::MenuItem("Continuous Save", NULL, &continuousSave);
-			*/
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Tools"))
-		{
-			bool todo = true;
-			ImGui::MenuItem("TODO", NULL, &todo);
-
-			/*
-			bool wasFalse = (bEditor == false);
-			ImGui::MenuItem("Editor", NULL, &bEditor);
-			if (wasFalse && bEditor) bStars = false;
-
-			wasFalse = (bStars == false);
-			ImGui::MenuItem("Stars", NULL, &bStars);
-			if (wasFalse && bStars) bEditor = false;
-			*/
-
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("Help"))
-		{
-			ImGui::MenuItem("Demo", NULL, &bDemo);
-			ImGui::MenuItem("Style", NULL, &bStyleEditor);
-			ImGui::MenuItem("Logger", NULL, &bLogger);
-#ifdef ENLIVE_ENABLE_PROFILE
-			ImGui::MenuItem("Profiler", NULL, &bProfiler);
-#else
-			ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-			ImGui::MenuItem("Profiler");
-			ImGui::PopStyleVar();
-#endif
-			ImGui::EndMenu();
-		}
-		ImGui::EndMainMenuBar();
-	}
-
-	if (bDemo)
-	{
-		ImGui::ShowDemoWindow(&bDemo);
-	}
-	if (bStyleEditor)
-	{
-		if (!ImGui::Begin("StyleEditor", &bStyleEditor))
-		{
-			ImGui::End();
-			return;
-		}
-		ImGui::ShowStyleEditor();
-		ImGui::End();
-	}
-	if (bLogger)
-	{
-		mLogger.draw();
-	}
-#ifdef ENLIVE_ENABLE_PROFILE
-	if (bProfiler)
-	{
-		mProfiler.draw();
-	}
-#endif
-#endif // ENLIVE_ENABLE_IMGUI
 }
 
 en::ScreenshotSystem& Application::getScreenshotSystem()

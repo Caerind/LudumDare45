@@ -115,6 +115,12 @@ set(SRC_ENTT
 )
 source_group("entt" FILES ${SRC_ENTT})
 
+# IconFontCppHeaders
+set(SRC_ICONFONTCPPHEADERS
+	IconFontCppHeaders/IconsFontAwesome5.h
+)
+source_group("IconFontCppHeaders" FILES ${SRC_ICONFONTCPPHEADERS})
+
 # imgui
 set(SRC_IMGUI
 	imgui/imconfig.h
@@ -153,6 +159,7 @@ add_library(EnlivengineThirdParty STATIC
 	${SRC_DEBUGBREAK}
 	${SRC_DOCTEST}
 	${SRC_ENTT}
+	${SRC_ICONFONTCPPHEADERS}
 	${SRC_IMGUI}
 	${SRC_IMGUISFML}
 	${SRC_PUGIXML}

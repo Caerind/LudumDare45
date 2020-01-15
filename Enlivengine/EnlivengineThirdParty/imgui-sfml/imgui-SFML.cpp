@@ -494,8 +494,7 @@ void UpdateFontTexture() {
     texture.create(width, height);
     texture.update(pixels);
 
-    io.Fonts->TexID =
-        convertGLTextureHandleToImTextureID(texture.getNativeHandle());
+    io.Fonts->TexID = convertGLTextureHandleToImTextureID(texture.getNativeHandle());
 }
 
 sf::Texture& GetFontTexture() { return *s_fontTexture; }

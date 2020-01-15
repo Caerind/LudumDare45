@@ -1058,19 +1058,17 @@ void GameState::devEvent(const sf::Event& event)
 {
 	ENLIVE_PROFILE_FUNCTION();
 
+#ifdef ENLIVE_ENABLE_IMGUI
 	// Config
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F2)
 	{
 		GameConfig::showWindow = !GameConfig::showWindow;
 	}
-
 	// Metrics
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F3)
 	{
 		GameSingleton::showWindow = !GameSingleton::showWindow;
 	}
-
-#ifdef ENLIVE_ENABLE_IMGUI
 	// Entities
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F4)
 	{
@@ -1108,6 +1106,7 @@ void GameState::devUpdate(en::Time& dt)
 		dt *= 0.5f;
 	}
 
+#ifdef ENLIVE_ENABLE_IMGUI
 	if (GameConfig::showWindow)
 	{
 		GameConfig::renderConfigWindow();
@@ -1116,8 +1115,6 @@ void GameState::devUpdate(en::Time& dt)
 	{
 		GameSingleton::renderMetricsWindow();
 	}
-
-#ifdef ENLIVE_ENABLE_IMGUI
 	if (GameSingleton::worldEditor.show_window)
 	{
 		if (ImGui::Begin("Entity list"))
@@ -1133,6 +1130,6 @@ void GameState::devUpdate(en::Time& dt)
 		}
 		GameSingleton::worldEditor.renderImGui(GameSingleton::world, GameSingleton::currentEntity);
 	}
-#endif
+#endif // ENLIVE_ENABLE_IMGUI
 }
 #endif // ENLIVE_DEBUG
