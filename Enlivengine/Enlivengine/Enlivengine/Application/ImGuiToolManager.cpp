@@ -4,12 +4,19 @@
 
 #include <Enlivengine/System/Hash.hpp>
 #include <Enlivengine/System/Assert.hpp>
+#include <Enlivengine/System/Profiler.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui-sfml/imgui-SFML.h>
 
 namespace en
 {
+
+ImGuiTool::ImGuiTool()
+	: mRegistered(false)
+	, mVisible(false)
+{
+}
 
 void ImGuiTool::Display()
 {
@@ -32,6 +39,11 @@ void ImGuiTool::Unregister()
 bool ImGuiTool::IsRegistered() const
 {
 	return mRegistered;
+}
+
+int ImGuiTool::GetWindowFlags() const
+{
+	return ImGuiWindowFlags_None;
 }
 
 bool ImGuiTool::IsImGuiDemoTool() const
@@ -111,7 +123,7 @@ void ImGuiToolManager::Initialize(Window& window)
 	io.Fonts->AddFontFromFileTTF(kImGuiFontAwesomePath, 16.0f, &icons_config, icons_ranges);
 	ImGui::SFML::UpdateFontTexture();
 
-	mShowImGui = true;
+	mShowImGui = true; // TODO : mShowImGui = IsDevVersion();
 	mRunning = true;
 }
 
@@ -126,6 +138,7 @@ void ImGuiToolManager::Shutdown()
 
 void ImGuiToolManager::Update(Window& window, Time dt)
 {
+	ENLIVE_PROFILE_FUNCTION();
 	if (mRunning)
 	{
 		ImGui::SFML::Update(window.getHandle(), toSF(dt));
@@ -138,6 +151,7 @@ void ImGuiToolManager::Update(Window& window, Time dt)
 
 void ImGuiToolManager::Render()
 {
+	ENLIVE_PROFILE_FUNCTION();
 	if (mRunning)
 	{
 		ImGui::Render();
@@ -146,6 +160,7 @@ void ImGuiToolManager::Render()
 
 void ImGuiToolManager::RenderFrame(Window& window)
 {
+	ENLIVE_PROFILE_FUNCTION();
 	if (mRunning && mShowImGui)
 	{
 		auto& windowHandle = window.getHandle();
@@ -199,7 +214,7 @@ void ImGuiToolManager::ImGuiMain()
 				const bool imguiDemoTool = tool->IsImGuiDemoTool();
 				if (!imguiDemoTool)
 				{
-					if (!ImGui::Begin(tool->GetName(), &tool->mVisible))
+					if (!ImGui::Begin(tool->GetName(), &tool->mVisible, tool->GetWindowFlags()))
 					{
 						ImGui::End();
 						continue;
@@ -213,6 +228,12 @@ void ImGuiToolManager::ImGuiMain()
 			}
 		}
 	}
+}
+
+ImGuiToolManager::ImGuiToolManager()
+	: mShowImGui(false)
+	, mRunning(false)
+{
 }
 
 } // namespace en

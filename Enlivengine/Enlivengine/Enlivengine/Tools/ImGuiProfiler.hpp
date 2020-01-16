@@ -18,7 +18,29 @@ public:
 	virtual ImGuiToolTab GetTab() const;
 	virtual const char* GetName() const;
 
+	virtual int GetWindowFlags() const;
+
 	virtual void Display();
+
+	// Shortcuts for Profiler
+	void SetEnabled(bool enabled);
+	bool IsEnabled() const;
+	bool CanCurrentFrameBeCaptured() const;
+	void CaptureCurrentFrame();
+	void CaptureFrames(U32 nbFrames);
+	bool IsCapturing() const;
+
+	// Specific methods
+	void CaptureCurrentFrameAndOpenProfiler();
+
+private:
+	void DisplayFrame(const ProfilerFrame& frame) const;
+	void ForceResize();
+
+private:
+	U32 mCaptureFrames;
+	U32 mCurrentFrameIndex;
+	bool mForceResize;
 
 private:
 	ImGuiProfiler();

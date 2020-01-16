@@ -18,7 +18,6 @@ struct ProfilerTask
 	Time start;
 	Time end;
 	U32 depth;
-	// TODO : Color color;
 
 	Time GetDuration() const;
 };
@@ -31,7 +30,8 @@ struct ProfilerFrame
 	std::vector<ProfilerTask> tasks;
 
 	Time GetDuration() const;
-	F32 GetPercent(const Time& subDuration) const;
+	F32 GetPercentTime(const Time& timePoint) const;
+	F32 GetPercentDuration(const Time& subDuration) const;
 	U32 GetMaxDepth() const;
 };
 
@@ -50,6 +50,12 @@ public:
 	void SetFrameCapacity(U32 capacity);
 	U32 GetFrameCapacity() const;
 
+	void SetEnabled(bool enabled);
+	bool IsEnabled() const;
+
+	bool CanCurrentFrameBeCaptured() const;
+
+	void CaptureCurrentFrame();
 	void CaptureFrames(U32 nbFrames);
 	bool IsCapturing() const;
 
@@ -64,18 +70,21 @@ private:
 	void StartFunction(const char* name);
 	void EndFunction();
 
+	U32 GetCurrentDepth() const;
+
 	static constexpr U32 kDefaultFramesCapacity{ 10 };
 	static constexpr U32 kProfilesPerFrameCapacity{ 256 };
+	static constexpr U32 kMaxDepthCapacity{ 10 };
 	Profiler();
 
 private:
-	// Working data
+	bool mEnabled;
+	bool mWasEnabledThisFrame;
+	ProfilerFrame mCurrentFrame;
+	std::vector<U32> mIndexStack;
+
 	bool mCapturing;
 	U32 mCapturingFrames;
-	U32 mDepthCounter;
-	ProfilerFrame mCurrentFrame;
-
-	// Stored data
 	std::vector<ProfilerFrame> mProfilerFrames;
 };
 

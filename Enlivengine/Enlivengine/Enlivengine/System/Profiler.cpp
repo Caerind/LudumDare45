@@ -8,18 +8,33 @@ namespace en
 {
 
 Time ProfilerTask::GetDuration() const
-{ 
+{
+	assert(start <= end);
 	return end - start;
 }
 
 Time ProfilerFrame::GetDuration() const
 {
+	assert(start <= end);
 	return end - start;
 }
 
-F32 ProfilerFrame::GetPercent(const Time& subDuration) const
+F32 ProfilerFrame::GetPercentTime(const Time& timePoint) const
 {
-	return (100.f * subDuration.asMicroseconds()) / (1.0f * GetDuration().asMicroseconds());
+	assert(start <= timePoint && timePoint <= end);
+	const I64 durationMS = GetDuration().asMicroseconds();
+	const I64 delta = (timePoint - start).asMicroseconds();
+	const F64 percent = (1.0 * delta) / (1.0 * durationMS);
+	return static_cast<F32>(percent);
+}
+
+F32 ProfilerFrame::GetPercentDuration(const Time& subDuration) const
+{
+	assert(subDuration <= GetDuration());
+	const I64 durationMS = GetDuration().asMicroseconds();
+	const I64 subDurationMS = subDuration.asMicroseconds();
+	const F64 percent = (1.0 * subDurationMS) / (1.0 * durationMS);
+	return static_cast<F32>(percent);
 }
 
 U32 ProfilerFrame::GetMaxDepth() const
@@ -62,9 +77,44 @@ U32 Profiler::GetFrameCapacity() const
 	return static_cast<U32>(mProfilerFrames.capacity());
 }
 
+void Profiler::SetEnabled(bool enabled)
+{
+	if (mEnabled != enabled)
+	{
+		mEnabled = enabled;
+		if (mEnabled)
+		{
+			mWasEnabledThisFrame = true;
+		}
+		else
+		{
+			mCurrentFrame.tasks.clear();
+			mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+			mIndexStack.reserve(kMaxDepthCapacity);
+			mIndexStack.clear();
+		}
+	}
+}
+
+bool Profiler::IsEnabled() const
+{
+	return mEnabled;
+}
+
+bool Profiler::CanCurrentFrameBeCaptured() const
+{
+	return IsEnabled() && !mWasEnabledThisFrame;
+}
+
+void Profiler::CaptureCurrentFrame()
+{
+	assert(CanCurrentFrameBeCaptured());
+	CaptureFrames(1);
+}
+
 void Profiler::CaptureFrames(U32 nbFrames)
 {
-	if (nbFrames > 0)
+	if (CanCurrentFrameBeCaptured() && nbFrames > 0)
 	{
 		mCapturing = true;
 		mCapturingFrames = nbFrames;
@@ -86,53 +136,100 @@ const std::vector<ProfilerFrame>& Profiler::GetProfilerFrames() const
 
 void Profiler::StartFrame(U32 frameNumber)
 {
-	mDepthCounter = 0;
-	mCurrentFrame.frame = frameNumber;
-	mCurrentFrame.start = Time::now();
-	mCurrentFrame.end = mCurrentFrame.start;
-	mCurrentFrame.tasks.clear();
-	mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+	const Time frameStart = Time::now();
+
+	if (IsEnabled() && mWasEnabledThisFrame)
+	{
+		mWasEnabledThisFrame = false;
+	}
+
+	ENLIVE_PROFILE_FUNCTION();
+
+	if (CanCurrentFrameBeCaptured())
+	{
+		// 1 because of the ENLIVE_PROFILE_FUNCTION already opened
+		assert(mCurrentFrame.tasks.size() == 1);
+		assert(mIndexStack.size() == 1); 
+
+		mCurrentFrame.frame = frameNumber;
+		mCurrentFrame.start = frameStart;
+		mCurrentFrame.end = frameStart;
+	}
 }
 
 void Profiler::EndFrame()
 {
-	assert(mDepthCounter == 0);
-	if (IsCapturing())
+	StartFunction("en::Profiler::EndFrame");
+
+	if (CanCurrentFrameBeCaptured())
 	{
 		mCurrentFrame.end = Time::now();
-		const U32 index = static_cast<U32>(mProfilerFrames.size()) - mCapturingFrames;
-		mProfilerFrames[index] = std::move(mCurrentFrame);
-		mCapturingFrames--;
-		if (mCapturingFrames == 0)
+		EndFunction();
+
+		assert(mIndexStack.size() == 0);
+
+		if (IsCapturing())
 		{
-			mCapturing = false;
+			const U32 index = static_cast<U32>(mProfilerFrames.size()) - mCapturingFrames;
+			mProfilerFrames[index] = std::move(mCurrentFrame);
+			mCapturingFrames--;
+			if (mCapturingFrames == 0)
+			{
+				mCapturing = false;
+			}
 		}
+
+		mCurrentFrame.tasks.clear();
+		mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+		mIndexStack.clear();
+		mIndexStack.reserve(kMaxDepthCapacity);
+	}
+	else
+	{
+		EndFunction();
 	}
 }
 
 void Profiler::StartFunction(const char* name)
 {
-	ProfilerTask task;
-	task.name = name;
-	task.start = Time::now();
-	task.depth = mDepthCounter++;
-	mCurrentFrame.tasks.push_back(task);
+	if (CanCurrentFrameBeCaptured())
+	{
+		ProfilerTask task;
+		task.name = name;
+		task.start = Time::now();
+		task.depth = GetCurrentDepth();
+		mCurrentFrame.tasks.push_back(task);
+		mIndexStack.push_back(static_cast<U32>(mCurrentFrame.tasks.size() - 1));
+	}
 }
 
 void Profiler::EndFunction()
 {
-	mCurrentFrame.tasks.back().end = Time::now();
-	mDepthCounter--;
+	if (CanCurrentFrameBeCaptured())
+	{
+		assert(mIndexStack.size() > 0);
+		const U32 index = mIndexStack.back();
+		mCurrentFrame.tasks[index].end = Time::now();
+		mIndexStack.pop_back();
+	}
+}
+
+U32 Profiler::GetCurrentDepth() const
+{
+	return static_cast<U32>(mIndexStack.size());
 }
 
 Profiler::Profiler()
-	: mCapturing(false)
-	, mCapturingFrames(0)
+	: mEnabled(false)
+	, mWasEnabledThisFrame(false)
 	, mCurrentFrame()
+	, mCapturing(false)
+	, mCapturingFrames(0)
 	, mProfilerFrames()
 {
 	SetFrameCapacity(kDefaultFramesCapacity);
 	mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+	mIndexStack.reserve(kMaxDepthCapacity);
 }
 
 /*

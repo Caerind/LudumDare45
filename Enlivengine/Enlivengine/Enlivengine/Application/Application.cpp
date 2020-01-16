@@ -33,6 +33,7 @@ Application::Application()
 
 #ifdef ENLIVE_ENABLE_IMGUI
 	ImGuiToolManager::GetInstance().Initialize(mWindow);
+
 	ImGuiProfiler::GetInstance().Register();
 	ImGuiEntt::GetInstance().Register();
 	ImGuiDemoWindow::GetInstance().Register();
@@ -121,64 +122,66 @@ void Application::run()
 #ifdef ENLIVE_ENABLE_PROFILE
 		Profiler::GetInstance().StartFrame(mTotalFrames);
 #endif
-
-		// Time
-		Time dt = clock.restart();
-
-		// Usefull when using Breakpoints on Debugging
-#ifdef ENLIVE_DEBUG
-		if (dt > Time::Second)
 		{
-			dt = TimePerFrame;
-		}
+			ENLIVE_PROFILE_SCOPE(MainFrame);
+
+			// Time
+			Time dt = clock.restart();
+
+			// Usefull when using Breakpoints on Debugging
+#ifdef ENLIVE_DEBUG
+			if (dt > Time::Second)
+			{
+				dt = TimePerFrame;
+			}
 #endif
 
-		accumulator += dt;
-		fpsAccumulator += dt;
+			accumulator += dt;
+			fpsAccumulator += dt;
 
-		events();
+			events();
 
-		// Fixed time 60 FPS
-		while (accumulator >= TimePerFrame)
-		{
-			accumulator -= TimePerFrame;
+			// Fixed time 60 FPS
+			while (accumulator >= TimePerFrame)
+			{
+				accumulator -= TimePerFrame;
 
 #ifdef ENLIVE_ENABLE_IMGUI
-			ImGuiToolManager::GetInstance().Update(mWindow, TimePerFrame);
+				ImGuiToolManager::GetInstance().Update(mWindow, TimePerFrame);
 #endif
 
-			preUpdate();
-			update(TimePerFrame);
-			postUpdate();
+				preUpdate();
+				update(TimePerFrame);
+				postUpdate();
 
 #ifdef ENLIVE_ENABLE_IMGUI
-			ImGuiToolManager::GetInstance().Render();
+				ImGuiToolManager::GetInstance().Render();
 #endif
-		}
+			}
 
-		render();
+			render();
 
-		// FPS
-		framesFps++;
-		if (fpsAccumulator > TimeUpdateFPS)
-		{
-			mFps = static_cast<U32>(framesFps / TimeUpdateFPS.asSeconds());
-			fpsAccumulator = Time::Zero;
-			framesFps = 0;
+			// FPS
+			framesFps++;
+			if (fpsAccumulator > TimeUpdateFPS)
+			{
+				mFps = static_cast<U32>(framesFps / TimeUpdateFPS.asSeconds());
+				fpsAccumulator = Time::Zero;
+				framesFps = 0;
 
 #ifdef ENLIVE_DEBUG
-			mWindow.setTitle("FPS : " + toString(mFps));
+				mWindow.setTitle("FPS : " + toString(mFps));
 #endif
+			}
+
+			mTotalFrames++;
+
+			// Stop ?
+			if (!mWindow.isOpen() || mStates.getStateCount() == 0)
+			{
+				stop();
+			}
 		}
-
-		mTotalFrames++;
-
-		// Stop ?
-		if (!mWindow.isOpen() || mStates.getStateCount() == 0)
-		{
-			stop();
-		}
-
 #ifdef ENLIVE_ENABLE_PROFILE
 		Profiler::GetInstance().EndFrame();
 #endif
@@ -204,6 +207,17 @@ void Application::events()
 
 #ifdef ENLIVE_ENABLE_IMGUI
 		ImGuiToolManager::GetInstance().HandleEvent(event);
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
+		{
+			if (ImGuiProfiler::GetInstance().CanCurrentFrameBeCaptured())
+			{
+				ImGuiProfiler::GetInstance().CaptureCurrentFrameAndOpenProfiler();
+			}
+			else
+			{
+				ImGuiProfiler::GetInstance().SetEnabled(true);
+			}
+		}
 #endif	
 
 		mStates.handleEvent(event);

@@ -39,6 +39,8 @@ class ImGuiToolTabNames
 class ImGuiTool
 {
 	public:
+		ImGuiTool();
+
 		virtual ImGuiToolTab GetTab() const = 0;
 		virtual const char* GetName() const = 0;
 
@@ -48,6 +50,7 @@ class ImGuiTool
 		void Unregister();
 		bool IsRegistered() const;
 
+		virtual int GetWindowFlags() const;
 		virtual bool IsImGuiDemoTool() const;
 
 	private:
@@ -82,6 +85,9 @@ class ImGuiToolManager
 		void HandleEvent(const sf::Event& event);
 		
 		void ImGuiMain();
+
+	private:
+		ImGuiToolManager();
 
 	private:
 		bool mShowImGui;

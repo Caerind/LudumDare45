@@ -115,6 +115,8 @@ set(SRC_TOOLS
 	Enlivengine/Tools/ImGuiDemoWindow.hpp
 	Enlivengine/Tools/ImGuiEntt.cpp
 	Enlivengine/Tools/ImGuiEntt.hpp
+	Enlivengine/Tools/ImGuiHelper.cpp
+	Enlivengine/Tools/ImGuiHelper.hpp
 	Enlivengine/Tools/ImGuiProfiler.cpp
 	Enlivengine/Tools/ImGuiProfiler.hpp
 )
