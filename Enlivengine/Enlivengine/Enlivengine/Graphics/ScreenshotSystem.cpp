@@ -3,6 +3,8 @@
 #include <Enlivengine/System/Log.hpp>
 #include <Enlivengine/System/DateTime.hpp>
 
+#include <Enlivengine/Application/PathManager.hpp>
+
 #include <SFML/Graphics/Image.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Texture.hpp>
@@ -13,32 +15,21 @@ namespace en
 {
 
 ScreenshotSystem::ScreenshotSystem()
-	: mScreenshotPath("")
 {
 }
 
-bool ScreenshotSystem::screenshot(const sf::RenderWindow& window)
+bool ScreenshotSystem::Screenshot(const sf::RenderWindow& window)
 {
 	sf::Texture texture;
 	texture.create(window.getSize().x, window.getSize().y);
 	texture.update(window);
 
-	return saveTexture(texture);
+	return SaveTexture(texture);
 }
 
-const std::string& ScreenshotSystem::getScreenshotPath() const
+bool ScreenshotSystem::SaveTexture(const sf::Texture& texture) const
 {
-	return mScreenshotPath;
-}
-
-void ScreenshotSystem::setScreenshotPath(const std::string& screenshotPath)
-{
-	mScreenshotPath = screenshotPath;
-}
-
-bool ScreenshotSystem::saveTexture(const sf::Texture& texture) const
-{
-	const std::string filename = getScreenshotPath() + getScreenshotName() + getScreenshotFormat();
+	const std::string filename = PathManager::GetInstance().GetScreenshotPath() + GetScreenshotName() + GetScreenshotFormat();
 	if (texture.copyToImage().saveToFile(filename))
 	{
 		LogInfo(en::LogChannel::Graphics, 5, "Screenshot saved to : %s", filename.c_str());
@@ -51,7 +42,7 @@ bool ScreenshotSystem::saveTexture(const sf::Texture& texture) const
 	}
 }
 
-std::string ScreenshotSystem::getScreenshotName()
+std::string ScreenshotSystem::GetScreenshotName()
 {
 	DateTime date;
 	I32 y, m, d;
@@ -63,7 +54,7 @@ std::string ScreenshotSystem::getScreenshotName()
 	return oss.str();
 }
 
-std::string ScreenshotSystem::getScreenshotFormat()
+std::string ScreenshotSystem::GetScreenshotFormat()
 {
 	return std::string(".png");
 }

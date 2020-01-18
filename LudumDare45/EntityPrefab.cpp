@@ -12,11 +12,11 @@ bool EntityPrefab::createEntity(entt::registry& world, en::F32 x, en::F32 y)
 	auto& renderable = world.assign<en::RenderableComponent>(entity);
 	renderable.z = 0;
 	auto& sprite = world.assign<en::SpriteComponent>(entity);
-	//sprite.setTexture(GameSingleton::application->getResourceManager().Get<en::Texture>(GameSingleton::mEverythingTexture).Get());
+	//sprite.setTexture(en::ResourceManager::GetInstance().Get<en::Texture>(GameSingleton::mEverythingTexture).Get());
 	sprite.setTextureRect(en::toSF(en::Recti(0, 0, 120, 120)));
 	sprite.setOrigin(60, 60);
 	auto& text = world.assign<en::TextComponent>(entity);
-	//text.setFont(GameSingleton::application->getResourceManager().Get<en::Font>(GameSingleton::mFont).Get());
+	//text.setFont(en::ResourceManager::GetInstance().Get<en::Font>(GameSingleton::mFont).Get());
 	text.setPosition(10, 10);
 	text.setString("Asteroid");
 	text.setFillColor(sf::Color::White);
@@ -143,7 +143,7 @@ bool EntityPrefab::createPiece(entt::registry& world, en::F32 x, en::F32 y)
 	auto& pieceComponent = world.assign<PieceComponent>(entity);
 	pieceComponent.sprite.setScale(sf::Vector2f(0.3f, 0.3f));
 	pieceComponent.sprite.setOrigin(sf::Vector2f(2, 2));
-	pieceComponent.sprite.setTexture(GameSingleton::application->getResourceManager().Get<en::Texture>("coin").Get());
+	pieceComponent.sprite.setTexture(en::ResourceManager::GetInstance().Get<en::Texture>("coin").Get());
 	pieceComponent.sprite.setTextureRect(sf::IntRect(0, 0, 16, 16));
 	pieceComponent.value = 1;
 	return true;

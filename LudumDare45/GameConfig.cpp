@@ -4,7 +4,7 @@
 #include <imgui/imgui.h>
 #endif
 
-std::string GameConfig::configFilename = "Assets/Data/config.ini";
+std::string GameConfig::configFilename = "Assets/Data/config.ini"; // TODO : Remove this
 en::ParserIni GameConfig::mIni;
 
 #ifdef ENLIVE_ENABLE_IMGUI

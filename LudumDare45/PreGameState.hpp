@@ -12,7 +12,7 @@ class PreGameState : public en::State
 		PreGameState(en::StateManager& manager)
 			: en::State(manager)
 		{
-			background.setTexture(getApplication().getResourceManager().Create<en::Texture>("atmog", en::SFMLResourcesLoader<en::Texture>::FromFile("Assets/Textures/atmog.png")).Get());
+			background.setTexture(en::ResourceManager::GetInstance().Create<en::Texture>("atmog", en::SFMLResourcesLoader<en::Texture>::FromFile(en::PathManager::GetInstance().GetTexturesPath() + "atmog.png")).Get());
 
 			accumulator = en::Time::Zero;
 			imageIndex = 0;

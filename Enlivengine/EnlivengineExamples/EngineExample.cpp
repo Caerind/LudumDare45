@@ -35,18 +35,17 @@ class MyState : public en::State
 public:
 	MyState(en::StateManager& manager) : en::State(manager)
 	{
-		getApplication().getWindow().setMainView(en::View(0.f, 0.f, 1024.f, 768.f));
+		getApplication().GetWindow().setMainView(en::View(0.f, 0.f, 1024.f, 768.f));
 
-		en::Texture::Ptr atmogTexture = getApplication().getResourceManager().Create("atmog", en::TextureLoader::FromFile("Assets/Textures/atmog.png"));
-		mAsteroidTexture = getApplication().getResourceManager().Create("asteroids", en::TextureLoader::FromFile("Assets/Textures/asteroids.png"));
-		mFont = getApplication().getResourceManager().Create("font", en::FontLoader::FromFile("Assets/Fonts/ErasBoldITC.ttf"));
+		en::Texture::Ptr atmogTexture = en::ResourceManager::GetInstance().Create("atmog", en::TextureLoader::FromFile(en::PathManager::GetInstance().GetTexturesPath() + "atmog.png"));
+		mAsteroidTexture = en::ResourceManager::GetInstance().Create("asteroids", en::TextureLoader::FromFile(en::PathManager::GetInstance().GetTexturesPath() + "asteroids.png"));
+		mFont = en::ResourceManager::GetInstance().Create("font", en::FontLoader::FromFile(en::PathManager::GetInstance().GetFontsPath() + "ErasBoldITC.ttf"));
 
-		getApplication().getAudio().PrepareMusic("mainTheme", "Assets/Musics/MainTheme.ogg");
-		getApplication().getAudio().PlayMusic("mainTheme");
+		en::AudioSystem::GetInstance().PrepareMusic("mainTheme", en::PathManager::GetInstance().GetMusicsPath() + "MainTheme.ogg");
+		en::AudioSystem::GetInstance().PlayMusic("mainTheme");
+		en::AudioSystem::GetInstance().PrepareSound("click", en::PathManager::GetInstance().GetSoundsPath() + "click.wav");
 
-		getApplication().getAudio().PrepareSound("click", "Assets/Sounds/click.wav");
-
-		getApplication().getWindow().create(sf::VideoMode(1024, 768), "EngineExample");
+		getApplication().GetWindow().create(sf::VideoMode(1024, 768), "EngineExample");
 
 		assert(atmogTexture.IsValid());
 		mBackground.setTexture(atmogTexture.Get());
@@ -56,12 +55,12 @@ public:
 	{
 		if (event.type == sf::Event::Closed)
 		{
-			getApplication().stop();
+			getApplication().Stop();
 		}
 		if (event.type == sf::Event::MouseButtonPressed)
 		{
-			getApplication().getAudio().PlaySound("click");
-			createEntity(getApplication().getWindow().getCursorPosition().x, getApplication().getWindow().getCursorPosition().y);
+			en::AudioSystem::GetInstance().PlaySound("click");
+			createEntity(getApplication().GetWindow().getCursorPosition().x, getApplication().GetWindow().getCursorPosition().y);
 		}
 		if (event.type == sf::Event::KeyPressed)
 		{
@@ -84,10 +83,10 @@ public:
 		{
 			ImGui::Begin("Metrics");
 			ImGui::Text("Entities : %d", mRegistry.size());
-			ImGui::Text("Mouse X : %d", (int)getApplication().getWindow().getCursorPosition().x);
-			ImGui::Text("Mouse Y : %d", (int)getApplication().getWindow().getCursorPosition().y);
-			ImGui::Text("View X : %d", (int)getApplication().getWindow().getMainView().getCenter().x);
-			ImGui::Text("View Y : %d", (int)getApplication().getWindow().getMainView().getCenter().y);
+			ImGui::Text("Mouse X : %d", (int)getApplication().GetWindow().getCursorPosition().x);
+			ImGui::Text("Mouse Y : %d", (int)getApplication().GetWindow().getCursorPosition().y);
+			ImGui::Text("View X : %d", (int)getApplication().GetWindow().getMainView().getCenter().x);
+			ImGui::Text("View Y : %d", (int)getApplication().GetWindow().getMainView().getCenter().y);
 #ifdef ENLIVE_DEBUG
 			ImGui::Text("DebugDisplay Rectangles : %d", en::DebugDraw::getCurrentRectangleCount());
 			ImGui::Text("DebugDisplay Circles : %d", en::DebugDraw::getCurrentCircleCount());
@@ -167,9 +166,7 @@ private:
 
 int main()
 {
-	en::LogManager::initialize();
-
-	en::Application app; // Moved this before just to see the logs inside ImGui
+	en::Application& app = en::Application::GetInstance();
 
 	b2Vec2 gravity(0.0f, -10.0f);
 	b2World world(gravity);
@@ -218,7 +215,7 @@ int main()
 
 	LogError(en::LogChannel::System, 9, "%4.2f %4.2f %4.2f", body->GetPosition().x, body->GetPosition().y, body->GetAngle());
 
-	app.start<MyState>();
+	app.Start<MyState>();
 
 	return 0;
 }

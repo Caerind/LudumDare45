@@ -12,7 +12,7 @@ class IntroState : public en::State
 		IntroState(en::StateManager& manager)
 			: en::State(manager)
 		{
-			background.setTexture(getApplication().getResourceManager().Create<en::Texture>("atmog", en::TextureLoader::FromFile("Assets/Textures/atmog.png")).Get());
+			background.setTexture(en::ResourceManager::GetInstance().Create<en::Texture>("atmog", en::TextureLoader::FromFile(en::PathManager::GetInstance().GetTexturesPath() + "atmog.png")).Get());
 
 			accumulator = en::Time::Zero;
 			imageIndex = 0;
@@ -28,13 +28,13 @@ class IntroState : public en::State
 
 				if (imageIndex == 1)
 				{
-					//getApplication().getTextures().create("storyOfNothing", en::TextureLoader::loadFromFile("Assets/Textures/storyOfNothing.png"));
+					//getApplication().getTextures().create("storyOfNothing", en::TextureLoader::loadFromFile(en::PathManager::GetInstance().GetTexturesPath() + "storyOfNothing.png"));
 					//background.setTexture(getApplication().getTextures().get("storyOfNothing"));
 				}
 				if (imageIndex == 2)
 				{
-					getApplication().clearStates();
-					getApplication().pushState<MenuState>();
+					getApplication().ClearStates();
+					getApplication().PushState<MenuState>();
 				}
 			}
 			return false;

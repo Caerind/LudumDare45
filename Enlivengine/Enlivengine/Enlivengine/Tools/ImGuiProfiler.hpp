@@ -2,7 +2,7 @@
 
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 
-#ifdef ENLIVE_ENABLE_IMGUI
+#if defined(ENLIVE_ENABLE_IMGUI) && defined(ENLIVE_ENABLE_PROFILE)
 
 #include <Enlivengine/Application/ImGuiToolManager.hpp>
 #include <Enlivengine/System/Profiler.hpp>
@@ -12,13 +12,11 @@ namespace en
 
 class ImGuiProfiler : public ImGuiTool
 {
-public:
-	static ImGuiProfiler& GetInstance();
+	ENLIVE_SINGLETON(ImGuiProfiler);
 
+public:
 	virtual ImGuiToolTab GetTab() const;
 	virtual const char* GetName() const;
-
-	virtual int GetWindowFlags() const;
 
 	virtual void Display();
 
@@ -35,17 +33,13 @@ public:
 
 private:
 	void DisplayFrame(const ProfilerFrame& frame) const;
-	void ForceResize();
 
 private:
 	U32 mCaptureFrames;
 	U32 mCurrentFrameIndex;
 	bool mForceResize;
-
-private:
-	ImGuiProfiler();
 };
 
 } // namespace en
 
-#endif // ENLIVE_ENABLE_IMGUI
+#endif // ENLIVE_ENABLE_IMGUI && ENLIVE_ENABLE_PROFILE

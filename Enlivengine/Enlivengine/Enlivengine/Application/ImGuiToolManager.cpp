@@ -5,6 +5,7 @@
 #include <Enlivengine/System/Hash.hpp>
 #include <Enlivengine/System/Assert.hpp>
 #include <Enlivengine/System/Profiler.hpp>
+#include <Enlivengine/Application/PathManager.hpp>
 
 #include <imgui/imgui.h>
 #include <imgui-sfml/imgui-SFML.h>
@@ -51,15 +52,34 @@ bool ImGuiTool::IsImGuiDemoTool() const
 	return false;
 }
 
+void ImGuiTool::AskForResize()
+{
+	mShouldResize = true;
+}
+
 U32 ImGuiTool::GetHash() const
 {
 	return Hash::CRC32(GetName());
 }
 
-ImGuiToolManager& ImGuiToolManager::GetInstance()
+bool ImGuiTool::ShouldResize() const
 {
-	static ImGuiToolManager instance;
-	return instance;
+	return mShouldResize;
+}
+
+void ImGuiTool::ResizeIfNeeded()
+{
+	if (mShouldResize)
+	{
+		ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
+		mShouldResize = false;
+	}
+}
+
+ImGuiToolManager::ImGuiToolManager()
+	: mShowImGui(false)
+	, mRunning(false)
+{
 }
 
 void ImGuiToolManager::RegisterTool(ImGuiTool* tool)
@@ -120,10 +140,15 @@ void ImGuiToolManager::Initialize(Window& window)
 	ImFontConfig icons_config;
 	icons_config.MergeMode = true;
 	icons_config.PixelSnapH = true;
-	io.Fonts->AddFontFromFileTTF(kImGuiFontAwesomePath, 16.0f, &icons_config, icons_ranges);
+	const std::string fontPath = en::PathManager::GetInstance().GetFontsPath() + std::string(FONT_ICON_FILE_NAME_FAS);
+	io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 16.0f, &icons_config, icons_ranges);
 	ImGui::SFML::UpdateFontTexture();
 
-	mShowImGui = true; // TODO : mShowImGui = IsDevVersion();
+#ifdef ENLIVE_DEBUG
+	mShowImGui = true;
+#else
+	mShowImGui = false;
+#endif // ENLIVE_DEBUG
 	mRunning = true;
 }
 
@@ -221,6 +246,7 @@ void ImGuiToolManager::ImGuiMain()
 					}
 				}
 				tool->Display();
+				tool->ResizeIfNeeded();
 				if (!imguiDemoTool)
 				{
 					ImGui::End();
@@ -228,12 +254,6 @@ void ImGuiToolManager::ImGuiMain()
 			}
 		}
 	}
-}
-
-ImGuiToolManager::ImGuiToolManager()
-	: mShowImGui(false)
-	, mRunning(false)
-{
 }
 
 } // namespace en

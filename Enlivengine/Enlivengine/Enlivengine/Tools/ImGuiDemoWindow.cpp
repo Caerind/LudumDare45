@@ -20,7 +20,7 @@ ImGuiToolTab ImGuiDemoWindow::GetTab() const
 
 const char* ImGuiDemoWindow::GetName() const
 {
-	return "DemoWindow";
+	return ICON_FA_INFO_CIRCLE " ImGui Demo";
 }
 
 void ImGuiDemoWindow::Display()

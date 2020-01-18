@@ -1,12 +1,15 @@
 #pragma once
 
+#include <Enlivengine/System/PrimitiveTypes.hpp>
+
+#ifdef ENLIVE_ENABLE_LOG
+
 #include <cstdarg>
 #include <fstream>
 #include <vector>
 
-#include <Enlivengine/System/CompilerDetection.hpp>
 #include <Enlivengine/System/PlatformDetection.hpp>
-#include <Enlivengine/System/PrimitiveTypes.hpp>
+#include <Enlivengine/System/Singleton.hpp>
 
 // TODO : Encapsulate info in class Message for 'post-filter' (now its filtered out on write())
 
@@ -21,6 +24,7 @@ enum class LogType : U32
 	Error = 1 << 2,
 	All = (1 << 3) - 1
 };
+const char* LogTypeToString(LogType type);
 
 enum class LogChannel : U32
 {
@@ -33,6 +37,15 @@ enum class LogChannel : U32
 	// TODO : Add others
 	All = (1 << 5) - 1,
 };
+const char* LogChannelToString(LogChannel type);
+
+struct LogMessage
+{
+	LogType type;
+	LogChannel channel;
+	U32 verbosity;
+	std::string message;
+};
 
 class Logger
 {
@@ -40,25 +53,27 @@ class Logger
 		Logger();
 		virtual ~Logger();
 
-		void enable(bool enable);
-		bool isEnabled() const;
+		void Enable(bool enable);
+		bool IsEnabled() const;
 
-		void setTypeFilter(U32 typeFilter);
-		U32 getTypeFilter() const;
+		void SetTypeFilter(U32 typeFilter);
+		U32 GetTypeFilter() const;
 
-		void setChannelFilter(U32 channelFilter);
-		U32 getChannelFilter() const;
+		void SetChannelFilter(U32 channelFilter);
+		U32 GetChannelFilter() const;
 
-		void setImportanceFilter(U32 importanceFilter);
-		U32 getImportanceFilter() const;
+		void SetImportanceFilter(U32 importanceFilter);
+		U32 GetImportanceFilter() const;
 
-		bool passFilters(LogType type, LogChannel channel, U32 importance) const;
+		bool PassFilters(LogType type, LogChannel channel, U32 importance) const;
 
-		virtual void write(LogType type, LogChannel channel, U32 verbosity, const std::string& message) = 0;
+		virtual void Write(LogType type, LogChannel channel, U32 verbosity, const std::string& message) = 0;
 	
+		bool IsRegistered() const;
+
 	protected:
-		void registerLogger();
-		void unregisterLogger();
+		void RegisterLogger();
+		void UnregisterLogger();
 
 	private:
 		U32 mTypeFilter;
@@ -69,56 +84,44 @@ class Logger
 
 class LogManager
 {
-	public:
-		LogManager() = delete;
-		~LogManager() = delete;
+	ENLIVE_SINGLETON(LogManager);
 
 	public:
-		static void write(LogType type, LogChannel channel, U32 importance, const char* message, ...);
-		static void error(const char* message, ...);
+		void Write(LogType type, LogChannel channel, U32 importance, const char* message, ...);
+		void Error(const char* message, ...);
 
-		static void setTypeFilter(U32 typeFilter);
-		static U32 getTypeFilter();
+		void SetTypeFilter(U32 typeFilter);
+		U32 GetTypeFilter() const;
 
-		static void setChannelFilter(U32 channelFilter);
-		static U32 getChannelFilter();
+		void SetChannelFilter(U32 channelFilter);
+		U32 GetChannelFilter() const;
 
-		static void setImportanceFilter(U32 importanceFilter);
-		static U32 getImportanceFilter();
+		void SetImportanceFilter(U32 importanceFilter);
+		U32 GetImportanceFilter() const;
 
-		static U32 getLoggerCount();
+		U32 GetLoggerCount() const;
 
-		static bool initialize();
-		static bool uninitialize();
-		static bool isInitialized();
+		bool Initialize();
+		bool Uninitialize();
+		bool IsInitialized() const;
 
 	private:
 		friend class Logger;
-		static void registerLogger(Logger* logger);
-		static void unregisterLogger(Logger* logger);
+		void RegisterLogger(Logger* logger);
+		void UnregisterLogger(Logger* logger);
+		bool IsRegistered(const Logger* logger) const;
 
 	private:
-		static void internalWrite(LogType type, LogChannel channel, U32 importance, const char* message, va_list argList);
+		void InternalWrite(LogType type, LogChannel channel, U32 importance, const char* message, va_list argList);
 
 	private:
-		static std::vector<Logger*> sLoggers;
-		static Logger* sDefaultLogger;
-		static U32 sTypeFilter;
-		static U32 sChannelFilter;
-		static U32 sImportanceFilter;
-		static bool sInitialized;
+		std::vector<Logger*> mLoggers;
+		Logger* mDefaultLogger;
+		U32 mTypeFilter;
+		U32 mChannelFilter;
+		U32 mImportanceFilter;
+		bool mInitialized;
 };
-
-// Try to only call these macros
-#ifdef ENLIVE_ENABLE_LOG
-	#define LogInfo(channel, importance, message, ...) ::en::LogManager::write(en::LogType::Info, channel, importance, message, __VA_ARGS__);
-	#define LogWarning(channel, importance, message, ...) ::en::LogManager::write(en::LogType::Warning, channel, importance, message, __VA_ARGS__);
-	#define LogError(channel, importance, message, ...) ::en::LogManager::write(en::LogType::Error, channel, importance, message, __VA_ARGS__);
-#else
-	#define LogInfo(channel, importance, message, ...)
-	#define LogWarning(channel, importance, message, ...)
-	#define LogError(channel, importance, message, ...)
-#endif
 
 class ConsoleLogger : public Logger
 {
@@ -126,7 +129,7 @@ class ConsoleLogger : public Logger
 		ConsoleLogger();
 		virtual ~ConsoleLogger();
 
-		virtual void write(LogType type, LogChannel channel, U32 importance, const std::string& message);
+		virtual void Write(LogType type, LogChannel channel, U32 importance, const std::string& message);
 };
 
 class FileLogger : public Logger
@@ -135,10 +138,10 @@ class FileLogger : public Logger
 		FileLogger(const std::string& filename = "");
 		virtual ~FileLogger();
 
-		void setFilename(const std::string& filename);
-		const std::string& getFilename() const;
+		void SetFilename(const std::string& filename);
+		const std::string& GetFilename() const;
 
-		virtual void write(LogType type, LogChannel channel, U32 importance, const std::string& message);
+		virtual void Write(LogType type, LogChannel channel, U32 importance, const std::string& message);
 
 	private:
 		std::ofstream mFile;
@@ -152,7 +155,7 @@ class VisualStudioLogger : public Logger
 		VisualStudioLogger();
 		virtual ~VisualStudioLogger();
 
-		virtual void write(LogType type, LogChannel channel, U32 importance, const std::string& message);
+		virtual void Write(LogType type, LogChannel channel, U32 importance, const std::string& message);
 };
 #endif // ENLIVE_COMPILER_MSVC
 
@@ -163,25 +166,20 @@ class MessageBoxLogger : public Logger
 		MessageBoxLogger();
 		virtual ~MessageBoxLogger();
 
-		virtual void write(LogType type, LogChannel channel, U32 importance, const std::string& message);
+		virtual void Write(LogType type, LogChannel channel, U32 importance, const std::string& message);
 };
 #endif // ENLIVE_PLATFORM_WINDOWS
 
-#ifdef ENLIVE_ENABLE_IMGUI
-class ImGuiLogger : public Logger
-{
-public:
-	ImGuiLogger(U32 maxSize = 128);
-	virtual ~ImGuiLogger();
-
-	virtual void write(LogType type, LogChannel channel, U32 importance, const std::string& message);
-
-	void draw();
-
-private:
-	std::vector<std::string> mMessages;
-	U32 mMaxSize;
-};
-#endif // ENLIVE_ENABLE_IMGUI
-
 } // namespace en
+
+#define LogInfo(channel, importance, message, ...) ::en::LogManager::GetInstance().Write(en::LogType::Info, channel, importance, message, __VA_ARGS__);
+#define LogWarning(channel, importance, message, ...) ::en::LogManager::GetInstance().Write(en::LogType::Warning, channel, importance, message, __VA_ARGS__);
+#define LogError(channel, importance, message, ...) ::en::LogManager::GetInstance().Write(en::LogType::Error, channel, importance, message, __VA_ARGS__);
+
+#else
+
+#define LogInfo(channel, importance, message, ...)
+#define LogWarning(channel, importance, message, ...)
+#define LogError(channel, importance, message, ...)
+
+#endif // ENLIVE_ENABLE_LOG

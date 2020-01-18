@@ -6,6 +6,7 @@
 #include <Enlivengine/Math/Random.hpp>
 #include <Enlivengine/Core/Components.hpp>
 #include <Enlivengine/Graphics/DebugDraw.hpp>
+#include <Enlivengine/Application/PathManager.hpp>
 
 #include "EntityPrefab.hpp"
 #include "EditorComponents.hpp"
@@ -62,10 +63,8 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 	mTileset = tileset;
 	mTileSize = tileSize;
 
-	const std::string mapPath = "Assets/Maps/";
-
 	en::ParserXml xml;
-	std::string filename = mapPath + "map-" + std::to_string(mMapID) + ".tmx";
+	std::string filename = en::PathManager::GetInstance().GetMapsPath() + "map-" + std::to_string(mMapID) + ".tmx";
 	if (!xml.loadFromFile(filename))
 	{
 		LogError(en::LogChannel::Global, 10, "Cant read map : %s", filename.c_str());

@@ -146,6 +146,13 @@ set(SRC_IMGUISFML
 )
 source_group("imgui-sfml" FILES ${SRC_IMGUISFML})
 
+# metrics-gui
+set(SRC_METRICSGUI
+	metrics_gui/metrics_gui.cpp
+	metrics_gui/metrics_gui.h
+)
+source_group("metrics_gui" FILES ${SRC_METRICSGUI})
+
 # pugixml
 set(SRC_PUGIXML
 	pugixml/pugiconfig.hpp
@@ -162,6 +169,7 @@ add_library(EnlivengineThirdParty STATIC
 	${SRC_ICONFONTCPPHEADERS}
 	${SRC_IMGUI}
 	${SRC_IMGUISFML}
+	${SRC_METRICSGUI}
 	${SRC_PUGIXML}
 )
 target_include_directories(EnlivengineThirdParty PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)

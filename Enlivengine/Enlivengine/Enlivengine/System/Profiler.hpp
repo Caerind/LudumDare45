@@ -5,6 +5,7 @@
 #ifdef ENLIVE_ENABLE_PROFILE
 
 #include <Enlivengine/System/CompilerTraits.hpp>
+#include <Enlivengine/System/Singleton.hpp>
 #include <Enlivengine/System/Time.hpp>
 
 #include <vector>
@@ -44,9 +45,9 @@ public:
 
 class Profiler
 {
-public:
-	static Profiler& GetInstance();
+	ENLIVE_SINGLETON(Profiler);
 
+public:
 	void SetFrameCapacity(U32 capacity);
 	U32 GetFrameCapacity() const;
 
@@ -75,7 +76,6 @@ private:
 	static constexpr U32 kDefaultFramesCapacity{ 10 };
 	static constexpr U32 kProfilesPerFrameCapacity{ 256 };
 	static constexpr U32 kMaxDepthCapacity{ 10 };
-	Profiler();
 
 private:
 	bool mEnabled;

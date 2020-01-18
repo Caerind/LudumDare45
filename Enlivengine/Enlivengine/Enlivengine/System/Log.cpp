@@ -1,4 +1,7 @@
 #include <Enlivengine/System/Log.hpp>
+
+#ifdef ENLIVE_ENABLE_LOG
+
 #include <Enlivengine/System/Assert.hpp>
 #include <Enlivengine/System/String.hpp>
 
@@ -44,186 +47,211 @@ Logger::Logger()
 	, mImportanceFilter(0)
 	, mEnabled(true)
 {
-	registerLogger();
+	RegisterLogger();
 }
 
 Logger::~Logger()
 {
-	unregisterLogger();
+	UnregisterLogger();
 }
 
-void Logger::enable(bool enable)
+void Logger::Enable(bool enable)
 {
 	mEnabled = enable;
 }
 
-bool Logger::isEnabled() const
+bool Logger::IsEnabled() const
 {
 	return mEnabled;
 }
 
-void Logger::setTypeFilter(U32 typeFilter)
+void Logger::SetTypeFilter(U32 typeFilter)
 {
 	mTypeFilter = typeFilter;
 }
 
-U32 Logger::getTypeFilter() const
+U32 Logger::GetTypeFilter() const
 {
 	return mTypeFilter;
 }
 
-void Logger::setChannelFilter(U32 channelFilter)
+void Logger::SetChannelFilter(U32 channelFilter)
 {
 	mChannelFilter = channelFilter;
 }
 
-U32 Logger::getChannelFilter() const
+U32 Logger::GetChannelFilter() const
 {
 	return mChannelFilter;
 }
 
-void Logger::setImportanceFilter(U32 importanceFilter)
+void Logger::SetImportanceFilter(U32 importanceFilter)
 {
 	mImportanceFilter = importanceFilter;
 }
 
-U32 Logger::getImportanceFilter() const
+U32 Logger::GetImportanceFilter() const
 {
 	return mImportanceFilter;
 }
 
-bool Logger::passFilters(LogType type, LogChannel channel, U32 importance) const
+bool Logger::PassFilters(LogType type, LogChannel channel, U32 importance) const
 {
 	return ((U32)channel & mChannelFilter) != 0
 		&& ((U32)type & mTypeFilter) != 0
 		&& importance >= mImportanceFilter;
 }
 
-void Logger::registerLogger()
+bool Logger::IsRegistered() const
 {
-	LogManager::registerLogger(this);
+	return LogManager::GetInstance().IsRegistered(this);
 }
 
-void Logger::unregisterLogger()
+void Logger::RegisterLogger()
 {
-	LogManager::unregisterLogger(this);
+	LogManager::GetInstance().RegisterLogger(this);
 }
 
-std::vector<Logger*> LogManager::sLoggers;
-Logger* LogManager::sDefaultLogger = nullptr;
-U32 LogManager::sTypeFilter;
-U32 LogManager::sChannelFilter;
-U32 LogManager::sImportanceFilter;
-bool LogManager::sInitialized;
+void Logger::UnregisterLogger()
+{
+	LogManager::GetInstance().UnregisterLogger(this);
+}
 
-void LogManager::write(LogType type, LogChannel channel, U32 importance, const char* message, ...)
+LogManager::LogManager()
+	: mLoggers()
+	, mDefaultLogger(nullptr)
+	, mTypeFilter()
+	, mChannelFilter()
+	, mImportanceFilter()
+	, mInitialized(false)
+{
+}
+
+void LogManager::Write(LogType type, LogChannel channel, U32 importance, const char* message, ...)
 {
 	va_list argList;
 	va_start(argList, message);
-	internalWrite(type, channel, importance, message, argList);
+	InternalWrite(type, channel, importance, message, argList);
 	va_end(argList);
 }
 
-void LogManager::error(const char * message, ...)
+void LogManager::Error(const char * message, ...)
 {
 	va_list argList;
 	va_start(argList, message);
-	internalWrite(LogType::Error, LogChannel::Global, 10, message, argList);
+	InternalWrite(LogType::Error, LogChannel::Global, 10, message, argList);
 	va_end(argList);
 }
 
-void LogManager::setTypeFilter(U32 typeFilter)
+void LogManager::SetTypeFilter(U32 typeFilter)
 {
-	sTypeFilter = typeFilter;
+	mTypeFilter = typeFilter;
 }
 
-U32 LogManager::getTypeFilter()
+U32 LogManager::GetTypeFilter() const
 {
-	return sTypeFilter;
+	return mTypeFilter;
 }
 
-void LogManager::setChannelFilter(U32 channelFilter)
+void LogManager::SetChannelFilter(U32 channelFilter)
 {
-	sChannelFilter = channelFilter;
+	mChannelFilter = channelFilter;
 }
 
-U32 LogManager::getChannelFilter()
+U32 LogManager::GetChannelFilter() const
 {
-	return sChannelFilter;
+	return mChannelFilter;
 }
 
-void LogManager::setImportanceFilter(U32 importanceFilter)
+void LogManager::SetImportanceFilter(U32 importanceFilter)
 {
-	sImportanceFilter = importanceFilter;
+	mImportanceFilter = importanceFilter;
 }
 
-U32 LogManager::getImportanceFilter()
+U32 LogManager::GetImportanceFilter() const
 {
-	return sImportanceFilter;
+	return mImportanceFilter;
 }
 
-U32 LogManager::getLoggerCount()
+U32 LogManager::GetLoggerCount() const
 {
-	return static_cast<U32>(sLoggers.size());
+	return static_cast<U32>(mLoggers.size());
 }
 
-bool LogManager::initialize()
+bool LogManager::Initialize()
 {
-	if (!isInitialized())
+	if (!IsInitialized())
 	{
-		sLoggers.clear();
-		sTypeFilter = (U32)LogType::All;
-		sChannelFilter = (U32)LogChannel::All;
-		sImportanceFilter = 0;
+		mLoggers.clear();
+		mTypeFilter = static_cast<U32>(LogType::All);
+		mChannelFilter = static_cast<U32>(LogChannel::All);
+		mImportanceFilter = 0;
 
-		#ifdef ENLIVE_ENABLE_DEFAULT_LOGGER
-			sDefaultLogger = new ConsoleLogger();
-		#endif
+#ifdef ENLIVE_ENABLE_DEFAULT_LOGGER
+		mDefaultLogger = new ConsoleLogger();
+#endif
 
-		sInitialized = true;
+		mInitialized = true;
 	}
 	return true;
 }
 
-bool LogManager::uninitialize()
+bool LogManager::Uninitialize()
 {
-	if (isInitialized())
+	if (IsInitialized())
 	{
 		#ifdef ENLIVE_ENABLE_DEFAULT_LOGGER
-			delete sDefaultLogger;
-			sDefaultLogger = nullptr;
+			delete mDefaultLogger;
+			mDefaultLogger = nullptr;
 		#endif
 
-		sLoggers.clear();
+		mLoggers.clear();
 
-		sInitialized = false;
+		mInitialized = false;
 	}
 	return true;
 }
 
-bool LogManager::isInitialized()
+bool LogManager::IsInitialized() const
 {
-	return sInitialized;
+	return mInitialized;
 }
 
-void LogManager::registerLogger(Logger* logger)
+void LogManager::RegisterLogger(Logger* logger)
 {
-	sLoggers.push_back(logger);
+	if (logger != nullptr && !logger->IsRegistered())
+	{
+		mLoggers.push_back(logger);
+	}
 }
 
-void LogManager::unregisterLogger(Logger* logger)
+void LogManager::UnregisterLogger(Logger* logger)
 {
-	const U32 size = getLoggerCount();
+	const U32 size = GetLoggerCount();
 	for (U32 i = 0; i < size; i++)
 	{
-		if (sLoggers[i] == logger)
+		if (mLoggers[i] == logger)
 		{
-			sLoggers.erase(sLoggers.begin() + i);
+			mLoggers.erase(mLoggers.begin() + i);
+			return;
 		}
 	}
 }
 
-void LogManager::internalWrite(LogType type, LogChannel channel, U32 importance, const char* message, va_list argList)
+bool LogManager::IsRegistered(const Logger* logger) const
+{
+	const U32 size = GetLoggerCount();
+	for (U32 i = 0; i < size; i++)
+	{
+		if (mLoggers[i] == logger)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void LogManager::InternalWrite(LogType type, LogChannel channel, U32 importance, const char* message, va_list argList)
 {
 	static const U32 mBufferSize = 256;
 	static char mBuffer[mBufferSize];
@@ -239,13 +267,13 @@ void LogManager::internalWrite(LogType type, LogChannel channel, U32 importance,
 		output = { mBuffer, mBufferSize };
 	}
 
-	if (((U32)type & sTypeFilter) != 0 && ((U32)channel & sChannelFilter) != 0 && importance >= sImportanceFilter && sLoggers.size() > 0)
+	if (((U32)type & mTypeFilter) != 0 && ((U32)channel & mChannelFilter) != 0 && importance >= mImportanceFilter && mLoggers.size() > 0)
 	{
-		for (const auto& logger : sLoggers)
+		for (const auto& logger : mLoggers)
 		{
-			if (logger->isEnabled() && logger->passFilters(type, channel, importance))
+			if (logger->IsEnabled() && logger->PassFilters(type, channel, importance))
 			{
-				logger->write(type, channel, importance, output);
+				logger->Write(type, channel, importance, output);
 			}
 		}
 	}
@@ -258,10 +286,10 @@ ConsoleLogger::ConsoleLogger()
 
 ConsoleLogger::~ConsoleLogger()
 {
-	unregisterLogger();
+	UnregisterLogger();
 }
 
-void ConsoleLogger::write(LogType type, LogChannel channel, U32 importance, const std::string& message)
+void ConsoleLogger::Write(LogType type, LogChannel channel, U32 importance, const std::string& message)
 {
 	printf("[%s][%s][%d] %s\n", LogTypeToString(type), LogChannelToString(channel), importance, message.c_str());
 }
@@ -269,15 +297,15 @@ void ConsoleLogger::write(LogType type, LogChannel channel, U32 importance, cons
 FileLogger::FileLogger(const std::string& filename)
 	: Logger()
 {
-	setFilename(filename);
+	SetFilename(filename);
 }
 
 FileLogger::~FileLogger()
 {
-	unregisterLogger();
+	UnregisterLogger();
 }
 
-void FileLogger::setFilename(const std::string& filename)
+void FileLogger::SetFilename(const std::string& filename)
 {
 	if (filename.size() > 0)
 	{
@@ -299,12 +327,12 @@ void FileLogger::setFilename(const std::string& filename)
 	}
 }
 
-const std::string& FileLogger::getFilename() const
+const std::string& FileLogger::GetFilename() const
 {
 	return mFilename;
 }
 
-void FileLogger::write(LogType type, LogChannel channel, U32 importance, const std::string& message)
+void FileLogger::Write(LogType type, LogChannel channel, U32 importance, const std::string& message)
 {
 	if (mFile.is_open())
 	{
@@ -322,10 +350,10 @@ VisualStudioLogger::VisualStudioLogger()
 
 VisualStudioLogger::~VisualStudioLogger()
 {
-	unregisterLogger();
+	UnregisterLogger();
 }
 
-void VisualStudioLogger::write(LogType type, LogChannel channel, U32 importance, const std::string& message)
+void VisualStudioLogger::Write(LogType type, LogChannel channel, U32 importance, const std::string& message)
 {
 	static const U32 mDebugBufferSize = 256;
 	static char mDebugBuffer[mDebugBufferSize];
@@ -346,19 +374,19 @@ MessageBoxLogger::MessageBoxLogger()
 
 MessageBoxLogger::~MessageBoxLogger()
 {
-	unregisterLogger();
+	UnregisterLogger();
 }
 
-void MessageBoxLogger::write(LogType type, LogChannel channel, U32 importance, const std::string& message)
+void MessageBoxLogger::Write(LogType type, LogChannel channel, U32 importance, const std::string& message)
 {
 	static const U32 mDebugBufferSize = 256;
 	static char mDebugBuffer[mDebugBufferSize];
 
-	#ifdef ENLIVE_COMPILER_MSVC
+#ifdef ENLIVE_COMPILER_MSVC
 	sprintf_s(mDebugBuffer, "NumeaEngine [%s] [%d]", LogChannelToString(channel), importance);
-	#else
+#else
 	sprintf(mDebugBuffer, "NumeaEngine [%s] [%d]", LogChannelToString(channel), importance);
-	#endif
+#endif
 
 	U32 mbOption;
 	switch (type)
@@ -374,57 +402,6 @@ void MessageBoxLogger::write(LogType type, LogChannel channel, U32 importance, c
 
 #endif // ENLIVE_PLATFORM_WINDOWS
 
-#ifdef ENLIVE_ENABLE_IMGUI
-ImGuiLogger::ImGuiLogger(U32 maxSize)
-	: Logger()
-	, mMessages()
-	, mMaxSize(maxSize)
-{
-}
-
-ImGuiLogger::~ImGuiLogger()
-{
-	unregisterLogger();
-}
-
-void ImGuiLogger::write(LogType type, LogChannel channel, U32 importance, const std::string& message)
-{
-	ENLIVE_UNUSED(channel);
-	ENLIVE_UNUSED(importance);
-
-	if (mMessages.size() + 1 > mMaxSize)
-	{
-		mMessages.erase(mMessages.begin());
-	}
-	mMessages.push_back("[" + std::string(LogTypeToString(type)) + "] : " + message);
-}
-
-void ImGuiLogger::draw()
-{
-	ImGui::Begin("Logger");
-
-	if (ImGui::Button("Clear"))
-	{
-		mMessages.clear();
-		mMessages.reserve(mMaxSize);
-	}
-
-	ImGui::BeginChild("", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar);
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-	for (U32 i = 0; i < mMessages.size(); ++i)
-	{
-		ImVec4 col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-		if (mMessages[i].find("[Error]") != std::string::npos) col = ImColor(1.0f, 0.4f, 0.4f, 1.0f);
-		else if (mMessages[i].find("[Warning]") != std::string::npos) col = ImColor(1.0f, 0.78f, 0.58f, 1.0f);
-		ImGui::PushStyleColor(ImGuiCol_Text, col);
-		ImGui::TextUnformatted(mMessages[i].c_str());
-		ImGui::PopStyleColor();
-	}
-	ImGui::PopStyleVar();
-	ImGui::EndChild();
-
-	ImGui::End();
-}
-#endif // ENLIVE_ENABLE_IMGUI
-
 } // namespace en
+
+#endif // ENLIVE_ENABLE_LOG

@@ -61,10 +61,17 @@ Profile::~Profile()
 	Profiler::GetInstance().EndFunction();
 }
 
-Profiler& Profiler::GetInstance()
+Profiler::Profiler()
+	: mEnabled(false)
+	, mWasEnabledThisFrame(false)
+	, mCurrentFrame()
+	, mCapturing(false)
+	, mCapturingFrames(0)
+	, mProfilerFrames()
 {
-	static Profiler instance;
-	return instance;
+	SetFrameCapacity(kDefaultFramesCapacity);
+	mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
+	mIndexStack.reserve(kMaxDepthCapacity);
 }
 
 void Profiler::SetFrameCapacity(U32 capacity)
@@ -217,19 +224,6 @@ void Profiler::EndFunction()
 U32 Profiler::GetCurrentDepth() const
 {
 	return static_cast<U32>(mIndexStack.size());
-}
-
-Profiler::Profiler()
-	: mEnabled(false)
-	, mWasEnabledThisFrame(false)
-	, mCurrentFrame()
-	, mCapturing(false)
-	, mCapturingFrames(0)
-	, mProfilerFrames()
-{
-	SetFrameCapacity(kDefaultFramesCapacity);
-	mCurrentFrame.tasks.reserve(kProfilesPerFrameCapacity);
-	mIndexStack.reserve(kMaxDepthCapacity);
 }
 
 /*

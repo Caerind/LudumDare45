@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <Enlivengine/System/PrimitiveTypes.hpp>
+#include <Enlivengine/System/Singleton.hpp>
 
 namespace en
 {
@@ -98,12 +99,9 @@ class ResourceHolder;
 
 class ResourceManager
 {
+	ENLIVE_SINGLETON(ResourceManager);
+
 public:
-	ResourceManager();
-
-	ResourceManager(const ResourceManager&) = delete;
-	ResourceManager& operator=(const ResourceManager&) = delete;
-
 	template <typename T> ResourcePtr<T> Create(const char* str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy = ResourceKnownStrategy::Reuse);
 	template <typename T> ResourcePtr<T> Get(const char* str);
 	template <typename T> ResourcePtr<T> Get(ResourceID id);

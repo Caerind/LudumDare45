@@ -5,6 +5,7 @@
 #ifdef ENLIVE_ENABLE_IMGUI
 
 #include <Enlivengine/Application/Window.hpp>
+#include <Enlivengine/System/Singleton.hpp>
 
 #include <IconFontCppHeaders/IconsFontAwesome5.h>
 
@@ -53,23 +54,27 @@ class ImGuiTool
 		virtual int GetWindowFlags() const;
 		virtual bool IsImGuiDemoTool() const;
 
+		void AskForResize();
+
 	private:
 		bool mRegistered;
 
 		friend class ImGuiToolManager;
 		virtual U32 GetHash() const;
+		bool ShouldResize() const;
+		void ResizeIfNeeded();
 
 	protected:
 		bool mVisible;
+		bool mShouldResize;
 };
 
 class ImGuiToolManager
 {
-    public:
-	    static ImGuiToolManager& GetInstance();
+	ENLIVE_SINGLETON(ImGuiToolManager);
 
+    public:
 		static constexpr bool kImGuiColorsClassic = false;
-		static constexpr const char* kImGuiFontAwesomePath = "../../Assets/Fonts/fa-solid-900.ttf";
 
 	private:
 		friend class ImGuiTool;
@@ -85,9 +90,6 @@ class ImGuiToolManager
 		void HandleEvent(const sf::Event& event);
 		
 		void ImGuiMain();
-
-	private:
-		ImGuiToolManager();
 
 	private:
 		bool mShowImGui;

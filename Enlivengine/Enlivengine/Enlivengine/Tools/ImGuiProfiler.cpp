@@ -1,19 +1,20 @@
 #include <Enlivengine/Tools/ImGuiProfiler.hpp>
 
-#ifdef ENLIVE_ENABLE_IMGUI
+#if defined(ENLIVE_ENABLE_IMGUI) && defined(ENLIVE_ENABLE_PROFILE)
 
 #include <imgui/imgui.h>
-#include <Enlivengine/Tools/ImGuiHelper.hpp>
 #include <Enlivengine/System/Hash.hpp>
 #include <Enlivengine/Graphics/LinearColor.hpp>
 
 namespace en
 {
 
-ImGuiProfiler& ImGuiProfiler::GetInstance()
+ImGuiProfiler::ImGuiProfiler()
+	: ImGuiTool()
+	, mCaptureFrames(1)
+	, mCurrentFrameIndex(0)
+	, mForceResize(false)
 {
-	static ImGuiProfiler instance;
-	return instance;
 }
 
 ImGuiToolTab ImGuiProfiler::GetTab() const
@@ -26,17 +27,12 @@ const char* ImGuiProfiler::GetName() const
 	return ICON_FA_CLOCK " Profiler";
 }
 
-int ImGuiProfiler::GetWindowFlags() const
-{
-	return ImGuiWindowFlags_None;
-}
-
 void ImGuiProfiler::Display()
 {
 	if (ImGui::Button(IsEnabled() ? "Disable Profiler" : "Enable Profiler"))
 	{
 		SetEnabled(!IsEnabled());
-		ForceResize();
+		AskForResize();
 	}
 
 	if (IsEnabled())
@@ -46,7 +42,7 @@ void ImGuiProfiler::Display()
 		if (ImGui::Button("Capture"))
 		{
 			Profiler::GetInstance().CaptureFrames(mCaptureFrames);
-			ForceResize();
+			AskForResize();
 		}
 
 		ImGui::SameLine();
@@ -62,6 +58,8 @@ void ImGuiProfiler::Display()
 			mCaptureFrames = static_cast<U32>(captureFrames);
 		}
 	}
+
+
 
 	ImGui::Separator();
 
@@ -102,14 +100,12 @@ void ImGuiProfiler::Display()
 	else
 	{
 		ImGui::Text("Capturing...");
-		ForceResize();
+		AskForResize();
 	}
 
-	if (mForceResize)
-	{
-		ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
-		mForceResize = false;
-	}
+	ImGui::Separator();
+
+	mFrameTimePlot.DrawList();
 }
 
 void ImGuiProfiler::CaptureCurrentFrameAndOpenProfiler()
@@ -118,7 +114,7 @@ void ImGuiProfiler::CaptureCurrentFrameAndOpenProfiler()
 	{
 		Profiler::GetInstance().CaptureCurrentFrame();
 		mVisible = true;
-		ForceResize();
+		AskForResize();
 	}
 }
 
@@ -222,22 +218,6 @@ void ImGuiProfiler::DisplayFrame(const ProfilerFrame& frame) const
 	ImGui::PopStyleVar();
 }
 
-void ImGuiProfiler::ForceResize()
-{
-	if (!mForceResize)
-	{
-		mForceResize = true;
-	}
-}
-
-ImGuiProfiler::ImGuiProfiler()
-	: ImGuiTool()
-	, mCaptureFrames(1)
-	, mCurrentFrameIndex(0)
-	, mForceResize(false)
-{
-}
-
 } // namespace en
 
-#endif // ENLIVE_ENABLE_IMGUI
+#endif // ENLIVE_ENABLE_IMGUI && ENLIVE_ENABLE_PROFILE

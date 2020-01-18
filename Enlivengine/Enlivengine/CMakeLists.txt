@@ -19,6 +19,7 @@ set(SRC_SYSTEM
     Enlivengine/System/Log.cpp
     Enlivengine/System/Log.hpp
     Enlivengine/System/Macros.hpp
+    Enlivengine/System/NonCopyable.hpp
     Enlivengine/System/ParserIni.cpp
     Enlivengine/System/ParserIni.hpp
     Enlivengine/System/ParserXml.cpp
@@ -95,6 +96,8 @@ set(SRC_APPLICATION
 	Enlivengine/Application/AudioSystem.hpp
 	Enlivengine/Application/ImGuiToolManager.cpp
 	Enlivengine/Application/ImGuiToolManager.hpp
+	Enlivengine/Application/PathManager.cpp
+	Enlivengine/Application/PathManager.hpp
 	Enlivengine/Application/ResourceManager.cpp
 	Enlivengine/Application/ResourceManager.hpp
 	Enlivengine/Application/ResourceManager.inl
@@ -115,6 +118,8 @@ set(SRC_TOOLS
 	Enlivengine/Tools/ImGuiDemoWindow.hpp
 	Enlivengine/Tools/ImGuiEntt.cpp
 	Enlivengine/Tools/ImGuiEntt.hpp
+	Enlivengine/Tools/ImGuiLogger.cpp
+	Enlivengine/Tools/ImGuiLogger.hpp
 	Enlivengine/Tools/ImGuiHelper.cpp
 	Enlivengine/Tools/ImGuiHelper.hpp
 	Enlivengine/Tools/ImGuiProfiler.cpp

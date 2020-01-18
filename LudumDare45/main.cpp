@@ -11,20 +11,18 @@
 
 int main()
 {
-	en::LogManager::initialize();
-
-	en::Application app;
-	app.getWindow().create(sf::VideoMode(1024, 768), "StoryOfNothing", sf::Style::Titlebar | sf::Style::Close);
-	app.getWindow().getMainView().setCenter({ 512.0f, 384.0f });
-	app.getWindow().getMainView().setSize({ 1024.0f, 768.0f });
-	app.getScreenshotSystem().setScreenshotPath("");
+	en::Application& app = en::Application::GetInstance();
+	app.GetWindow().create(sf::VideoMode(1024, 768), "StoryOfNothing", sf::Style::Titlebar | sf::Style::Close);
+	app.GetWindow().getMainView().setCenter({ 512.0f, 384.0f });
+	app.GetWindow().getMainView().setSize({ 1024.0f, 768.0f });
+	en::PathManager::GetInstance().SetScreenshotPath("Screenshots/");
 
 	GameSingleton::loadResourcesMain(app);
 	GameSingleton::loadResourcesGame();
 
 	GameSingleton::setCursor(true);
 
-	app.start<IntroState>();
+	app.Start<IntroState>();
 
 	return 0;
 }

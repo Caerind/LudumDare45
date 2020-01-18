@@ -16,19 +16,13 @@ class ScreenshotSystem
 public:
 	ScreenshotSystem();
 
-	bool screenshot(const sf::RenderWindow& window);
-
-	const std::string& getScreenshotPath() const;
-	void setScreenshotPath(const std::string& screenshotPath);
+	bool Screenshot(const sf::RenderWindow& window);
 
 private:
-	bool saveTexture(const sf::Texture& texture) const;
+	bool SaveTexture(const sf::Texture& texture) const;
 
-	static std::string getScreenshotName();
-	static std::string getScreenshotFormat();
-	
-private:
-	std::string mScreenshotPath;
+	static std::string GetScreenshotName();
+	static std::string GetScreenshotFormat();
 };
 
 } // namespace en

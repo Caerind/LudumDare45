@@ -12,7 +12,7 @@
 		if (expr) {} \
 		else \
 		{ \
-			::en::LogManager::write(en::LogType::Error, en::LogChannel::All, 10, "Assertion failed!\nExpr : %s\n File : %s\n Line : %d\n", #expr, __FILE__, __LINE__); \
+			LogError(en::LogChannel::All, 10, "Assertion failed!\nExpr : %s\nFile : %s\nLine : %d\n", #expr, __FILE__, __LINE__); \
 			::en::Debugger::Break(); \
 		}
 #else

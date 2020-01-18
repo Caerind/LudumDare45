@@ -403,7 +403,7 @@ const en::Sound* SoundPtr::GetSound() const
 	return nullptr;
 }
 
-AudioSystem::AudioSystem(ResourceManager& resourceManager)
+AudioSystem::AudioSystem()
 	: mGlobalVolume(1.0f)
 	, mGlobalEnabled(true)
 	, mPlaying(true)
@@ -411,7 +411,6 @@ AudioSystem::AudioSystem(ResourceManager& resourceManager)
 	, mMusicsVolume(1.0f)
 	, mMusicsEnabled(true)
 	, mMusics()
-	, mResourceManager(resourceManager)
 	, mLoadedSounds()
 	, mSoundsVolume(1.0f)
 	, mSoundsEnabled(true)
@@ -618,7 +617,7 @@ F32 AudioSystem::GetCurrentSoundsVolume() const
 
 SoundID AudioSystem::PrepareSound(const char* id, const std::string& filename)
 {
-	const SoundBufferPtr soundBuffer = mResourceManager.Create(id, SoundBufferLoader::FromFile(filename));
+	const SoundBufferPtr soundBuffer = ResourceManager::GetInstance().Create(id, SoundBufferLoader::FromFile(filename));
 	if (soundBuffer.IsValid())
 	{
 		const SoundID soundId = soundBuffer.GetID();
@@ -659,9 +658,9 @@ U32 AudioSystem::GetLoadedSoundsCount() const
 
 SoundPtr AudioSystem::PlaySound(SoundID id)
 {
-	if (mSounds.size() < MAX_SOUNDS && IsSoundLoaded(id) && mResourceManager.Has(id))
+	if (mSounds.size() < MAX_SOUNDS && IsSoundLoaded(id) && ResourceManager::GetInstance().Has(id))
 	{
-		const SoundBufferPtr soundBuffer = mResourceManager.Get<en::SoundBuffer>(id);
+		const SoundBufferPtr soundBuffer = ResourceManager::GetInstance().Get<en::SoundBuffer>(id);
 		if (soundBuffer.IsValid())
 		{
 			mSounds.push_back(new Sound(soundBuffer, this));
@@ -698,7 +697,7 @@ void AudioSystem::ReleaseSound(SoundID id)
 	{
 		if (mLoadedSounds[i] == id)
 		{
-			mResourceManager.Release(id);
+			ResourceManager::GetInstance().Release(id);
 			mLoadedSounds.erase(mLoadedSounds.begin() + i);
 			return;
 		}
@@ -744,7 +743,7 @@ void AudioSystem::ReleaseSounds()
 	const size_t size = mLoadedSounds.size();
 	for (size_t i = 0; i < size; ++i)
 	{
-		mResourceManager.Release(mLoadedSounds[i]);
+		ResourceManager::GetInstance().Release(mLoadedSounds[i]);
 	}
 	mLoadedSounds.clear();
 }

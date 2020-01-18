@@ -10,6 +10,7 @@
 #ifdef ENLIVE_ENABLE_IMGUI
 #include <Enlivengine/Application/ImGuiToolManager.hpp>
 #include <Enlivengine/Tools/ImGuiEntt.hpp>
+#include <Enlivengine/Tools/ImGuiLogger.hpp>
 #include <Enlivengine/Tools/ImGuiProfiler.hpp>
 #include <Enlivengine/Tools/ImGuiDemoWindow.hpp>
 #endif // ENLIVE_ENABLE_IMGUI
@@ -20,54 +21,50 @@ namespace en
 Application::Application()
 	: mStates(*this)
 	, mWindow(sf::VideoMode(1024, 768), "")
-	, mResourceManager()
-	, mAudioSystem(mResourceManager)
 	, mFps(0)
 	, mRunning(true)
 	, mTotalFrames(0)
 	, mTotalDuration()
 {
-	LogManager::initialize();
+#ifdef ENLIVE_ENABLE_LOG
+	LogManager::GetInstance().Initialize();
+#endif // ENLIVE_ENABLE_LOG
 
-	mWindowClosedSlot.connect(mWindow.onWindowClosed, [this](const en::Window*) { stop(); });
+	mWindowClosedSlot.connect(mWindow.onWindowClosed, [this](const en::Window*) { Stop(); });
 
 #ifdef ENLIVE_ENABLE_IMGUI
 	ImGuiToolManager::GetInstance().Initialize(mWindow);
 
-	ImGuiProfiler::GetInstance().Register();
-	ImGuiEntt::GetInstance().Register();
+	// Main
+#ifdef ENLIVE_ENABLE_LOG
+	ImGuiLogger::GetInstance().Register();
+#endif // ENLIVE_ENABLE_LOG
 	ImGuiDemoWindow::GetInstance().Register();
+
+	// Engine
+	ImGuiEntt::GetInstance().Register();
+
+	// Game
+#ifdef ENLIVE_ENABLE_PROFILE
+	ImGuiProfiler::GetInstance().Register();
+#endif // ENLIVE_ENABLE_PROFILE
 #endif
 }
 
 Application::~Application()
 {
-	stop();
-
-#ifdef ENLIVE_PLATFORM_MOBILE
-	std::exit(0);
-#endif
+	Stop();
 }
 
-Window& Application::getWindow()
+Window& Application::GetWindow()
 {
 	return mWindow;
 }
 
-ResourceManager& Application::getResourceManager()
+void Application::Stop()
 {
-	return mResourceManager;
-}
-
-AudioSystem& Application::getAudio()
-{
-	return mAudioSystem;
-}
-
-void Application::stop()
-{
-	mAudioSystem.Stop();
-	mAudioSystem.Clear();
+	AudioSystem::GetInstance().Stop();
+	AudioSystem::GetInstance().Clear();
 
 #ifdef ENLIVE_ENABLE_IMGUI
 	ImGuiToolManager::GetInstance().Shutdown();
@@ -79,35 +76,36 @@ void Application::stop()
 	}
 
 	mRunning = false;
+
+	std::exit(EXIT_SUCCESS);
 }
 
-void Application::popState()
+void Application::PopState()
 {
 	mStates.popState();
 }
 
-void Application::clearStates()
+void Application::ClearStates()
 {
 	mStates.clearStates();
 }
 
-U32 Application::getFPS() const
+U32 Application::GetFPS() const
 {
 	return mFps;
 }
 
-
-U32 Application::getTotalFrames() const
+U32 Application::GetTotalFrames() const
 {
 	return mTotalFrames;
 }
 
-Time Application::getTotalDuration() const
+Time Application::GetTotalDuration() const
 {
 	return mTotalDuration.getElapsedTime();
 }
 
-void Application::run()
+void Application::Run()
 {
 	const Time TimeUpdateFPS = seconds(0.5f);
 	const Time TimePerFrame = seconds(1.0f / 60.0f);
@@ -121,7 +119,8 @@ void Application::run()
 	{
 #ifdef ENLIVE_ENABLE_PROFILE
 		Profiler::GetInstance().StartFrame(mTotalFrames);
-#endif
+#endif // ENLIVE_ENABLE_PROFILE
+
 		{
 			ENLIVE_PROFILE_SCOPE(MainFrame);
 
@@ -134,12 +133,12 @@ void Application::run()
 			{
 				dt = TimePerFrame;
 			}
-#endif
+#endif // ENLIVE_DEBUG
 
 			accumulator += dt;
 			fpsAccumulator += dt;
 
-			events();
+			Events();
 
 			// Fixed time 60 FPS
 			while (accumulator >= TimePerFrame)
@@ -148,18 +147,18 @@ void Application::run()
 
 #ifdef ENLIVE_ENABLE_IMGUI
 				ImGuiToolManager::GetInstance().Update(mWindow, TimePerFrame);
-#endif
+#endif // ENLIVE_ENABLE_IMGUI
 
-				preUpdate();
-				update(TimePerFrame);
-				postUpdate();
+				PreUpdate();
+				Update(TimePerFrame);
+				PostUpdate();
 
 #ifdef ENLIVE_ENABLE_IMGUI
 				ImGuiToolManager::GetInstance().Render();
-#endif
+#endif // ENLIVE_ENABLE_IMGUI
 			}
 
-			render();
+			Render();
 
 			// FPS
 			framesFps++;
@@ -171,7 +170,7 @@ void Application::run()
 
 #ifdef ENLIVE_DEBUG
 				mWindow.setTitle("FPS : " + toString(mFps));
-#endif
+#endif // ENLIVE_DEBUG
 			}
 
 			mTotalFrames++;
@@ -179,16 +178,17 @@ void Application::run()
 			// Stop ?
 			if (!mWindow.isOpen() || mStates.getStateCount() == 0)
 			{
-				stop();
+				Stop();
 			}
 		}
+
 #ifdef ENLIVE_ENABLE_PROFILE
 		Profiler::GetInstance().EndFrame();
-#endif
+#endif // ENLIVE_ENABLE_PROFILE
 	}
 }
 
-void Application::events()
+void Application::Events()
 {
 	ENLIVE_PROFILE_FUNCTION();
 
@@ -198,17 +198,18 @@ void Application::events()
 		// Might have used Signal of the Window, but clearer like this
 		if (event.type == sf::Event::GainedFocus)
 		{
-			mAudioSystem.Play();
+			AudioSystem::GetInstance().Play();
 		}
 		if (event.type == sf::Event::LostFocus)
 		{
-			mAudioSystem.Pause();
+			AudioSystem::GetInstance().Pause();
 		}
 
 #ifdef ENLIVE_ENABLE_IMGUI
 		ImGuiToolManager::GetInstance().HandleEvent(event);
 		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
 		{
+#ifdef ENLIVE_ENABLE_PROFILE
 			if (ImGuiProfiler::GetInstance().CanCurrentFrameBeCaptured())
 			{
 				ImGuiProfiler::GetInstance().CaptureCurrentFrameAndOpenProfiler();
@@ -217,6 +218,7 @@ void Application::events()
 			{
 				ImGuiProfiler::GetInstance().SetEnabled(true);
 			}
+#endif // ENLIVE_ENABLE_PROFILE
 		}
 #endif	
 
@@ -224,24 +226,24 @@ void Application::events()
 	}
 }
 
-void Application::preUpdate()
+void Application::PreUpdate()
 {
 	ENLIVE_PROFILE_FUNCTION();
-	mAudioSystem.Update();
+	AudioSystem::GetInstance().Update();
 }
 
-void Application::update(Time dt)
+void Application::Update(Time dt)
 {
 	ENLIVE_PROFILE_FUNCTION();
 	mStates.update(dt);
 }
 
-void Application::postUpdate()
+void Application::PostUpdate()
 {
 	ENLIVE_PROFILE_FUNCTION();
 }
 
-void Application::render()
+void Application::Render()
 {
 	ENLIVE_PROFILE_FUNCTION();
 
@@ -250,7 +252,7 @@ void Application::render()
 	mStates.render(mWindow.getHandle());
 
 #ifdef ENLIVE_DEBUG
-	en::DebugDraw::render(mWindow.getHandle());
+	DebugDraw::render(mWindow.getHandle());
 #endif // ENLIVE_DEBUG
 
 #ifdef ENLIVE_ENABLE_IMGUI
@@ -260,7 +262,7 @@ void Application::render()
 	mWindow.display();
 }
 
-en::ScreenshotSystem& Application::getScreenshotSystem()
+en::ScreenshotSystem& Application::GetScreenshotSystem()
 {
 	return mScreenshotSystem;
 }

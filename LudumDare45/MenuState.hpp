@@ -12,23 +12,23 @@ class MenuState : public en::State
 		MenuState(en::StateManager& manager)
 			: en::State(manager)
 		{
-			background.setTexture(getApplication().getResourceManager().Create<en::Texture>("menubg", en::TextureLoader::FromFile("Assets/Textures/background_menu.png")).Get());
+			background.setTexture(en::ResourceManager::GetInstance().Create<en::Texture>("menubg", en::TextureLoader::FromFile(en::PathManager::GetInstance().GetTexturesPath() + "background_menu.png")).Get());
 
-			buttonPlay.setTexture(getApplication().getResourceManager().Create<en::Texture>("menuplaybutton", en::TextureLoader::FromFile("Assets/Textures/PlayButtons.png")).Get());
+			buttonPlay.setTexture(en::ResourceManager::GetInstance().Create<en::Texture>("menuplaybutton", en::TextureLoader::FromFile(en::PathManager::GetInstance().GetTexturesPath() + "PlayButtons.png")).Get());
 			buttonPlay.setTextureRect(sf::IntRect(0, 0, 96, 32));
 			buttonPlay.setPosition(512 - 150, 384);
 			buttonPlay.setScale(3.5f, 3.5f);
 
 			/*
-			getApplication().getTextures().create("menucontinuebutton", en::TextureLoader::loadFromFile("Assets/Textures/PlayButtons.png"));
+			getApplication().getTextures().create("menucontinuebutton", en::TextureLoader::loadFromFile(en::PathManager::GetInstance().GetTexturesPath() + "PlayButtons.png"));
 			buttonContinue.setTexture(getApplication().getTextures().get("menucontinuebutton"));
 			buttonContinue.setTextureRect(sf::IntRect(0, 0, 96, 32));
 			buttonContinue.setPosition(512 - 150, 384 + 100);
 			buttonContinue.setScale(3.5f, 3.5f);
 			*/
 
-			buttonSound.setTexture(getApplication().getResourceManager().Get<en::Texture>("menuplaybutton").Get());
-			buttonSound.setTextureRect(sf::IntRect(((getApplication().getAudio().IsEnabled()) ? 0 : 18), 114, 14, 14));
+			buttonSound.setTexture(en::ResourceManager::GetInstance().Get<en::Texture>("menuplaybutton").Get());
+			buttonSound.setTextureRect(sf::IntRect(((en::AudioSystem::GetInstance().IsEnabled()) ? 0 : 18), 114, 14, 14));
 			buttonSound.setPosition(512 + 300, 384 + 35);
 			buttonSound.setScale(3.5f, 3.5f);
 		}
@@ -40,8 +40,8 @@ class MenuState : public en::State
 				const sf::Vector2f p((float)event.mouseButton.x, (float)event.mouseButton.y);
 				if (buttonPlay.getGlobalBounds().contains(p))
 				{
-					getApplication().clearStates();
-					getApplication().pushState<GameState>();
+					getApplication().ClearStates();
+					getApplication().PushState<GameState>();
 				}
 				/*else if (buttonContinue.getGlobalBounds().contains(p))
 				{
@@ -50,11 +50,7 @@ class MenuState : public en::State
 				}*/
 				else if (buttonSound.getGlobalBounds().contains(p))
 				{
-					getApplication().getAudio().SetEnabled(!getApplication().getAudio().IsEnabled());
-					if (!getApplication().getAudio().IsEnabled())
-					{
-						getApplication().getAudio().Stop();
-					}
+					en::AudioSystem::GetInstance().SetEnabled(!en::AudioSystem::GetInstance().IsEnabled());
 				}
 			}
 			return false; 
@@ -64,7 +60,7 @@ class MenuState : public en::State
 		{
 			ENLIVE_UNUSED(dt);
 
-			const sf::Vector2f p = static_cast<sf::Vector2f>(sf::Mouse::getPosition(getApplication().getWindow().getHandle()));
+			const sf::Vector2f p = static_cast<sf::Vector2f>(sf::Mouse::getPosition(getApplication().GetWindow().getHandle()));
 			if (buttonPlay.getGlobalBounds().contains(p))
 			{
 				buttonPlay.setTextureRect(sf::IntRect(0, 32, 96, 32));
@@ -85,7 +81,7 @@ class MenuState : public en::State
 			}
 			*/
 
-			if (getApplication().getAudio().IsEnabled())
+			if (en::AudioSystem::GetInstance().IsEnabled())
 			{
 				buttonSound.setTextureRect(sf::IntRect(0, 114, 14, 14));
 			}

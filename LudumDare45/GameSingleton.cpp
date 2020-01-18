@@ -57,42 +57,40 @@ bool GameSingleton::showWindow = false;
 void GameSingleton::loadResourcesMain(en::Application& app)
 {
 	GameSingleton::application = &app;
-
-	// Font
-	const std::string fontPath = "Assets/Fonts/";
-	mFont = app.getResourceManager().Create<en::Font>("pix", en::FontLoader::FromFile(fontPath + "EndlessBossBattle.ttf"));
+	const std::string& fontsPath = en::PathManager::GetInstance().GetFontsPath();
+	mFont = en::ResourceManager::GetInstance().Create<en::Font>("pix", en::FontLoader::FromFile(fontsPath + "EndlessBossBattle.ttf"));
 }
 
 void GameSingleton::loadResourcesGame()
 {
 	// Textures
-	const std::string texturePath = "Assets/Textures/";
-	mNothingTexture = application->getResourceManager().Create<en::Texture>("nothingtexture", en::TextureLoader::FromFile(texturePath + "perso_nothing.png"));
-	mEverythingTexture = application->getResourceManager().Create<en::Texture>("everythingtexture", en::TextureLoader::FromFile(texturePath + "perso_everything.png"));
-	mAITexture = application->getResourceManager().Create<en::Texture>("aitexture", en::TextureLoader::FromFile(texturePath + "perso_IA.png"));
-	application->getResourceManager().Create<en::Texture>("buble", en::TextureLoader::FromFile(texturePath + "buble.png"));
-	application->getResourceManager().Create<en::Texture>("coin", en::TextureLoader::FromFile(texturePath + "coin.png"));
-	application->getResourceManager().Create<en::Texture>("cursor", en::TextureLoader::FromFile(texturePath + "cursor.png"));
+	const std::string& texturesPath = en::PathManager::GetInstance().GetTexturesPath();
+	mNothingTexture = en::ResourceManager::GetInstance().Create<en::Texture>("nothingtexture", en::TextureLoader::FromFile(texturesPath + "perso_nothing.png"));
+	mEverythingTexture = en::ResourceManager::GetInstance().Create<en::Texture>("everythingtexture", en::TextureLoader::FromFile(texturesPath + "perso_everything.png"));
+	mAITexture = en::ResourceManager::GetInstance().Create<en::Texture>("aitexture", en::TextureLoader::FromFile(texturesPath + "perso_IA.png"));
+	en::ResourceManager::GetInstance().Create<en::Texture>("buble", en::TextureLoader::FromFile(texturesPath + "buble.png"));
+	en::ResourceManager::GetInstance().Create<en::Texture>("coin", en::TextureLoader::FromFile(texturesPath + "coin.png"));
+	en::ResourceManager::GetInstance().Create<en::Texture>("cursor", en::TextureLoader::FromFile(texturesPath + "cursor.png"));
 
 	// Sound
-	const std::string soundPath = "Assets/Sounds/";
-	mChopSound = application->getAudio().PrepareSound("chop", soundPath + "Chop.wav");
-	mHitSound = application->getAudio().PrepareSound("hit", soundPath + "Hit.wav");
-	mKnockoutSound = application->getAudio().PrepareSound("knockout", soundPath + "Knockout.wav");
-	mSelectSound = application->getAudio().PrepareSound("select", soundPath + "Select.wav");
-	mThrowSound = application->getAudio().PrepareSound("throw", soundPath + "Throw.wav");
-	mDestrPropsSound = application->getAudio().PrepareSound("props", soundPath + "Props.wav");
-	mNothingWallSound = application->getAudio().PrepareSound("nwall", soundPath + "Nwall.wav");
-	mNothingAISound = application->getAudio().PrepareSound("nai", soundPath + "Nia.wav");
-	mPieceSound = application->getAudio().PrepareSound("piece", soundPath + "Piece.wav");
-	mPieceGetSound = application->getAudio().PrepareSound("pieceGet", soundPath + "PieceGet.wav");
+	const std::string& soundsPath = en::PathManager::GetInstance().GetSoundsPath();
+	mChopSound = en::AudioSystem::GetInstance().PrepareSound("chop", soundsPath + "Chop.wav");
+	mHitSound = en::AudioSystem::GetInstance().PrepareSound("hit", soundsPath + "Hit.wav");
+	mKnockoutSound = en::AudioSystem::GetInstance().PrepareSound("knockout", soundsPath + "Knockout.wav");
+	mSelectSound = en::AudioSystem::GetInstance().PrepareSound("select", soundsPath + "Select.wav");
+	mThrowSound = en::AudioSystem::GetInstance().PrepareSound("throw", soundsPath + "Throw.wav");
+	mDestrPropsSound = en::AudioSystem::GetInstance().PrepareSound("props", soundsPath + "Props.wav");
+	mNothingWallSound = en::AudioSystem::GetInstance().PrepareSound("nwall", soundsPath + "Nwall.wav");
+	mNothingAISound = en::AudioSystem::GetInstance().PrepareSound("nai", soundsPath + "Nia.wav");
+	mPieceSound = en::AudioSystem::GetInstance().PrepareSound("piece", soundsPath + "Piece.wav");
+	mPieceGetSound = en::AudioSystem::GetInstance().PrepareSound("pieceGet", soundsPath + "PieceGet.wav");
 
 	// Tileset & Map
 	GameSingleton::mTileset.setFirstGid(1);
 	GameSingleton::mTileset.setTileSize(en::Vector2i(16, 16));
 	GameSingleton::mTileset.setTileCount(160);
 	GameSingleton::mTileset.setColumns(8);
-	GameSingleton::mTileset.setImageSource("Assets/Textures/tileset.png");
+	GameSingleton::mTileset.setImageSource(texturesPath + "tileset.png");
 
 	// Idle
 	en::Animation animIdleBG;
@@ -421,16 +419,16 @@ void GameSingleton::setCursor(bool enable)
 {
 	if (enable)
 	{
-		application->getWindow().setCursor(en::Window::Cursor::Custom);
-		application->getWindow().setCursorTexture("Assets/Textures/cursor.png");
-		application->getWindow().setCursorTextureRect(sf::IntRect(0, 0, 32, 32));
-		application->getWindow().setCursorOrigin({ 16,16 });
-		application->getWindow().setCursorScale({ 1.2f,1.2f });
-		application->getWindow().setCursorRotation(45.f);
+		en::Application::GetInstance().GetWindow().setCursor(en::Window::Cursor::Custom);
+		en::Application::GetInstance().GetWindow().setCursorTexture(en::PathManager::GetInstance().GetTexturesPath() + "cursor.png");
+		en::Application::GetInstance().GetWindow().setCursorTextureRect(sf::IntRect(0, 0, 32, 32));
+		en::Application::GetInstance().GetWindow().setCursorOrigin({ 16,16 });
+		en::Application::GetInstance().GetWindow().setCursorScale({ 1.2f,1.2f });
+		en::Application::GetInstance().GetWindow().setCursorRotation(45.f);
 	}
 	else
 	{
-		application->getWindow().setCursor(en::Window::Cursor::None);
+		en::Application::GetInstance().GetWindow().setCursor(en::Window::Cursor::None);
 	}
 }
 
@@ -452,14 +450,14 @@ void GameSingleton::renderMetricsWindow()
 	{
 		ImGui::Begin("Metrics");
 		ImGui::Text("Entities : %d", world.size());
-		ImGui::Text("FPS : %d", (int)application->getFPS());
-		ImGui::Text("TotalTime : %d s", (int)application->getTotalDuration().asSeconds());
-		ImGui::Text("Mouse X (Window): %d", (int)application->getWindow().getCursorPosition().x);
-		ImGui::Text("Mouse Y (Window): %d", (int)application->getWindow().getCursorPosition().y);
-		ImGui::Text("Mouse X (View): %d", (int)application->getWindow().getCursorPositionView(GameSingleton::mView).x);
-		ImGui::Text("Mouse Y (View): %d", (int)application->getWindow().getCursorPositionView(GameSingleton::mView).y);
-		ImGui::Text("View X : %d", (int)application->getWindow().getMainView().getCenter().x);
-		ImGui::Text("View Y : %d", (int)application->getWindow().getMainView().getCenter().y);
+		ImGui::Text("FPS : %d", (int)en::Application::GetInstance().GetFPS());
+		ImGui::Text("TotalTime : %d s", (int)en::Application::GetInstance().GetTotalDuration().asSeconds());
+		ImGui::Text("Mouse X (Window): %d", (int)en::Application::GetInstance().GetWindow().getCursorPosition().x);
+		ImGui::Text("Mouse Y (Window): %d", (int)en::Application::GetInstance().GetWindow().getCursorPosition().y);
+		ImGui::Text("Mouse X (View): %d", (int)en::Application::GetInstance().GetWindow().getCursorPositionView(GameSingleton::mView).x);
+		ImGui::Text("Mouse Y (View): %d", (int)en::Application::GetInstance().GetWindow().getCursorPositionView(GameSingleton::mView).y);
+		ImGui::Text("View X : %d", (int)en::Application::GetInstance().GetWindow().getMainView().getCenter().x);
+		ImGui::Text("View Y : %d", (int)en::Application::GetInstance().GetWindow().getMainView().getCenter().y);
 #ifdef ENLIVE_DEBUG
 		ImGui::Text("DebugDisplay Rectangles : %d", en::DebugDraw::getCurrentRectangleCount());
 		ImGui::Text("DebugDisplay Circles : %d", en::DebugDraw::getCurrentCircleCount());

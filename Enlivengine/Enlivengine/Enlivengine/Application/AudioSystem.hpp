@@ -174,9 +174,9 @@ private:
 // Class that smartly manage audio sources
 class AudioSystem
 {
-public:
-	AudioSystem(ResourceManager& resourceManager);
+	ENLIVE_SINGLETON(AudioSystem);
 
+public:
 	F32 GetGlobalVolume() const;
 	void SetGlobalVolume(F32 volume);
 	bool IsEnabled() const;
@@ -245,7 +245,6 @@ private:
 	bool mMusicsEnabled;
 	std::vector<Music*> mMusics;
 
-	ResourceManager& mResourceManager;
 	std::vector<SoundID> mLoadedSounds;
 	F32 mSoundsVolume;
 	bool mSoundsEnabled;
