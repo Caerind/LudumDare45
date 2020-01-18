@@ -8,6 +8,8 @@
 
 #include <Enlivengine/Graphics/SFMLWrapper.hpp>
 
+#include <memory>
+
 namespace en
 {
 
@@ -56,7 +58,7 @@ class Tileset
 		std::string mImageSource;
 		Color mImageTransparent;
 
-		sf::Texture mTexture;
+		std::unique_ptr<sf::Texture> mTexture;
 
 		bool mImageChanged;
 };

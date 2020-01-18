@@ -16,7 +16,6 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 	
 find_package(OpenGL REQUIRED)
-find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 add_subdirectory(Enlivengine)
 

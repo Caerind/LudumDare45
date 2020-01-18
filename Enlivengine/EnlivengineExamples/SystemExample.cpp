@@ -16,7 +16,9 @@
 
 int main()
 {
-	en::LogManager::initialize();
+#ifdef ENLIVE_ENABLE_LOG
+	en::LogManager::GetInstance().Initialize();
+#endif // ENLIVE_ENABLE_LOG
 
 	LogInfo(en::LogChannel::System, 9, "ENLIVE_FUNCTION : %s", ENLIVE_FUNCTION);
 	LogInfo(en::LogChannel::System, 9, "ENLIVE_COMPILER_NAME : %s", ENLIVE_COMPILER_NAME);

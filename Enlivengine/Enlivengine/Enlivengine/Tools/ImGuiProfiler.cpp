@@ -104,8 +104,6 @@ void ImGuiProfiler::Display()
 	}
 
 	ImGui::Separator();
-
-	mFrameTimePlot.DrawList();
 }
 
 void ImGuiProfiler::CaptureCurrentFrameAndOpenProfiler()

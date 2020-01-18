@@ -13,6 +13,7 @@ Tileset::Tileset()
 	, mRelativePath("")
 	, mImageSource()
 	, mImageTransparent(Color::Transparent)
+	, mTexture(nullptr)
 	, mImageChanged(true)
 {
 }
@@ -117,8 +118,14 @@ const Color& Tileset::getImageTransparent() const
 
 sf::Texture& Tileset::getTexture()
 {
-	if (mImageChanged)
+	if (mImageChanged || mTexture == nullptr)
 	{
+		if (mTexture == nullptr)
+		{
+			mTexture = std::make_unique<sf::Texture>();
+		}
+		assert(mTexture != nullptr);
+
 		const std::string filename = mRelativePath + mImageSource;
 		if (mImageTransparent != Color::Transparent)
 		{
@@ -128,11 +135,11 @@ sf::Texture& Tileset::getTexture()
 				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
 			}
 			image.createMaskFromColor(toSF(mImageTransparent));
-			mTexture.loadFromImage(image);
+			mTexture->loadFromImage(image);
 		}
 		else
 		{
-			if (!mTexture.loadFromFile(mRelativePath + mImageSource))
+			if (!mTexture->loadFromFile(mRelativePath + mImageSource))
 			{
 				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
 			}
@@ -140,7 +147,8 @@ sf::Texture& Tileset::getTexture()
 		
 		mImageChanged = false;
 	}
-	return mTexture;
+	assert(mTexture != nullptr);
+	return *(mTexture.get());
 }
 
 bool Tileset::hasId(TileId gid)

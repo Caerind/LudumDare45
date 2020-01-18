@@ -8,6 +8,7 @@ project(EnlivengineProject
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 
+# TODO : Why is this here ? Wanted ? Or I forgot to remove some copy-paste from SFML ?
 if(SFML_OS_WINDOWS)
     sfml_set_option(SFML_USE_STATIC_STD_LIBS FALSE BOOL "TRUE to statically link to the standard libraries, FALSE to use them as DLLs")
 
@@ -44,7 +45,6 @@ endif()
 	
 # SFML
 find_package(OpenGL REQUIRED)
-find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 # Others 3rd
 add_subdirectory(EnlivengineThirdParty)

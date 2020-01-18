@@ -1,4 +1,13 @@
 
+# SFML
+set(SFML_BUILD_AUDIO TRUE)
+set(SFML_BUILD_GRAPHICS TRUE)
+set(SFML_BUILD_NETWORK TRUE)
+set(SFML_BUILD_WINDOW TRUE)
+set(SFML_DIR "./SFML/cmake/")
+set(BUILD_SHARED_LIBS FALSE)
+add_subdirectory(SFML)
+
 # Box2D
 set(SRC_BOX2D
   Box2D/Collision/Shapes/b2ChainShape.cpp
