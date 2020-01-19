@@ -1,8 +1,12 @@
 #pragma once
 
+#include <string>
+
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 
-#include <string>
+#ifdef ENLIVE_ENABLE_IMGUI
+#include <imgui/imgui.h>
+#endif // ENLIVE_ENABLE_IMGUI
 
 namespace en
 {
@@ -24,6 +28,8 @@ class Color
 
 		bool isOpaque() const;
 
+		Color withAlpha(U8 alpha) const;
+
 		std::string toString() const;
 		Color& fromString(const std::string& color);
 
@@ -32,6 +38,11 @@ class Color
 
 		LinearColor toLinearColor() const;
 		Color& fromLinearColor(const LinearColor& color);
+
+#ifdef ENLIVE_ENABLE_IMGUI
+		ImVec4 toImGuiColor() const;
+		Color& fromImGuiColor(const ImVec4& color);
+#endif // ENLIVE_ENABLE_IMGUI
 
 		U8 r;
 		U8 g;

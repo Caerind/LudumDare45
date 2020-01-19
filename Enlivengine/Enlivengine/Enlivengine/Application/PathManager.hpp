@@ -14,6 +14,7 @@ class PathManager
 
 public:	
 	const std::string& GetAssetsPath() const;
+	const std::string& GetResourcesPath() const;
 	
 	const std::string& GetFontsPath() const;
 	const std::string& GetMapsPath() const;

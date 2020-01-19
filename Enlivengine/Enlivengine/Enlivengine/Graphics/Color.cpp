@@ -138,6 +138,11 @@ bool Color::isOpaque() const
 	return a == 255;
 }
 
+Color Color::withAlpha(U8 alpha) const
+{
+	return Color(r, g, b, alpha);
+}
+
 std::string Color::toString() const
 {
 	std::ostringstream oss;
@@ -181,6 +186,22 @@ Color& Color::fromLinearColor(const LinearColor& color)
 	a = U8(Math::Clamp(color.a, 0.0f, 1.0f) * 255.0f);
 	return *this;
 }
+
+#ifdef ENLIVE_ENABLE_IMGUI
+ImVec4 Color::toImGuiColor() const
+{
+	return ImVec4(r * 0.00392156862f, g * 0.00392156862f, b * 0.00392156862f, a * 0.00392156862f);
+}
+
+Color& Color::fromImGuiColor(const ImVec4& color)
+{
+	r = U8(Math::Clamp(color.x, 0.0f, 1.0f) * 255.0f);
+	g = U8(Math::Clamp(color.y, 0.0f, 1.0f) * 255.0f);
+	b = U8(Math::Clamp(color.z, 0.0f, 1.0f) * 255.0f);
+	a = U8(Math::Clamp(color.w, 0.0f, 1.0f) * 255.0f);
+	return *this;
+}
+#endif // ENLIVE_ENABLE_IMGUI
 
 bool operator==(const Color& left, const Color& right)
 {

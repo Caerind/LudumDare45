@@ -5,6 +5,10 @@
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 #include <Enlivengine/Math/Utilities.hpp>
 
+#ifdef ENLIVE_ENABLE_IMGUI
+#include <imgui/imgui.h>
+#endif // ENLIVE_ENABLE_IMGUI
+
 namespace en
 {
 
@@ -26,6 +30,8 @@ class LinearColor
 		bool isOpaque() const;
 		bool equals(const LinearColor& color, F32 tolerance = 0.01f) const;
 
+		LinearColor withAlpha(F32 alpha) const;
+
 		LinearColor& clamp();
 		LinearColor clamped() const;
 
@@ -37,6 +43,11 @@ class LinearColor
 
 		Color toColor() const;
 		LinearColor& fromColor(const Color& color);
+
+#ifdef ENLIVE_ENABLE_IMGUI
+		ImVec4 toImGuiColor() const;
+		LinearColor& fromImGuiColor(const ImVec4& color);
+#endif // ENLIVE_ENABLE_IMGUI
 
 		LinearColor& fromRedGreenScalar(F32 scalar);
 

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Resources resourceCount="19" typeCount="4">
+	<Resource identifier="MainFont" filename="Fonts/EndlessBossBattle.ttf" type="0" />
+	<Resource identifier="mainTheme" filename="Musics/MainTheme.ogg" type="1" />
+	<Resource identifier="chop" filename="Sounds/Chop.wav" type="2" />
+	<Resource identifier="hit" filename="Sounds/Hit.wav" type="2" />
+	<Resource identifier="knockout" filename="Sounds/Knockout.wav" type="2" />
+	<Resource identifier="select" filename="Sounds/Select.wav" type="2" />
+	<Resource identifier="throw" filename="Sounds/Throw.wav" type="2" />
+	<Resource identifier="props" filename="Sounds/Props.wav" type="2" />
+	<Resource identifier="nwall" filename="Sounds/Nwall.wav" type="2" />
+	<Resource identifier="nai" filename="Sounds/Nia.wav" type="2" />
+	<Resource identifier="piece" filename="Sounds/Piece.wav" type="2" />
+	<Resource identifier="pieceGet" filename="Sounds/PieceGet.wav" type="2" />
+	<Resource identifier="aitexture" filename="Textures/perso_IA.png" type="3" />
+	<Resource identifier="buble" filename="Textures/buble.png" type="3" />
+	<Resource identifier="coin" filename="Textures/coin.png" type="3" />
+	<Resource identifier="cursor" filename="Textures/cursor.png" type="3" />
+	<Resource identifier="nothingtexture" filename="Textures/perso_nothing.png" type="3" />
+	<Resource identifier="everythingtexture" filename="Textures/perso_everything.png" type="3" />
+	<Resource identifier="atmog" filename="Textures/atmog.png" type="3" />
+</Resources>

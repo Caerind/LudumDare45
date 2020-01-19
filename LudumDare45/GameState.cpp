@@ -13,7 +13,7 @@
 
 GameState::GameState(en::StateManager& manager)
 	: en::State(manager)
-	, mText(en::ResourceManager::GetInstance().Get<en::Texture>("buble"), GameSingleton::mFont)
+	, mText(en::ResourceManager::GetInstance().Get<en::Texture>("buble"), en::ResourceManager::GetInstance().Get<en::Font>("MainFont"))
 	, mCursorFrame(0)
 {
 	GameSingleton::clear();
@@ -53,7 +53,6 @@ GameState::GameState(en::StateManager& manager)
 		en::AudioSystem::GetInstance().SetGlobalVolume(50.0f);
 
 		// Musics
-		en::AudioSystem::GetInstance().PrepareMusic("mainTheme", en::PathManager::GetInstance().GetMusicsPath() + "MainTheme.ogg");
 		en::AudioSystem::GetInstance().PlayMusic("mainTheme");
 
 		// Sounds

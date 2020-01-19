@@ -9,10 +9,12 @@
 
 #ifdef ENLIVE_ENABLE_IMGUI
 #include <Enlivengine/Application/ImGuiToolManager.hpp>
+#include <Enlivengine/Tools/ImGuiConsole.hpp>
 #include <Enlivengine/Tools/ImGuiEntt.hpp>
 #include <Enlivengine/Tools/ImGuiLogger.hpp>
 #include <Enlivengine/Tools/ImGuiProfiler.hpp>
 #include <Enlivengine/Tools/ImGuiDemoWindow.hpp>
+#include <Enlivengine/Tools/ImGuiResourceBrowser.hpp>
 #endif // ENLIVE_ENABLE_IMGUI
 
 namespace en
@@ -30,25 +32,15 @@ Application::Application()
 	LogManager::GetInstance().Initialize();
 #endif // ENLIVE_ENABLE_LOG
 
+	ImGuiConsole::GetInstance().RegisterConsole();
+
 	mWindowClosedSlot.connect(mWindow.onWindowClosed, [this](const en::Window*) { Stop(); });
 
+	RegisterTools();
+
 #ifdef ENLIVE_ENABLE_IMGUI
-	ImGuiToolManager::GetInstance().Initialize(mWindow);
-
-	// Main
-#ifdef ENLIVE_ENABLE_LOG
-	ImGuiLogger::GetInstance().Register();
-#endif // ENLIVE_ENABLE_LOG
-	ImGuiDemoWindow::GetInstance().Register();
-
-	// Engine
-	ImGuiEntt::GetInstance().Register();
-
-	// Game
-#ifdef ENLIVE_ENABLE_PROFILE
-	ImGuiProfiler::GetInstance().Register();
-#endif // ENLIVE_ENABLE_PROFILE
-#endif
+	ImGuiResourceBrowser::GetInstance().LoadResourceInfosFromFile(PathManager::GetInstance().GetAssetsPath() + "resources.xml");
+#endif // ENLIVE_ENABLE_IMGUI
 }
 
 Application::~Application()
@@ -67,8 +59,12 @@ void Application::Stop()
 	AudioSystem::GetInstance().Clear();
 
 #ifdef ENLIVE_ENABLE_IMGUI
+	ImGuiResourceBrowser::GetInstance().SaveResourceInfosToFile(PathManager::GetInstance().GetAssetsPath() + "resources.xml");
+#endif // ENLIVE_ENABLE_IMGUI
+
+#ifdef ENLIVE_ENABLE_IMGUI
 	ImGuiToolManager::GetInstance().Shutdown();
-#endif
+#endif // ENLIVE_ENABLE_IMGUI
 
 	if (mWindow.isOpen())
 	{
@@ -207,7 +203,7 @@ void Application::Events()
 
 #ifdef ENLIVE_ENABLE_IMGUI
 		ImGuiToolManager::GetInstance().HandleEvent(event);
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P && event.key.control == true)
 		{
 #ifdef ENLIVE_ENABLE_PROFILE
 			if (ImGuiProfiler::GetInstance().CanCurrentFrameBeCaptured())
@@ -262,7 +258,30 @@ void Application::Render()
 	mWindow.display();
 }
 
-en::ScreenshotSystem& Application::GetScreenshotSystem()
+void Application::RegisterTools()
+{
+#ifdef ENLIVE_ENABLE_IMGUI
+	ImGuiToolManager::GetInstance().Initialize(mWindow);
+
+	// Main
+#ifdef ENLIVE_ENABLE_LOG
+	ImGuiLogger::GetInstance().Register();
+#endif // ENLIVE_ENABLE_LOG
+	ImGuiResourceBrowser::GetInstance().Register();
+	ImGuiConsole::GetInstance().Register();
+	ImGuiDemoWindow::GetInstance().Register();
+
+	// Engine
+	ImGuiEntt::GetInstance().Register();
+
+	// Game
+#ifdef ENLIVE_ENABLE_PROFILE
+	ImGuiProfiler::GetInstance().Register();
+#endif // ENLIVE_ENABLE_PROFILE
+#endif // ENLIVE_ENABLE_IMGUI
+}
+
+ScreenshotSystem& Application::GetScreenshotSystem()
 {
 	return mScreenshotSystem;
 }

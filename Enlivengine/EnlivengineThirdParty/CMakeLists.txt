@@ -111,6 +111,12 @@ set(SRC_DEBUGBREAK
 	debug_break/debugbreak.h
 )
 source_group("debug_break" FILES ${SRC_DEBUGBREAK})
+
+# dirent
+set(SRC_DIRENT
+	dirent/dirent.h
+)
+source_group("dirent" FILES ${SRC_DIRENT})
 	
 # doctest
 set(SRC_DOCTEST
@@ -147,6 +153,13 @@ set(SRC_IMGUI
 )
 source_group("imgui" FILES ${SRC_IMGUI})
 
+# ImGuiFileDialog
+set(SRC_IMGUIFILEDIALOG
+	ImGuiFileDialog/ImGuiFileDialog.cpp
+	ImGuiFileDialog/ImGuiFileDialog.h
+)
+source_group("ImGuiFileDialog" FILES ${SRC_IMGUIFILEDIALOG})
+
 # imgui-sfml
 set(SRC_IMGUISFML
 	imgui-sfml/imgui-SFML.cpp
@@ -173,10 +186,12 @@ source_group("pugixml" FILES ${SRC_PUGIXML})
 add_library(EnlivengineThirdParty STATIC
 	${SRC_BOX2D}
 	${SRC_DEBUGBREAK}
+	${SRC_DIRENT}
 	${SRC_DOCTEST}
 	${SRC_ENTT}
 	${SRC_ICONFONTCPPHEADERS}
 	${SRC_IMGUI}
+	${SRC_IMGUIFILEDIALOG}
 	${SRC_IMGUISFML}
 	${SRC_METRICSGUI}
 	${SRC_PUGIXML}

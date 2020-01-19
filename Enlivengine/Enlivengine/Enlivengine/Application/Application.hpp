@@ -45,6 +45,8 @@ private:
 	void PostUpdate();
 	void Render();
 
+	void RegisterTools();
+
 private:
 	StateManager mStates;
 	Window mWindow;

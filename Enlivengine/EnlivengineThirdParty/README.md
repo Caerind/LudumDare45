@@ -1,13 +1,12 @@
 - https://github.com/onqtam/doctest 
 - https://github.com/scottt/debugbreak 
-- https://github.com/wc-duck/dbgtools 
-- https://github.com/r-lyeh-archived/cocoa 
 - https://github.com/zeux/pugixml 
 - https://github.com/erincatto/Box2D 
 - https://github.com/SFML/SFML
 - https://github.com/ocornut/imgui 
 - https://github.com/eliasdaler/imgui-sfml 
-- https://github.com/richgel999/miniz 
 - https://github.com/skypjack/entt
 - https://github.com/juliettef/IconFontCppHeaders  
-https://github.com/GameTechDev/MetricsGui  
+- https://github.com/GameTechDev/MetricsGui  
+- https://github.com/aiekick/ImGuiFileDialog  
+- https://github.com/tronkko/dirent  

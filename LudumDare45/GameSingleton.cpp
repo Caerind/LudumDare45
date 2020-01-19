@@ -57,20 +57,16 @@ bool GameSingleton::showWindow = false;
 void GameSingleton::loadResourcesMain(en::Application& app)
 {
 	GameSingleton::application = &app;
-	const std::string& fontsPath = en::PathManager::GetInstance().GetFontsPath();
-	mFont = en::ResourceManager::GetInstance().Create<en::Font>("pix", en::FontLoader::FromFile(fontsPath + "EndlessBossBattle.ttf"));
+	mFont = en::ResourceManager::GetInstance().Get<en::Font>("MainFont");
 }
 
 void GameSingleton::loadResourcesGame()
 {
 	// Textures
 	const std::string& texturesPath = en::PathManager::GetInstance().GetTexturesPath();
-	mNothingTexture = en::ResourceManager::GetInstance().Create<en::Texture>("nothingtexture", en::TextureLoader::FromFile(texturesPath + "perso_nothing.png"));
-	mEverythingTexture = en::ResourceManager::GetInstance().Create<en::Texture>("everythingtexture", en::TextureLoader::FromFile(texturesPath + "perso_everything.png"));
-	mAITexture = en::ResourceManager::GetInstance().Create<en::Texture>("aitexture", en::TextureLoader::FromFile(texturesPath + "perso_IA.png"));
-	en::ResourceManager::GetInstance().Create<en::Texture>("buble", en::TextureLoader::FromFile(texturesPath + "buble.png"));
-	en::ResourceManager::GetInstance().Create<en::Texture>("coin", en::TextureLoader::FromFile(texturesPath + "coin.png"));
-	en::ResourceManager::GetInstance().Create<en::Texture>("cursor", en::TextureLoader::FromFile(texturesPath + "cursor.png"));
+	mNothingTexture = en::ResourceManager::GetInstance().Get<en::Texture>("nothingtexture");
+	mEverythingTexture = en::ResourceManager::GetInstance().Get<en::Texture>("everythingtexture");
+	mAITexture = en::ResourceManager::GetInstance().Get<en::Texture>("aitexture");
 
 	// Sound
 	const std::string& soundsPath = en::PathManager::GetInstance().GetSoundsPath();

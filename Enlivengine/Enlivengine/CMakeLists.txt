@@ -9,6 +9,8 @@ set(SRC_SYSTEM
     Enlivengine/System/Compression.cpp
     Enlivengine/System/Compression.hpp
     Enlivengine/System/Config.hpp
+    Enlivengine/System/Console.cpp
+    Enlivengine/System/Console.hpp
     Enlivengine/System/DateTime.cpp
     Enlivengine/System/DateTime.hpp
     Enlivengine/System/Debugger.cpp
@@ -114,6 +116,8 @@ set(SRC_CORE
 source_group("Core" FILES ${SRC_CORE})
 
 set(SRC_TOOLS
+	Enlivengine/Tools/ImGuiConsole.cpp
+	Enlivengine/Tools/ImGuiConsole.hpp
 	Enlivengine/Tools/ImGuiDemoWindow.cpp
 	Enlivengine/Tools/ImGuiDemoWindow.hpp
 	Enlivengine/Tools/ImGuiEntt.cpp
@@ -124,6 +128,8 @@ set(SRC_TOOLS
 	Enlivengine/Tools/ImGuiHelper.hpp
 	Enlivengine/Tools/ImGuiProfiler.cpp
 	Enlivengine/Tools/ImGuiProfiler.hpp
+	Enlivengine/Tools/ImGuiResourceBrowser.cpp
+	Enlivengine/Tools/ImGuiResourceBrowser.hpp
 )
 source_group("Tools" FILES ${SRC_TOOLS})
 

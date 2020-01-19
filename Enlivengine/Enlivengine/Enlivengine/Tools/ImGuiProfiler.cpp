@@ -13,7 +13,6 @@ ImGuiProfiler::ImGuiProfiler()
 	: ImGuiTool()
 	, mCaptureFrames(1)
 	, mCurrentFrameIndex(0)
-	, mForceResize(false)
 {
 }
 

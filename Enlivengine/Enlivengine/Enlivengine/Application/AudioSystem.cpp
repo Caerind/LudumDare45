@@ -658,7 +658,7 @@ U32 AudioSystem::GetLoadedSoundsCount() const
 
 SoundPtr AudioSystem::PlaySound(SoundID id)
 {
-	if (mSounds.size() < MAX_SOUNDS && IsSoundLoaded(id) && ResourceManager::GetInstance().Has(id))
+	if (mSounds.size() < MAX_SOUNDS && ResourceManager::GetInstance().Has(id))
 	{
 		const SoundBufferPtr soundBuffer = ResourceManager::GetInstance().Get<en::SoundBuffer>(id);
 		if (soundBuffer.IsValid())

@@ -145,6 +145,11 @@ bool LinearColor::equals(const LinearColor & color, F32 tolerance) const
 		&& Math::Equals(a, color.a, tolerance);
 }
 
+LinearColor LinearColor::withAlpha(F32 alpha) const
+{
+	return LinearColor(r, g, b, alpha);
+}
+
 LinearColor& LinearColor::clamp()
 {
 	r = Math::Clamp(r, 0.0f, 1.0f);
@@ -198,6 +203,22 @@ LinearColor& LinearColor::fromColor(const Color& color)
 	a = color.a * 0.00392156862f;
 	return *this;
 }
+
+#ifdef ENLIVE_ENABLE_IMGUI
+ImVec4 LinearColor::toImGuiColor() const
+{
+	return ImVec4(r, g, b, a);
+}
+
+LinearColor& LinearColor::fromImGuiColor(const ImVec4& color)
+{
+	r = color.x;
+	g = color.y;
+	b = color.z;
+	a = color.w;
+	return *this;
+}
+#endif // ENLIVE_ENABLE_IMGUI
 
 LinearColor& LinearColor::fromRedGreenScalar(F32 scalar)
 {

@@ -69,8 +69,10 @@ void ParserXml::closeNode()
 
 bool ParserXml::createChild(const std::string& nodeName)
 {
-	if (mCurrentNode.append_child(nodeName.c_str()))
+	pugi::xml_node n = mCurrentNode.append_child(nodeName.c_str());
+	if (n)
 	{
+		mCurrentNode = n;
 		return true;
 	}
 	return false;

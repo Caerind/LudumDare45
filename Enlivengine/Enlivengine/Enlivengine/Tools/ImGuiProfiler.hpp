@@ -37,7 +37,6 @@ private:
 private:
 	U32 mCaptureFrames;
 	U32 mCurrentFrameIndex;
-	bool mForceResize;
 };
 
 } // namespace en

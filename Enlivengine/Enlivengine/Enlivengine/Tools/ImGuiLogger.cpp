@@ -14,9 +14,6 @@ ImGuiLogger::ImGuiLogger()
 	, mMessages()
 	, mMaxSize(kDefaultMaxSize)
 {
-	LogInfo(LogChannel::Global, 10, "Test");
-	LogWarning(LogChannel::Global, 10, "Test");
-	LogError(LogChannel::Global, 10, "Test");
 }
 
 ImGuiLogger::~ImGuiLogger()
@@ -59,7 +56,6 @@ void ImGuiLogger::Display()
 		{
 			col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 		}
-		ImGui::SameLine();
 		ImGui::PushStyleColor(ImGuiCol_Text, col);
 		ImGui::TextUnformatted(mMessages[i].message.c_str());
 		ImGui::PopStyleColor();
