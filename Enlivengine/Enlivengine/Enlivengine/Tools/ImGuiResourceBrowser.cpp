@@ -15,6 +15,7 @@
 
 #include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Graphics/SFMLResources.hpp>
+#include <Enlivengine/Graphics/Tileset.hpp>
 
 namespace en
 {
@@ -249,6 +250,40 @@ void ImGuiResourceBrowser::Display()
 					ImGui::SameLine();
 					break;
 				}
+
+                case ResourceInfo::Type::Tileset:
+                {
+                    ImGui::Text(ICON_FA_SEARCH);
+                    if (ImGui::IsItemHovered())
+                    {
+                        TilesetPtr tileset = ResourceManager::GetInstance().Get<Tileset>(resourceInfo.resourceID);
+                        if (tileset.IsValid() && tileset.Get().GetTexture().IsValid())
+                        {
+                            ImGui::BeginTooltip();
+
+                            const Texture& texture = tileset.Get().GetTexture().Get();
+
+                            constexpr F32 maxPreviewSize = 150.0f;
+                            sf::Sprite previewSprite;
+                            previewSprite.setTexture(texture);
+                            Vector2f textureSize;
+                            textureSize.x = static_cast<F32>(texture.getSize().x);
+                            textureSize.y = static_cast<F32>(texture.getSize().y);
+                            if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+                            {
+                                const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+                                const F32 scale = maxPreviewSize / larger;
+                                previewSprite.setScale(scale, scale);
+                            }
+                            ImGui::Image(previewSprite);
+
+                            ImGui::EndTooltip();
+                        }
+                        
+                    }
+                    ImGui::SameLine();
+                    break;
+                }
 
 				default: break;
 				}

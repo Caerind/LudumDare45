@@ -16,6 +16,7 @@ class Tileset : public Resource<Tileset>
 
 		bool LoadFromFile(const std::string& filename);
 
+        /*
 		void SetTileSize(const Vector2i& tileSize);
 		void SetSpacing(U32 spacing);
 		void SetMargin(U32 margin);
@@ -25,6 +26,7 @@ class Tileset : public Resource<Tileset>
 		void SetPath(const std::string& path);
 		void SetImageSource(const std::string& source);
 		void SetImageTransparent(const Color& transparent);
+        */
 
 		const Vector2i& GetTileSize() const;
 		U32 GetSpacing() const;
@@ -35,9 +37,6 @@ class Tileset : public Resource<Tileset>
 		const std::string& GetPath() const;
 		const std::string& GetImageSource() const;
 		const Color& GetImageTransparent() const;
-
-		void SetTextureResourceID(ResourceID resourceID);
-		ResourceID GetTextureResourceID() const;
 
 		TexturePtr& GetTexture();
 
@@ -55,7 +54,6 @@ class Tileset : public Resource<Tileset>
 		std::string mImageSource;
 		Color mImageTransparent;
 
-		ResourceID mTextureResourceID;
 		TexturePtr mTexture;
 		bool mTextureChanged;
 };

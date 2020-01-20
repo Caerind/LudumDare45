@@ -137,6 +137,26 @@ ResourcePtr<T> ResourceManager::Get(ResourceID id)
 }
 
 template <typename T> 
+ResourcePtr<T> en::ResourceManager::GetFromFilename(const std::string& filename)
+{
+    for (auto itr = mResources.begin(); itr != mResources.end(); ++itr)
+    {
+        if (itr->second->GetFilename() == filename)
+        {
+            if (T* validType = static_cast<T*>(itr->second.get()))
+            {
+                return ResourcePtr<T>(itr->first, this);
+            }
+            else
+            {
+                return ResourcePtr<T>(InvalidResourceID, this);
+            }
+        }
+    }
+    return ResourcePtr<T>(InvalidResourceID, this);
+}
+
+template <typename T> 
 T* ResourceManager::GetRawPtr(ResourceID id)
 {
 	assert(Has(id));

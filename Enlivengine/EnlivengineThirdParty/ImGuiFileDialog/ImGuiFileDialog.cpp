@@ -351,7 +351,7 @@ void ImGuiFileDialog::SetCurrentDir(const std::string& vPath)
 				m_CurrentPath = m_CurrentPath.substr(0, m_CurrentPath.size() - 1);
 			}
 			m_CurrentPath_Decomposition = splitStringToVector(m_CurrentPath, PATH_SEP, false);
-#if defined(LINUX) or defined(APPLE)
+#if defined(LINUX) || defined(APPLE)
 			m_CurrentPath_Decomposition.insert(m_CurrentPath_Decomposition.begin(), std::string(1u, PATH_SEP));
 #endif
 			if (m_CurrentPath_Decomposition.size()>0)
@@ -595,10 +595,9 @@ bool ImGuiFileDialog::FileDialog(const std::string& vKey)
 
 		IsOk = false;
 
-		if (ImGui::Begin(name.c_str(), (bool*)0, ImGuiWindowFlags_Modal |
+		if (ImGui::Begin(name.c_str(), &m_ShowDialog, ImGuiWindowFlags_Modal |
 			ImGuiWindowFlags_NoCollapse /*| ImGuiWindowFlags_NoDocking*/))
 		{
-
 			m_Name = name;
 
 			m_AnyWindowsHovered |= ImGui::IsWindowHovered();
@@ -903,7 +902,7 @@ bool ImGuiFileDialog::FileDialog(const std::string& vKey)
 				}
 			}
 
-			if (ImGui::Button("Cancel"))
+			if (ImGui::Button("Cancel") || !m_ShowDialog)
 			{
 				IsOk = false;
 				res = true;

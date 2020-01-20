@@ -108,6 +108,8 @@ public:
 	template <typename T> ResourcePtr<T> Get(const std::string& str);
 	template <typename T> ResourcePtr<T> Get(ResourceID id);
 
+    template <typename T> ResourcePtr<T> GetFromFilename(const std::string& filename);
+
 	bool Has(const std::string& str) const;
 	bool Has(ResourceID id) const;
 

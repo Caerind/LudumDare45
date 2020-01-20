@@ -16,7 +16,6 @@ Tileset::Tileset()
 	, mPath()
 	, mImageSource()
 	, mImageTransparent(Color::Transparent)
-	, mTextureResourceID(InvalidResourceID)
 	, mTexture()
 	, mTextureChanged(true)
 {
@@ -65,11 +64,11 @@ bool Tileset::LoadFromFile(const std::string& filename)
 		return false;
 	}
 
-	// TODO : Now find a way to deal with the Texture loading
-
-	return true;
+    mTextureChanged = true;
+	return GetTexture().IsValid();
 }
 
+/*
 void Tileset::SetTileSize(const Vector2i& tileSize)
 {
 	mTileSize = tileSize;
@@ -126,6 +125,7 @@ void Tileset::SetImageTransparent(const Color& transparent)
 		mTextureChanged = true;
 	}
 }
+*/
 
 const Vector2i& Tileset::GetTileSize() const
 {
@@ -172,43 +172,27 @@ const Color& Tileset::GetImageTransparent() const
 	return mImageTransparent;
 }
 
-void Tileset::SetTextureResourceID(ResourceID resourceID)
-{
-	if (mTextureResourceID != resourceID)
-	{
-		mTextureResourceID = resourceID;
-		mTextureChanged = true;
-	}
-}
-
-ResourceID Tileset::GetTextureResourceID() const
-{
-	return mTextureResourceID;
-}
-
 TexturePtr& Tileset::GetTexture()
 {
 	if (mTextureChanged)
-	{
+    {
+        mTextureChanged = false;
+
 		const std::string filepath = mPath + mImageSource;
 		if (mImageTransparent != Color::Transparent)
 		{
 			LogWarning(en::LogChannel::Graphics, 8, "%s : Transparent color for Tileset isn't supported yet -> Use alpha values", filepath.c_str());
 		}
 
-		mTexture = ResourceManager::GetInstance().Get<Texture>(mTextureResourceID);
+        mTexture = ResourceManager::GetInstance().GetFromFilename<Texture>(filepath);
 		if (!mTexture.IsValid())
 		{
-			// TODO : The texture isn't loaded yet
-			/*
-			if (!mTexture->loadFromFile(filepath))
-			{
-				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
+            mTexture = ResourceManager::GetInstance().Create<Texture>(mName + "-texture", TextureLoader::FromFile(filepath));
+            if (!mTexture.IsValid())
+            {
+				LogError(en::LogChannel::Graphics, 10, "Can't load tileset texture : %s", filepath.c_str());
 			}
-			*/
 		}
-		
-		mTextureChanged = false;
 	}
 
 	return mTexture;
