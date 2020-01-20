@@ -15,7 +15,7 @@ en::Application* GameSingleton::application;
 bool GameSingleton::mFirstIntroDone = false;
 bool GameSingleton::mFirstThrowNothingDone = false;
 
-en::Tileset GameSingleton::mTileset;
+en::TilesetPtr GameSingleton::mTileset;
 GameMap GameSingleton::mMap;
 en::View GameSingleton::mView;
 
@@ -82,11 +82,7 @@ void GameSingleton::loadResourcesGame()
 	mPieceGetSound = en::AudioSystem::GetInstance().PrepareSound("pieceGet", soundsPath + "PieceGet.wav");
 
 	// Tileset & Map
-	GameSingleton::mTileset.setFirstGid(1);
-	GameSingleton::mTileset.setTileSize(en::Vector2i(16, 16));
-	GameSingleton::mTileset.setTileCount(160);
-	GameSingleton::mTileset.setColumns(8);
-	GameSingleton::mTileset.setImageSource(texturesPath + "tileset.png");
+	mTileset = en::ResourceManager::GetInstance().Get<en::Tileset>("tileset");
 
 	// Idle
 	en::Animation animIdleBG;

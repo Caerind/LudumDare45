@@ -102,6 +102,10 @@ void Music::Pause()
 void Music::Stop()
 {
 	mMusic.stop();
+	if (mAudioSystem != nullptr)
+	{
+		mAudioSystem->ForceStopMusic(mMusicUID);
+	}
 }
 
 SoundSourceStatus Music::GetStatus() const
@@ -292,6 +296,10 @@ void Sound::Pause()
 void Sound::Stop()
 {
 	mSound.stop();
+	if (mAudioSystem != nullptr)
+	{
+		mAudioSystem->ForceStopSound(mSoundUID);
+	}
 }
 
 SoundSourceStatus Sound::GetStatus() const
@@ -786,6 +794,20 @@ void AudioSystem::Update()
 	}
 }
 
+void AudioSystem::ForceStopMusic(U32 musicUID)
+{
+	for (size_t i = 0; i < mMusics.size(); ++i)
+	{
+		if (mMusics[i]->GetUID() == musicUID)
+		{
+			delete mMusics[i];
+			mMusics[i] = nullptr;
+			mMusics.erase(mMusics.begin() + i);
+			return;
+		}
+	}
+}
+
 en::Music* AudioSystem::GetMusicInternal(U32 musicUID)
 {
 	const size_t size = mMusics.size();
@@ -810,6 +832,20 @@ const en::Music* AudioSystem::GetMusicInternal(U32 musicUID) const
 		}
 	}
 	return nullptr;
+}
+
+void AudioSystem::ForceStopSound(U32 soundUID)
+{
+	for (size_t i = 0; i < mSounds.size(); ++i)
+	{
+		if (mSounds[i]->GetUID() == soundUID)
+		{
+			delete mSounds[i];
+			mSounds[i] = nullptr;
+			mSounds.erase(mSounds.begin() + i);
+			return;
+		}
+	}
 }
 
 en::Sound* AudioSystem::GetSoundInternal(U32 soundUID)

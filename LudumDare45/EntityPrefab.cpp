@@ -68,7 +68,7 @@ bool EntityPrefab::createNothing(entt::registry& world, entt::entity& nothingEnt
 }
 
 
-bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::Tileset& tileset)
+bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::TilesetPtr tileset)
 {
 	auto entity = world.create();
 #ifdef ENLIVE_DEBUG
@@ -80,13 +80,19 @@ bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::
 	positionComponent.setPosition(x + 8, y + 8);
 	world.assign<en::RenderableComponent>(entity);
 	auto& propsComponent = world.assign<PropsComponent>(entity);
-	propsComponent.sprite.setTexture(tileset.getTexture());
 	propsComponent.sprite.setOrigin(8, 8);
-	const sf::Vector2f vertexPos = tileset.toPos(gid);
-	propsComponent.sprite.setTextureRect(sf::IntRect((int)vertexPos.x, (int)vertexPos.y, 16, 16));
 	propsComponent.coords = GameSingleton::mMap.worldToCoords(en::Vector2f(x + 8.0f, y + 8.0f));
 	propsComponent.destructFrames = 3;
 	propsComponent.gid = gid;
+	if (tileset.IsValid())
+	{
+		if (tileset.Get().GetTexture().IsValid())
+		{
+			propsComponent.sprite.setTexture(tileset.Get().GetTexture().Get());
+		}
+		const sf::Vector2f vertexPos = toSF(tileset.Get().ToPos(gid));
+		propsComponent.sprite.setTextureRect(sf::IntRect((int)vertexPos.x, (int)vertexPos.y, 16, 16));
+	}
 
 	if (gid == 113)
 	{

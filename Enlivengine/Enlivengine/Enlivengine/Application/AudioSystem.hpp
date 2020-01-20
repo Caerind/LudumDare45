@@ -224,9 +224,15 @@ private:
 	friend class Application;
 	void Update();
 
+	friend class Music;
+	void ForceStopMusic(U32 musicUID);
+
 	friend class MusicPtr;
 	en::Music* GetMusicInternal(U32 musicUID);
 	const en::Music* GetMusicInternal(U32 musicUID) const;
+
+	friend class Sound;
+	void ForceStopSound(U32 soundUID);
 
 	friend class SoundPtr;
 	en::Sound* GetSoundInternal(U32 soundUID);

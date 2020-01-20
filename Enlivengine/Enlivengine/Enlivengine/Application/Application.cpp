@@ -2,6 +2,7 @@
 
 #include <Enlivengine/System/Config.hpp>
 #include <Enlivengine/System/String.hpp>
+#include <Enlivengine/System/ParserXml.hpp>
 
 #ifdef ENLIVE_DEBUG
 #include <Enlivengine/Graphics/DebugDraw.hpp>
@@ -17,6 +18,9 @@
 #include <Enlivengine/Tools/ImGuiResourceBrowser.hpp>
 #endif // ENLIVE_ENABLE_IMGUI
 
+// Resources
+#include <Enlivengine/Graphics/Tileset.hpp>
+
 namespace en
 {
 
@@ -25,12 +29,24 @@ Application::Application()
 	, mWindow(sf::VideoMode(1024, 768), "")
 	, mFps(0)
 	, mRunning(true)
+	, mInitialized(false)
 	, mTotalFrames(0)
 	, mTotalDuration()
+{
+}
+
+Application::~Application()
+{
+	Stop();
+}
+
+bool Application::Initialize()
 {
 #ifdef ENLIVE_ENABLE_LOG
 	LogManager::GetInstance().Initialize();
 #endif // ENLIVE_ENABLE_LOG
+
+	mInitialized = true;
 
 	ImGuiConsole::GetInstance().RegisterConsole();
 
@@ -38,14 +54,9 @@ Application::Application()
 
 	RegisterTools();
 
-#ifdef ENLIVE_ENABLE_IMGUI
-	ImGuiResourceBrowser::GetInstance().LoadResourceInfosFromFile(PathManager::GetInstance().GetAssetsPath() + "resources.xml");
-#endif // ENLIVE_ENABLE_IMGUI
-}
+	LoadResources();
 
-Application::~Application()
-{
-	Stop();
+	return true;
 }
 
 Window& Application::GetWindow()
@@ -99,6 +110,156 @@ U32 Application::GetTotalFrames() const
 Time Application::GetTotalDuration() const
 {
 	return mTotalDuration.getElapsedTime();
+}
+
+bool Application::LoadResources()
+{
+	assert(mInitialized);
+
+#ifdef ENLIVE_ENABLE_IMGUI
+	return ImGuiResourceBrowser::GetInstance().LoadResourceInfosFromFile(PathManager::GetInstance().GetAssetsPath() + "resources.xml");
+#else
+	ParserXml xml;
+	if (!xml.loadFromFile(filename))
+	{
+		LogError(en::LogChannel::Application, 9, "Can't open resources file at %s", filename.c_str());
+		return false;
+	}
+
+	if (xml.readNode("Resources"))
+	{
+		U32 resourceCount = 0;
+		xml.getAttribute("resourceCount", resourceCount);
+		if (resourceCount > 0)
+		{
+			if (xml.readNode("Resource"))
+			{
+				do
+				{
+					std::string identifierStr;
+					xml.getAttribute("identifier", identifierStr);
+					std::string filenameStr;
+					xml.getAttribute("filename", filenameStr);
+					I32 typeInt;
+					xml.getAttribute("type", typeInt);
+					ResourceID resourceID;
+					LoadResource(type, identifierStr, filenameStr, resourceID);
+				} while (xml.nextSibling("Resource"));
+				xml.closeNode();
+			}
+		}
+		xml.closeNode();
+	}
+	else
+	{
+		LogError(en::LogChannel::Application, 9, "Invalid resources file at %s", filename.c_str());
+		return false;
+	}
+	return true;
+#endif // ENLIVE_ENABLE_IMGUI
+}
+
+bool Application::LoadResource(I32 type, const std::string& identifier, const std::string& filename, ResourceID& resourceID)
+{
+#ifdef ENLIVE_ENABLE_IMGUI
+	assert(-1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Unknown));
+	assert(0 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Font));
+	assert(1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
+	assert(2 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
+	assert(3 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Texture));
+	assert(4 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Tileset));
+	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
+#endif // ENLIVE_ENABLE_IMGUI
+
+	ResourceManager& resourceManager = ResourceManager::GetInstance();
+	std::string resourceFilename = en::PathManager::GetInstance().GetAssetsPath() + filename;
+	switch (type)
+	{
+	case -1: // ResourceInfo::Type::Unknown
+	{
+		resourceID = InvalidResourceID;
+		LogError(en::LogChannel::Global, 4, "Unknown resource type for resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+		return false;
+	}
+	case 0: // ResourceInfo::Type::Font
+	{
+		FontPtr fontPtr = resourceManager.Create<Font>(identifier.c_str(), FontLoader::FromFile(resourceFilename));
+		if (!fontPtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = fontPtr.GetID();
+		}
+		break;
+	}
+	case 1: // ResourceInfo::Type::Music
+	{
+		MusicID musicID = AudioSystem::GetInstance().PrepareMusic(identifier.c_str(), resourceFilename);
+		if (musicID == InvalidMusicID)
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = musicID;
+		}
+		break;
+	}
+	case 2: // ResourceInfo::Type::Sound
+	{
+		SoundID soundID = AudioSystem::GetInstance().PrepareSound(identifier.c_str(), resourceFilename);
+		if (soundID == InvalidSoundID)
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = soundID;
+		}
+		break;
+	}
+	case 3: // ResourceInfo::Type::Texture
+	{
+		TexturePtr texturePtr = resourceManager.Create<Texture>(identifier.c_str(), TextureLoader::FromFile(resourceFilename));
+		if (!texturePtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = texturePtr.GetID();
+		}
+		break;
+	}
+	case 4: // ResourceInfo::Type::Tileset
+	{
+		TilesetPtr tilesetPtr = resourceManager.Create<Tileset>(identifier.c_str(), TilesetLoader::FromFile(resourceFilename));
+		if (!tilesetPtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = tilesetPtr.GetID();
+		}
+		break;
+		break;
+	}
+	default: assert(false); return false;
+	}
+	return true;
 }
 
 void Application::Run()

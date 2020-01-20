@@ -1,66 +1,82 @@
 #pragma once
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/System/Vector2.hpp>
-
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 
-#include <Enlivengine/Graphics/SFMLWrapper.hpp>
-
-#include <memory>
+#include <Enlivengine/Math/Vector2.hpp>
+#include <Enlivengine/Graphics/Color.hpp>
+#include <Enlivengine/Graphics/SFMLResources.hpp>
 
 namespace en
 {
 
-// TODO : Read from .tsx
-
-using TileId = U32;
-
-class Tileset
+class Tileset : public Resource<Tileset>
 {
 	public:
 		Tileset();
 
-		void setFirstGid(TileId id);
-		void setTileSize(const Vector2i& tileSize);
-		void setSpacing(U32 spacing);
-		void setMargin(U32 margin);
-		void setTileCount(U32 tileCount);
-		void setColumns(U32 columns);
-		void setRelativePath(const std::string& path);
-		void setImageSource(const std::string& source);
-		void setImageTransparent(const Color& transparent);
+		bool LoadFromFile(const std::string& filename);
 
-		TileId getFirstGid() const;
-		const Vector2i& getTileSize() const;
-		U32 getSpacing() const;
-		U32 getMargin() const;
-		U32 getTileCount() const;
-		U32 getColumns() const;
-		const std::string& getRelativePath() const;
-		const std::string& getImageSource() const;
-		const Color& getImageTransparent() const;
+		void SetTileSize(const Vector2i& tileSize);
+		void SetSpacing(U32 spacing);
+		void SetMargin(U32 margin);
+		void SetTileCount(U32 tileCount);
+		void SetColumns(U32 columns);
+		void SetName(const std::string& name);
+		void SetPath(const std::string& path);
+		void SetImageSource(const std::string& source);
+		void SetImageTransparent(const Color& transparent);
 
-		sf::Texture& getTexture();
+		const Vector2i& GetTileSize() const;
+		U32 GetSpacing() const;
+		U32 GetMargin() const;
+		U32 GetTileCount() const;
+		U32 GetColumns() const;
+		const std::string& GetName() const;
+		const std::string& GetPath() const;
+		const std::string& GetImageSource() const;
+		const Color& GetImageTransparent() const;
 
-		bool hasId(TileId gid);
-		sf::Vector2f toPos(TileId gid);
+		void SetTextureResourceID(ResourceID resourceID);
+		ResourceID GetTextureResourceID() const;
+
+		TexturePtr& GetTexture();
+
+		Vector2f ToPos(U32 tileId) const;
 
 	private:
-		U32 mFirstGid;
 		Vector2i mTileSize;
 		U32 mSpacing;
 		U32 mMargin;
 		U32 mTileCount;
 		U32 mColumns;
-		std::string mRelativePath;
+		std::string mName;
+		std::string mPath;
+
 		std::string mImageSource;
 		Color mImageTransparent;
 
-		std::unique_ptr<sf::Texture> mTexture;
+		ResourceID mTextureResourceID;
+		TexturePtr mTexture;
+		bool mTextureChanged;
+};
 
-		bool mImageChanged;
+using TilesetPtr = ResourcePtr<Tileset>;
+
+class TilesetLoader
+{
+public:
+	TilesetLoader() = delete;
+	~TilesetLoader() = delete;
+
+	static ResourceLoader<Tileset> FromFile(const std::string& filename)
+	{
+		return ResourceLoader<Tileset>([&filename](Tileset& r)
+		{
+			const bool result = r.LoadFromFile(filename);
+			r.mFilename = (result) ? filename : "";
+			return result;
+		});
+	}
 };
 
 } // namespace en

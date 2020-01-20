@@ -83,6 +83,15 @@ bool ParserXml::removeChild(const std::string& nodeName)
 	return mCurrentNode.remove_child(nodeName.c_str());
 }
 
+bool ParserXml::hasAttribute(const std::string& attributeName) const
+{
+	if (mCurrentNode.attribute(attributeName.c_str()))
+	{
+		return true;
+	}
+	return false;
+}
+
 void ParserXml::setAttribute(const std::string& attributeName, const std::string& value)
 {
 	const char* n = attributeName.c_str();

@@ -16,7 +16,7 @@ class EntityPrefab
 
 		static bool createPlayer(entt::registry& world, entt::entity& playerEntity);
 		static bool createNothing(entt::registry& world, entt::entity& nothingEntt);
-		static bool createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::Tileset& tileset);
+		static bool createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::TilesetPtr tileset);
 		static bool createAI(entt::registry& world, en::F32 x, en::F32 y);
 		static bool createPiece(entt::registry& world, en::F32 x, en::F32 y);
 };

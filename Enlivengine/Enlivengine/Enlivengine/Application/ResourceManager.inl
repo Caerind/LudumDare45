@@ -91,7 +91,7 @@ bool ResourceLoader<T>::Load(T& resource) const
 }
 
 template <typename T> 
-ResourcePtr<T> ResourceManager::Create(const char* str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy)
+ResourcePtr<T> ResourceManager::Create(const std::string& str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy)
 {
 	ResourceID id = priv::StringToResourceID(str);
 	const auto itr = mResources.find(id);
@@ -102,6 +102,7 @@ ResourcePtr<T> ResourceManager::Create(const char* str, const ResourceLoader<T>&
 		{
 			resourcePtr->mLoaded = loader.Load(*resourcePtr);
 			resourcePtr->mID = id;
+			resourcePtr->mIdentifier = str;
 
 			mResources[resourcePtr->mID] = std::move(resource);
 
@@ -123,7 +124,7 @@ ResourcePtr<T> ResourceManager::Create(const char* str, const ResourceLoader<T>&
 }
 
 template <typename T> 
-ResourcePtr<T> ResourceManager::Get(const char* str)
+ResourcePtr<T> ResourceManager::Get(const std::string& str)
 {
 	return Get<T>(priv::StringToResourceID(str));
 }

@@ -166,7 +166,7 @@ private:
 
 int main()
 {
-	en::Application& app = en::Application::GetInstance();
+	en::Application::GetInstance().Initialize();
 
 	b2Vec2 gravity(0.0f, -10.0f);
 	b2World world(gravity);
@@ -215,7 +215,7 @@ int main()
 
 	LogError(en::LogChannel::System, 9, "%4.2f %4.2f %4.2f", body->GetPosition().x, body->GetPosition().y, body->GetAngle());
 
-	app.Start<MyState>();
+	en::Application::GetInstance().Start<MyState>();
 
 	return 0;
 }

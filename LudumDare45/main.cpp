@@ -11,6 +11,8 @@
 
 int main()
 {
+	en::Application::GetInstance().Initialize();
+
 	en::Application& app = en::Application::GetInstance();
 	app.GetWindow().create(sf::VideoMode(1024, 768), "StoryOfNothing", sf::Style::Titlebar | sf::Style::Close);
 	app.GetWindow().getMainView().setCenter({ 512.0f, 384.0f });

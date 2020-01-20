@@ -1,173 +1,229 @@
 #include <Enlivengine/Graphics/Tileset.hpp>
 
+#include <Enlivengine/System/ParserXml.hpp>
+#include <filesystem>
+
 namespace en
 {
 
 Tileset::Tileset() 
-	: mFirstGid(1)
-	, mTileSize()
+	: mTileSize()
 	, mSpacing(0)
 	, mMargin(0)
 	, mTileCount(0)
 	, mColumns(0)
-	, mRelativePath("")
+	, mName()
+	, mPath()
 	, mImageSource()
 	, mImageTransparent(Color::Transparent)
-	, mTexture(nullptr)
-	, mImageChanged(true)
+	, mTextureResourceID(InvalidResourceID)
+	, mTexture()
+	, mTextureChanged(true)
 {
 }
 
-void Tileset::setFirstGid(TileId id)
+bool Tileset::LoadFromFile(const std::string& filename)
 {
-	mFirstGid = id;
+	ParserXml xml;
+	if (!xml.loadFromFile(filename))
+	{
+		LogError(en::LogChannel::Graphics, 9, "Can't open tileset file at %s", filename.c_str());
+		return false;
+	}
+
+	if (xml.readNode("tileset"))
+	{
+		xml.getAttribute("name", mName);
+		xml.getAttribute("tilewidth", mTileSize.x);
+		xml.getAttribute("tileheight", mTileSize.y);
+		xml.getAttribute("tilecount", mTileCount);
+		xml.getAttribute("columns", mColumns);
+		xml.getAttribute("spacing", mSpacing);
+		xml.getAttribute("margin", mMargin);
+
+		mPath = std::filesystem::path(filename).remove_filename().string();
+
+		if (xml.readNode("image"))
+		{
+			xml.getAttribute("source", mImageSource);
+			
+			if (xml.hasAttribute("trans"))
+			{
+				std::string transparentStr;
+				xml.getAttribute("trans", transparentStr);
+				mImageTransparent.fromString(transparentStr);
+			}
+
+			xml.closeNode();
+		}
+
+		xml.closeNode();
+	}
+	else
+	{
+		LogError(en::LogChannel::Graphics, 9, "Invalid tileset file at %s", filename.c_str());
+		return false;
+	}
+
+	// TODO : Now find a way to deal with the Texture loading
+
+	return true;
 }
 
-void Tileset::setTileSize(const Vector2i& tileSize)
+void Tileset::SetTileSize(const Vector2i& tileSize)
 {
 	mTileSize = tileSize;
 }
 
-void Tileset::setSpacing(U32 spacing)
+void Tileset::SetSpacing(U32 spacing)
 {
 	mSpacing = spacing;
 }
 
-void Tileset::setMargin(U32 margin)
+void Tileset::SetMargin(U32 margin)
 {
 	mMargin = margin;
 }
 
-void Tileset::setTileCount(U32 tileCount)
+void Tileset::SetTileCount(U32 tileCount)
 {
 	mTileCount = tileCount;
 }
 
-void Tileset::setColumns(U32 columns)
+void Tileset::SetColumns(U32 columns)
 {
 	mColumns = columns;
 }
 
-void Tileset::setRelativePath(const std::string& path)
+void Tileset::SetName(const std::string& name)
 {
-	if (mRelativePath != path)
+	mName = name;
+}
+
+void Tileset::SetPath(const std::string& path)
+{
+	if (mPath != path)
 	{
-		mRelativePath = path;
-		mImageChanged = true;
+		mPath = path;
+		mTextureChanged = true;
 	}
 }
 
-void Tileset::setImageSource(const std::string& source)
+void Tileset::SetImageSource(const std::string& source)
 {
 	if (mImageSource != source)
 	{
 		mImageSource = source;
-		mImageChanged = true;
+		mTextureChanged = true;
 	}
 }
 
-void Tileset::setImageTransparent(const Color& transparent)
+void Tileset::SetImageTransparent(const Color& transparent)
 {
-	mImageTransparent = transparent;
+	if (mImageTransparent != transparent)
+	{
+		mImageTransparent = transparent;
+		mTextureChanged = true;
+	}
 }
 
-TileId Tileset::getFirstGid() const
-{
-	return mFirstGid;
-}
-
-const Vector2i& Tileset::getTileSize() const
+const Vector2i& Tileset::GetTileSize() const
 {
 	return mTileSize;
 }
 
-U32 Tileset::getSpacing() const
+U32 Tileset::GetSpacing() const
 {
 	return mSpacing;
 }
 
-U32 Tileset::getMargin() const
+U32 Tileset::GetMargin() const
 {
 	return mMargin;
 }
 
-U32 Tileset::getTileCount() const
+U32 Tileset::GetTileCount() const
 {
 	return mTileCount;
 }
 
-U32 Tileset::getColumns() const
+U32 Tileset::GetColumns() const
 {
 	return mColumns;
 }
 
-const std::string& Tileset::getRelativePath() const
+const std::string& Tileset::GetName() const
 {
-	return mRelativePath;
+	return mName;
 }
 
-const std::string& Tileset::getImageSource() const
+const std::string& Tileset::GetPath() const
+{
+	return mPath;
+}
+
+const std::string& Tileset::GetImageSource() const
 {
 	return mImageSource;
 }
 
-const Color& Tileset::getImageTransparent() const
+const Color& Tileset::GetImageTransparent() const
 {
 	return mImageTransparent;
 }
 
-sf::Texture& Tileset::getTexture()
+void Tileset::SetTextureResourceID(ResourceID resourceID)
 {
-	if (mImageChanged || mTexture == nullptr)
+	if (mTextureResourceID != resourceID)
 	{
-		if (mTexture == nullptr)
-		{
-			mTexture = std::make_unique<sf::Texture>();
-		}
-		assert(mTexture != nullptr);
+		mTextureResourceID = resourceID;
+		mTextureChanged = true;
+	}
+}
 
-		const std::string filename = mRelativePath + mImageSource;
+ResourceID Tileset::GetTextureResourceID() const
+{
+	return mTextureResourceID;
+}
+
+TexturePtr& Tileset::GetTexture()
+{
+	if (mTextureChanged)
+	{
+		const std::string filepath = mPath + mImageSource;
 		if (mImageTransparent != Color::Transparent)
 		{
-			sf::Image image;
-			if (!image.loadFromFile(filename))
-			{
-				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
-			}
-			image.createMaskFromColor(toSF(mImageTransparent));
-			mTexture->loadFromImage(image);
+			LogWarning(en::LogChannel::Graphics, 8, "%s : Transparent color for Tileset isn't supported yet -> Use alpha values", filepath.c_str());
 		}
-		else
+
+		mTexture = ResourceManager::GetInstance().Get<Texture>(mTextureResourceID);
+		if (!mTexture.IsValid())
 		{
-			if (!mTexture->loadFromFile(mRelativePath + mImageSource))
+			// TODO : The texture isn't loaded yet
+			/*
+			if (!mTexture->loadFromFile(filepath))
 			{
 				LogError(en::LogChannel::Graphics, 10, "Can't load tileset : %s", filename.c_str());
 			}
+			*/
 		}
 		
-		mImageChanged = false;
+		mTextureChanged = false;
 	}
-	assert(mTexture != nullptr);
-	return *(mTexture.get());
+
+	return mTexture;
 }
 
-bool Tileset::hasId(TileId gid)
+Vector2f Tileset::ToPos(U32 tileId) const
 {
-	return (mFirstGid <= gid && gid < mFirstGid + mTileCount);
-}
-
-sf::Vector2f Tileset::toPos(TileId gid)
-{
-	if (!hasId(gid))
-	{
-		return sf::Vector2f();
-	}
-	gid -= mFirstGid;
 	if (mColumns > 0)
 	{
-		return { (F32)((gid % mColumns) * (mTileSize.x + mSpacing) + mMargin), (F32)((gid / mColumns) * (mTileSize.y + mSpacing) + mMargin) };
+		return {
+			(F32)((tileId % mColumns) * (mTileSize.x + mSpacing) + mMargin),
+			(F32)((tileId / mColumns) * (mTileSize.y + mSpacing) + mMargin)
+		};
 	}
-	return sf::Vector2f();
+	return Vector2f::zero;
 }
 
 } // namespace en

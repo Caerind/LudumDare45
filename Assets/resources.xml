@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
-<Resources resourceCount="19" typeCount="4">
+<Resources resourceCount="21" typeCount="5">
 	<Resource identifier="MainFont" filename="Fonts/EndlessBossBattle.ttf" type="0" />
 	<Resource identifier="mainTheme" filename="Musics/MainTheme.ogg" type="1" />
+	<Resource identifier="blablaTest" filename="Musics/MainTheme.ogg" type="1" />
 	<Resource identifier="chop" filename="Sounds/Chop.wav" type="2" />
 	<Resource identifier="hit" filename="Sounds/Hit.wav" type="2" />
 	<Resource identifier="knockout" filename="Sounds/Knockout.wav" type="2" />
@@ -19,4 +20,5 @@
 	<Resource identifier="nothingtexture" filename="Textures/perso_nothing.png" type="3" />
 	<Resource identifier="everythingtexture" filename="Textures/perso_everything.png" type="3" />
 	<Resource identifier="atmog" filename="Textures/atmog.png" type="3" />
+	<Resource identifier="tileset" filename="Maps/tileset.tsx" type="4" />
 </Resources>

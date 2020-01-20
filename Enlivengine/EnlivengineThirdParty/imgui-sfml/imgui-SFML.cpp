@@ -205,8 +205,6 @@ void Init(sf::Window& window, const sf::Vector2f& displaySize, bool loadDefaultF
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-	
-	io.IniFilename = nullptr;
 
     // tell ImGui which features we support
     io.BackendFlags |= ImGuiBackendFlags_HasGamepad;

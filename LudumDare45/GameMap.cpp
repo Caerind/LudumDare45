@@ -53,7 +53,7 @@ en::Vector2f GameMap::coordsToWorld(const en::Vector2i& coords)
 	return p;
 }
 
-void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* tileset /*= nullptr*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
+void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::TilesetPtr tileset /*= en::TilesetPtr()*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
 {
 	mTileGrid.clear();
 	mCollisions.clear();
@@ -113,9 +113,9 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 			}
 			for (en::U32 i = 0; i < byteVector.size() - 3; i += 4)
 			{
-				en::TileId gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
+				en::U32 gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
 
-				if (gid > mTileset->getColumns())
+				if (mTileset.IsValid() && gid > mTileset.Get().GetColumns())
 				{
 					mCollisions[coords.x + coords.y * size.x] = true;
 				}
@@ -156,12 +156,12 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::Tileset* t
 
 				for (en::U32 i = 0; i < byteVector.size() - 3; i += 4)
 				{
-					en::TileId gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
+					en::U32 gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
 
-					if (gid != 0)
+					if (gid != 0 && mTileset.IsValid())
 					{
 						const en::Vector2f worldPos = coordsToWorld(coords);
-						EntityPrefab::createProps(GameSingleton::world, worldPos.x, worldPos.y, gid, *mTileset);
+						EntityPrefab::createProps(GameSingleton::world, worldPos.x, worldPos.y, gid, mTileset);
 						mCollisions[coords.x + coords.y * size.x] = true;
 					}
 
@@ -240,11 +240,11 @@ bool GameMap::loadFromCode(const std::string& code)
 
 		en::U32 index(coords.x + coords.y * mSize.x);
 		mTileGrid[index] = gid;
-		if (mTileset != nullptr)
+		if (mTileset.IsValid())
 		{
 			sf::Vertex* vertex(&mVertices[index * 4]);
-			const sf::Vector2f pos(mTileset->toPos(gid));
-			const en::Vector2f texSize(static_cast<en::F32>(mTileset->getTileSize().x), static_cast<en::F32>(mTileset->getTileSize().y));
+			const sf::Vector2f pos(toSF(mTileset.Get().ToPos(gid)));
+			const en::Vector2f texSize(static_cast<en::F32>(mTileset.Get().GetTileSize().x), static_cast<en::F32>(mTileset.Get().GetTileSize().y));
 			vertex[0].texCoords = pos;
 			vertex[1].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y);
 			vertex[2].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y + texSize.y);
@@ -281,11 +281,11 @@ void GameMap::setTileId(const en::Vector2i& coords, en::U32 id)
 		ensureUpdateGeometry();
 		const en::U32 index(coords.x + coords.y * mSize.x);
 		mTileGrid[index] = id;
-		if (mTileset != nullptr)
+		if (mTileset.IsValid())
 		{
 			sf::Vertex* vertex(&mVertices[index * 4]);
-			const sf::Vector2f pos(mTileset->toPos(id));
-			const en::Vector2f texSize(static_cast<en::F32>(mTileset->getTileSize().x), static_cast<en::F32>(mTileset->getTileSize().y));
+			const sf::Vector2f pos(toSF(mTileset.Get().ToPos(id)));
+			const en::Vector2f texSize(static_cast<en::F32>(mTileset.Get().GetTileSize().x), static_cast<en::F32>(mTileset.Get().GetTileSize().y));
 			vertex[0].texCoords = pos;
 			vertex[1].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y);
 			vertex[2].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y + texSize.y);
@@ -304,12 +304,12 @@ void GameMap::setName(const std::string& name)
 	mName = name;
 }
 
-en::Tileset* GameMap::getTileset() const
+en::TilesetPtr GameMap::getTileset() const
 {
 	return mTileset;
 }
 
-void GameMap::setTileset(en::Tileset* tileset)
+void GameMap::setTileset(en::TilesetPtr tileset)
 {
 	if (mTileset != tileset)
 	{
@@ -365,22 +365,25 @@ bool GameMap::collide(const en::Vector2i& coords)
 
 void GameMap::render(sf::RenderTarget& target)
 {
-	if (mTileset != nullptr)
+	if (mTileset.IsValid())
 	{
 		ensureUpdateRender();
 		sf::RenderStates states;
-		states.texture = &mTileset->getTexture();
+		if (mTileset.Get().GetTexture().IsValid())
+		{
+			states.texture = &(mTileset.Get().GetTexture().Get());
+		}
 		target.draw(mVertices, states);
 	}
 }
 
 void GameMap::updateGeometry()
 {
-	if (mTileset == nullptr || mSize.x == 0 || mSize.y == 0 || mTileSize.x == 0 || mTileSize.y == 0)
+	if (!mTileset.IsValid() || mSize.x == 0 || mSize.y == 0 || mTileSize.x == 0 || mTileSize.y == 0)
 	{
 		return;
 	}
-	const en::Vector2f texSize(static_cast<en::F32>(mTileset->getTileSize().x), static_cast<en::F32>(mTileset->getTileSize().y));
+	const en::Vector2f texSize(static_cast<en::F32>(mTileset.Get().GetTileSize().x), static_cast<en::F32>(mTileset.Get().GetTileSize().y));
 	mVertices.resize(mSize.x * mSize.y * 4);
 	mTileGrid.resize(mSize.x * mSize.y * 4); // TODO : Keep tile id already set in order
 	en::Vector2i coords;

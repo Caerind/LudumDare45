@@ -24,6 +24,7 @@ class ParserXml
 		bool createChild(const std::string& nodeName);
 		bool removeChild(const std::string& nodeName);
 		
+		bool hasAttribute(const std::string& attributeName) const;
 		void setAttribute(const std::string& attributeName, const std::string& value);
 		void setAttribute(const std::string& attributeName, I32 value);
 		void setAttribute(const std::string& attributeName, U32 value);

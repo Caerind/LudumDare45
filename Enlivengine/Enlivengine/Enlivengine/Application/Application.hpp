@@ -19,6 +19,8 @@ class Application
 	ENLIVE_SINGLETON(Application);
 
 public:
+	bool Initialize();
+
 	Window& GetWindow();
 	ScreenshotSystem& GetScreenshotSystem();
 
@@ -34,6 +36,9 @@ public:
 	U32 GetFPS() const;
 	U32 GetTotalFrames() const;
 	Time GetTotalDuration() const;
+
+	bool LoadResources();
+	bool LoadResource(I32 type, const std::string& identifier, const std::string& filename, ResourceID& resourceID);
 
 private:
 	~Application();
@@ -56,6 +61,7 @@ private:
 
 	U32 mFps;
 	bool mRunning;
+	bool mInitialized;
 
 	U32 mTotalFrames;
 	Clock mTotalDuration;

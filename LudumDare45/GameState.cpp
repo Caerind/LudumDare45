@@ -18,7 +18,7 @@ GameState::GameState(en::StateManager& manager)
 {
 	GameSingleton::clear();
 
-	GameSingleton::mMap.load(1, en::Vector2f(408, 312), &GameSingleton::mTileset, en::Vector2i(16, 16));
+	GameSingleton::mMap.load(1, en::Vector2f(408, 312), GameSingleton::mTileset, en::Vector2i(16, 16));
 
 #ifdef ENLIVE_ENABLE_IMGUI
 	static bool editorRegisterDone = false;
@@ -50,13 +50,13 @@ GameState::GameState(en::StateManager& manager)
 
 	// Audio
 	{
-		en::AudioSystem::GetInstance().SetGlobalVolume(50.0f);
+		en::AudioSystem::GetInstance().SetGlobalVolume(0.5f);
 
 		// Musics
 		en::AudioSystem::GetInstance().PlayMusic("mainTheme");
 
 		// Sounds
-		en::AudioSystem::GetInstance().SetSoundVolume(40.0f);
+		en::AudioSystem::GetInstance().SetSoundVolume(0.4f);
 	}
 
 	// View

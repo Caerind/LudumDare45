@@ -17,7 +17,7 @@ constexpr ResourceID InvalidResourceID = U32_Max;
 namespace priv
 {
 
-ResourceID StringToResourceID(const char* str);
+ResourceID StringToResourceID(const std::string& str);
 
 class BaseResource
 {
@@ -25,15 +25,17 @@ public:
 	BaseResource();
 
 	bool IsLoaded() const;
+	bool IsFromFile() const;
 	bool IsManaged() const;
 	ResourceID GetID() const;
+	const std::string& GetIdentifier() const;
+	const std::string& GetFilename() const;
 
 public:
-	friend class ResourceManager;
 	ResourceID mID;
-
-public:
 	bool mLoaded;
+	std::string mIdentifier;
+	std::string mFilename;
 };
 
 } // namespace priv
@@ -102,14 +104,14 @@ class ResourceManager
 	ENLIVE_SINGLETON(ResourceManager);
 
 public:
-	template <typename T> ResourcePtr<T> Create(const char* str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy = ResourceKnownStrategy::Reuse);
-	template <typename T> ResourcePtr<T> Get(const char* str);
+	template <typename T> ResourcePtr<T> Create(const std::string& str, const ResourceLoader<T>& loader, ResourceKnownStrategy knownStrategy = ResourceKnownStrategy::Reuse);
+	template <typename T> ResourcePtr<T> Get(const std::string& str);
 	template <typename T> ResourcePtr<T> Get(ResourceID id);
 
-	bool Has(const char* str) const;
+	bool Has(const std::string& str) const;
 	bool Has(ResourceID id) const;
 
-	void Release(const char* str);
+	void Release(const std::string& str);
 	void Release(ResourceID id);
 
 	void ReleaseAll();

@@ -23,7 +23,12 @@ class SFMLResourcesLoader
 
 		static ResourceLoader<T> FromFile(const std::string& filename)
 		{
-			return ResourceLoader<T>([&filename](T& r) { return r.loadFromFile(filename); });
+			return ResourceLoader<T>([&filename](T& r) 
+			{
+				const bool result = r.loadFromFile(filename);
+				r.mFilename = (result) ? filename : "";
+				return result;
+			});
 		}
 };
 

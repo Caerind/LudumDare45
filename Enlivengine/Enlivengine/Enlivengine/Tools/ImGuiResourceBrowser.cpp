@@ -3,11 +3,13 @@
 #ifdef ENLIVE_ENABLE_IMGUI
 
 #include <imgui/imgui.h>
+#include <imgui-sfml/imgui-SFML.h>
 #include <ImGuiFileDialog/ImGuiFileDialog.h>
 
 #include <filesystem>
 
 #include <Enlivengine/Application/PathManager.hpp>
+#include <Enlivengine/Application/Application.hpp>
 #include <Enlivengine/Graphics/LinearColor.hpp>
 #include <Enlivengine/System/ParserXml.hpp>
 
@@ -20,25 +22,26 @@ namespace en
 ImGuiResourceBrowser::ImGuiResourceBrowser()
 	: ImGuiTool()
 {
-	ImGuiFileDialog::Instance()->SetFilterColor(".ttf", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Font).withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".ttf", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Font).withAlpha(0.8f).toImGuiColor());
 
 	ImGuiFileDialog::Instance()->SetFilterColor(".tmx", LinearColor::Lime.withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".tsx", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Tileset).withAlpha(0.8f).toImGuiColor());
 
-	ImGuiFileDialog::Instance()->SetFilterColor(".ogg", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Music).withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".ogg", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Music).withAlpha(0.8f).toImGuiColor());
 
-	ImGuiFileDialog::Instance()->SetFilterColor(".wav", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Sound).withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".wav", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Sound).withAlpha(0.8f).toImGuiColor());
 
-	ImGuiFileDialog::Instance()->SetFilterColor(".png", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Texture).withAlpha(0.7f).toImGuiColor());
-	ImGuiFileDialog::Instance()->SetFilterColor(".jpg", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Texture).withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".png", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Texture).withAlpha(0.8f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".jpg", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Texture).withAlpha(0.8f).toImGuiColor());
 
-	ImGuiFileDialog::Instance()->SetFilterColor(".cpp", LinearColor::Yellow.withAlpha(0.7f).toImGuiColor());
-	ImGuiFileDialog::Instance()->SetFilterColor(".h", LinearColor::Yellow.withAlpha(0.7f).toImGuiColor());
-	ImGuiFileDialog::Instance()->SetFilterColor(".hpp", LinearColor::Yellow.withAlpha(0.7f).toImGuiColor());
-	ImGuiFileDialog::Instance()->SetFilterColor(".inl", LinearColor::Yellow.withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".cpp", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".h", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".hpp", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".inl", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
 
-	ImGuiFileDialog::Instance()->SetFilterColor(".xml", LinearColor::LightBlue.withAlpha(0.7f).toImGuiColor());
-	ImGuiFileDialog::Instance()->SetFilterColor(".txt", LinearColor::Magenta.withAlpha(0.7f).toImGuiColor());
-	ImGuiFileDialog::Instance()->SetFilterColor(".md", LinearColor::Mint.withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".xml", LinearColor::LightBlue.withAlpha(0.8f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".txt", LinearColor::Magenta.withAlpha(0.8f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".md", LinearColor::Mint.withAlpha(0.8f).toImGuiColor());
 }
 
 ImGuiToolTab ImGuiResourceBrowser::GetTab() const
@@ -97,8 +100,8 @@ void ImGuiResourceBrowser::Display()
 			resourceInfo.filename = mFilenameBuffer;
 			resourceInfo.type = ResourceInfo::DetectTypeFromFilename(resourceInfo.filename);
 
-			resourceInfo.Load();
-
+			Application::GetInstance().LoadResource(static_cast<I32>(resourceInfo.type), resourceInfo.identifier, resourceInfo.filename, resourceInfo.resourceID);
+			
 			std::sort(mResourceInfos.begin(), mResourceInfos.end(), [](const ResourceInfo& a, const ResourceInfo& b) { return a.type < b.type; });
 
 			AskForResize();
@@ -131,12 +134,14 @@ void ImGuiResourceBrowser::Display()
 		ResourceInfo::Type previousType = mResourceInfos[0].type;
 		for (U32 i = 0; i < size; ++i)
 		{
-			const ResourceInfo& resourceInfo = mResourceInfos[i];
+			ResourceInfo& resourceInfo = mResourceInfos[i];
 			if (resourceInfo.type > previousType)
 			{
 				ImGui::Separator();
 				previousType = resourceInfo.type;
 			}
+
+			bool resourceLoaded = false;
 
 			ImGui::PushID(i);
 
@@ -145,6 +150,24 @@ void ImGuiResourceBrowser::Display()
 				ImGui::Text(ICON_FA_EXCLAMATION_TRIANGLE);
 				ImGui::SameLine();
 				ImGui::Dummy(ImVec2(4, 0));
+				ImGui::SameLine();
+			}
+			else
+			{
+				resourceLoaded = ResourceManager::GetInstance().Has(resourceInfo.resourceID);
+			}
+
+			if (!resourceLoaded && resourceInfo.type != ResourceInfo::Type::Music)
+			{
+				ImGui::Text(ICON_FA_PLUS_CIRCLE);
+				if (ImGui::IsItemHovered())
+				{
+					ImGui::SetTooltip("This resource is not loaded yet. Click to load");
+				}
+				if (ImGui::IsItemClicked())
+				{
+					Application::GetInstance().LoadResource(static_cast<I32>(resourceInfo.type), resourceInfo.identifier, resourceInfo.filename, resourceInfo.resourceID);
+				}
 				ImGui::SameLine();
 			}
 
@@ -156,6 +179,81 @@ void ImGuiResourceBrowser::Display()
 				ImGui::SetTooltip("ID: %d", resourceInfo.resourceID);
 			}
 			ImGui::SameLine();
+
+			if (resourceLoaded || resourceInfo.type == ResourceInfo::Type::Music)
+			{
+				switch (resourceInfo.type)
+				{
+				case ResourceInfo::Type::Sound:
+				{
+					ImGui::Text(ICON_FA_PLAY_CIRCLE);
+					if (ImGui::IsItemClicked())
+					{
+						AudioSystem::GetInstance().PlaySound(resourceInfo.resourceID);
+					}
+					ImGui::SameLine();
+					break;
+				}
+				
+				case ResourceInfo::Type::Music:
+				{
+					static MusicPtr music;
+					if (music.IsValid() && music.GetMusicID() == resourceInfo.resourceID)
+					{
+						ImGui::Text(ICON_FA_STOP_CIRCLE);
+						if (ImGui::IsItemClicked())
+						{
+							music.Stop();
+							AudioSystem::GetInstance().PlayMusics();
+						}
+						ImGui::SameLine();
+					}
+					else
+					{
+						ImGui::Text(ICON_FA_PLAY_CIRCLE);
+						if (ImGui::IsItemClicked())
+						{
+							AudioSystem::GetInstance().PauseMusics();
+							music = AudioSystem::GetInstance().PlayMusic(resourceInfo.resourceID, false);
+						}
+						ImGui::SameLine();
+					}
+					break;
+				}
+
+				case ResourceInfo::Type::Texture:
+				{
+					ImGui::Text(ICON_FA_SEARCH);
+					if (ImGui::IsItemHovered())
+					{
+						ImGui::BeginTooltip();
+
+						const Texture& texture = ResourceManager::GetInstance().Get<Texture>(resourceInfo.resourceID).Get();
+
+						constexpr F32 maxPreviewSize = 150.0f;
+						sf::Sprite previewSprite;
+						previewSprite.setTexture(texture);
+						Vector2f textureSize;
+						textureSize.x = static_cast<F32>(texture.getSize().x);
+						textureSize.y = static_cast<F32>(texture.getSize().y);
+						if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+						{
+							const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+							const F32 scale = maxPreviewSize / larger;
+							previewSprite.setScale(scale, scale);
+						}
+						ImGui::Image(previewSprite);
+
+						ImGui::EndTooltip();
+					}
+					ImGui::SameLine();
+					break;
+				}
+
+				default: break;
+				}
+			}
+
 			ImGui::Text(" : %s", resourceInfo.filename.c_str());
 			ImGui::SameLine();
 			if (ImGui::Button("Remove"))
@@ -220,12 +318,19 @@ bool ImGuiResourceBrowser::LoadResourceInfosFromFile(const std::string& filename
 					{
 						resourceInfo.type = ResourceInfo::DetectTypeFromFilename(resourceInfo.filename);
 					}
-					resourceInfo.Load();
+
+					Application::GetInstance().LoadResource(static_cast<I32>(resourceInfo.type), resourceInfo.identifier, resourceInfo.filename, resourceInfo.resourceID);
+				
 				} while (xml.nextSibling("Resource"));
 				xml.closeNode();
 			}
 		}
 		xml.closeNode();
+	}
+	else
+	{
+		LogError(en::LogChannel::Application, 9, "Invalid resources file at %s", filename.c_str());
+		return false;
 	}
 
 	std::sort(mResourceInfos.begin(), mResourceInfos.end(), [](const ResourceInfo& a, const ResourceInfo& b) { return a.type < b.type; });
@@ -269,83 +374,6 @@ bool ImGuiResourceBrowser::SaveResourceInfosToFile(const std::string& filename)
 	return true;
 }
 
-bool ImGuiResourceBrowser::ResourceInfo::Load()
-{
-	ResourceManager& resourceManager = ResourceManager::GetInstance();
-	std::string resourceFilename = en::PathManager::GetInstance().GetAssetsPath() + filename;
-	switch (type)
-	{
-	case ResourceInfo::Type::Unknown:
-	{
-		resourceID = InvalidResourceID;
-		LogError(en::LogChannel::Global, 4, "Unknown resource type for resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-		return false;
-	}
-	case ResourceInfo::Type::Font:
-	{
-		FontPtr fontPtr = resourceManager.Create<Font>(identifier.c_str(), FontLoader::FromFile(resourceFilename));
-		if (!fontPtr.IsValid())
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = fontPtr.GetID();
-		}
-		break;
-	}
-	case ResourceInfo::Type::Music:
-	{
-		MusicID musicID = AudioSystem::GetInstance().PrepareMusic(identifier.c_str(), resourceFilename);
-		if (musicID == InvalidMusicID)
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = musicID;
-		}
-		break;
-	}
-	case ResourceInfo::Type::Sound:
-	{
-		SoundID soundID = AudioSystem::GetInstance().PrepareSound(identifier.c_str(), resourceFilename);
-		if (soundID == InvalidSoundID)
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = soundID;
-		}
-		break;
-	}
-	case ResourceInfo::Type::Texture:
-	{
-		TexturePtr texturePtr = resourceManager.Create<Texture>(identifier.c_str(), TextureLoader::FromFile(resourceFilename));
-		if (!texturePtr.IsValid())
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = texturePtr.GetID();
-		}
-		break;
-	}
-	default: assert(false); return false;
-	}
-	return true;
-}
-
 ImGuiResourceBrowser::ResourceInfo::Type ImGuiResourceBrowser::ResourceInfo::DetectTypeFromFilename(const std::string& filename)
 {
 	std::string ext = std::filesystem::path(filename).extension().string();
@@ -365,6 +393,10 @@ ImGuiResourceBrowser::ResourceInfo::Type ImGuiResourceBrowser::ResourceInfo::Det
 	{
 		return Type::Texture;
 	}
+	if (ext == ".tsx")
+	{
+		return Type::Tileset;
+	}
 	return Type::Unknown;
 }
 
@@ -377,6 +409,7 @@ const char* ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToString(Type ty
 	case ResourceInfo::Type::Music: return "Music"; break;
 	case ResourceInfo::Type::Sound: return "Sound"; break;
 	case ResourceInfo::Type::Texture: return "Texture"; break;
+	case ResourceInfo::Type::Tileset: return "Tileset"; break;
 	default: assert(false); break;
 	}
 	return "";
@@ -391,6 +424,7 @@ const LinearColor& ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToColor(T
 		LinearColor::BabyPink, // Music
 		LinearColor::HotPink, // Sound
 		LinearColor::Cyan, // Texture
+		LinearColor::Peach, // Tileset
 	};
 	if (type == ResourceInfo::Type::Unknown)
 	{

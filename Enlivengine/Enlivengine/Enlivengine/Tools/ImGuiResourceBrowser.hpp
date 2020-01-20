@@ -23,20 +23,16 @@ public:
 	bool LoadResourceInfosFromFile(const std::string& filename);
 	bool SaveResourceInfosToFile(const std::string& filename);
 
-private:
-	static constexpr U32 kBufferSize{ 256 };
-	char mIdentifierBuffer[kBufferSize];
-	char mFilenameBuffer[kBufferSize];
-
 	struct ResourceInfo
 	{
-		enum class Type
+		enum class Type : I32
 		{
 			Unknown = -1,
 			Font,
 			Music,
 			Sound,
 			Texture,
+			Tileset,
 			Count
 		};
 
@@ -45,12 +41,16 @@ private:
 		Type type;
 		ResourceID resourceID;
 
-		bool Load();
-
 		static Type DetectTypeFromFilename(const std::string& filename);
 		static const char* ResourceInfoTypeToString(Type type);
 		static const LinearColor& ResourceInfoTypeToColor(Type type);
 	};
+
+private:
+	static constexpr U32 kBufferSize{ 256 };
+	char mIdentifierBuffer[kBufferSize];
+	char mFilenameBuffer[kBufferSize];
+
 	std::vector<ResourceInfo> mResourceInfos;
 };
 
