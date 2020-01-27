@@ -15,7 +15,8 @@
 
 #include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Graphics/SFMLResources.hpp>
-#include <Enlivengine/Graphics/Tileset.hpp>
+#include <Enlivengine/Map/Tileset.hpp>
+#include <Enlivengine/Map/Map.hpp>
 
 namespace en
 {
@@ -25,7 +26,7 @@ ImGuiResourceBrowser::ImGuiResourceBrowser()
 {
 	ImGuiFileDialog::Instance()->SetFilterColor(".ttf", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Font).withAlpha(0.8f).toImGuiColor());
 
-	ImGuiFileDialog::Instance()->SetFilterColor(".tmx", LinearColor::Lime.withAlpha(0.7f).toImGuiColor());
+	ImGuiFileDialog::Instance()->SetFilterColor(".tmx", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Map).withAlpha(0.7f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".tsx", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Tileset).withAlpha(0.8f).toImGuiColor());
 
 	ImGuiFileDialog::Instance()->SetFilterColor(".ogg", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Music).withAlpha(0.8f).toImGuiColor());
@@ -195,6 +196,12 @@ void ImGuiResourceBrowser::Display()
 					ImGui::SameLine();
 					break;
 				}
+
+				case ResourceInfo::Type::Map:
+				{
+					// TODO : Map Preview !
+					break;
+				}
 				
 				case ResourceInfo::Type::Music:
 				{
@@ -341,6 +348,7 @@ bool ImGuiResourceBrowser::LoadResourceInfosFromFile(const std::string& filename
 				{
 					mResourceInfos.push_back(ResourceInfo());
 					ResourceInfo& resourceInfo = mResourceInfos.back();
+					
 					xml.getAttribute("identifier", resourceInfo.identifier);
 					xml.getAttribute("filename", resourceInfo.filename);
 					I32 typeInt;
@@ -416,6 +424,10 @@ ImGuiResourceBrowser::ResourceInfo::Type ImGuiResourceBrowser::ResourceInfo::Det
 	{
 		return Type::Font;
 	}
+	if (ext == ".tmx")
+	{
+		return Type::Map;
+	}
 	if (ext == ".ogg")
 	{
 		return Type::Music;
@@ -441,6 +453,7 @@ const char* ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToString(Type ty
 	{
 	case ResourceInfo::Type::Unknown: return "Unknown"; break;
 	case ResourceInfo::Type::Font: return "Font"; break;
+	case ResourceInfo::Type::Map: return "Map"; break;
 	case ResourceInfo::Type::Music: return "Music"; break;
 	case ResourceInfo::Type::Sound: return "Sound"; break;
 	case ResourceInfo::Type::Texture: return "Texture"; break;
@@ -456,6 +469,7 @@ const LinearColor& ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToColor(T
 	static LinearColor resourceInfoTypeColors[static_cast<U32>(ResourceInfo::Type::Count)] = 
 	{
 		LinearColor::Orange, // Font
+		LinearColor::Lime, // Map
 		LinearColor::BabyPink, // Music
 		LinearColor::HotPink, // Sound
 		LinearColor::Cyan, // Texture

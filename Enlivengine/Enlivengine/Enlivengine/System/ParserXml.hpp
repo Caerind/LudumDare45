@@ -18,6 +18,7 @@ class ParserXml
 		bool saveToFile(const std::string& filename = "");
 
 		bool readNode(const std::string& childName);
+		bool readFirstNode();
 		bool nextSibling(const std::string& sibling = "");
 		void closeNode();
 

@@ -84,13 +84,27 @@ set(SRC_GRAPHICS
 	Enlivengine/Graphics/SFMLResources.cpp
 	Enlivengine/Graphics/SFMLResources.hpp
 	Enlivengine/Graphics/SFMLWrapper.hpp
-	Enlivengine/Graphics/Tileset.cpp
-	Enlivengine/Graphics/Tileset.hpp
 	Enlivengine/Graphics/View.cpp
 	Enlivengine/Graphics/View.hpp
 )
 source_group("Graphics" FILES ${SRC_GRAPHICS})
 
+set(SRC_MAP
+	Enlivengine/Map/LayerBase.cpp
+	Enlivengine/Map/LayerBase.hpp
+	Enlivengine/Map/Map.cpp
+	Enlivengine/Map/Map.hpp
+	Enlivengine/Map/ObjectBase.cpp
+	Enlivengine/Map/ObjectBase.hpp
+	Enlivengine/Map/ObjectGroup.cpp
+	Enlivengine/Map/ObjectGroup.hpp
+	Enlivengine/Map/TileLayer.cpp
+	Enlivengine/Map/TileLayer.hpp
+	Enlivengine/Map/Tileset.cpp
+	Enlivengine/Map/Tileset.hpp
+)
+source_group("Map" FILES ${SRC_MAP})
+	
 set(SRC_APPLICATION
 	Enlivengine/Application/Application.cpp
 	Enlivengine/Application/Application.hpp
@@ -137,6 +151,7 @@ add_library(Enlivengine STATIC
 	${SRC_SYSTEM} 
 	${SRC_MATH} 
 	${SRC_GRAPHICS}
+	${SRC_MAP}
 	${SRC_APPLICATION}
 	${SRC_CORE}
 	${SRC_TOOLS}

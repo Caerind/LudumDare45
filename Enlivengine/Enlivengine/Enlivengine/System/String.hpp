@@ -12,6 +12,13 @@
 namespace en
 {
 
+void ltrim(std::string& s);
+void rtrim(std::string& s);
+void trim(std::string& s);
+std::string ltrim_copy(std::string s);
+std::string rtrim_copy(std::string s);
+std::string trim_copy(std::string s);
+
 void toLower(std::string& string);
 void toUpper(std::string& string);
 void toLower(const std::string& string, std::string& result);
@@ -25,8 +32,6 @@ bool contains(const std::string& string, const std::string& c);
 
 bool limitSize(std::string& string, U32 size);
 bool limitSize(const std::string& string, std::string& result, U32 size);
-
-void trimWhitespace(std::string& string);
 
 inline std::string toBoolString(bool value) { return (value) ? "true" : "false"; }
 

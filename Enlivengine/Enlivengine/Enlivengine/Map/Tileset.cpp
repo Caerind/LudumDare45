@@ -1,4 +1,4 @@
-#include <Enlivengine/Graphics/Tileset.hpp>
+#include <Enlivengine/Map/Tileset.hpp>
 
 #include <Enlivengine/System/ParserXml.hpp>
 #include <filesystem>
@@ -67,65 +67,6 @@ bool Tileset::LoadFromFile(const std::string& filename)
     mTextureChanged = true;
 	return GetTexture().IsValid();
 }
-
-/*
-void Tileset::SetTileSize(const Vector2i& tileSize)
-{
-	mTileSize = tileSize;
-}
-
-void Tileset::SetSpacing(U32 spacing)
-{
-	mSpacing = spacing;
-}
-
-void Tileset::SetMargin(U32 margin)
-{
-	mMargin = margin;
-}
-
-void Tileset::SetTileCount(U32 tileCount)
-{
-	mTileCount = tileCount;
-}
-
-void Tileset::SetColumns(U32 columns)
-{
-	mColumns = columns;
-}
-
-void Tileset::SetName(const std::string& name)
-{
-	mName = name;
-}
-
-void Tileset::SetPath(const std::string& path)
-{
-	if (mPath != path)
-	{
-		mPath = path;
-		mTextureChanged = true;
-	}
-}
-
-void Tileset::SetImageSource(const std::string& source)
-{
-	if (mImageSource != source)
-	{
-		mImageSource = source;
-		mTextureChanged = true;
-	}
-}
-
-void Tileset::SetImageTransparent(const Color& transparent)
-{
-	if (mImageTransparent != transparent)
-	{
-		mImageTransparent = transparent;
-		mTextureChanged = true;
-	}
-}
-*/
 
 const Vector2i& Tileset::GetTileSize() const
 {

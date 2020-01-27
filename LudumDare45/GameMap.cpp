@@ -101,7 +101,7 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::TilesetPtr
 			std::stringstream ss;
 			ss << code;
 			ss >> data;
-			if (!en::Compression::decompress64(data))
+			if (!en::Compression::Decompress64(data))
 			{
 				return;
 			}
@@ -143,7 +143,7 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::TilesetPtr
 				std::stringstream ss;
 				ss << code;
 				ss >> data;
-				if (!en::Compression::decompress64(data))
+				if (!en::Compression::Decompress64(data))
 				{
 					return;
 				}
@@ -204,7 +204,7 @@ std::string GameMap::getCode()
 			data.push_back(static_cast<en::U8>(id >> 24));
 		}
 	}
-	if (!en::Compression::compress64(data))
+	if (!en::Compression::Compress64(data))
 	{
 		LogError(en::LogChannel::Global, 10, "Can't read compress map data");
 		return "";
@@ -222,7 +222,7 @@ bool GameMap::loadFromCode(const std::string& code)
 	std::stringstream ss;
 	ss << code;
 	ss >> data;
-	if (!en::Compression::decompress64(data))
+	if (!en::Compression::Decompress64(data))
 	{
 		return false;
 	}
@@ -242,9 +242,10 @@ bool GameMap::loadFromCode(const std::string& code)
 		mTileGrid[index] = gid;
 		if (mTileset.IsValid())
 		{
+			en::Tileset& tileset = mTileset.Get();
 			sf::Vertex* vertex(&mVertices[index * 4]);
 			const sf::Vector2f pos(toSF(mTileset.Get().ToPos(gid)));
-			const en::Vector2f texSize(static_cast<en::F32>(mTileset.Get().GetTileSize().x), static_cast<en::F32>(mTileset.Get().GetTileSize().y));
+			const en::Vector2f texSize(static_cast<en::F32>(tileset.GetTileSize().x), static_cast<en::F32>(tileset.GetTileSize().y));
 			vertex[0].texCoords = pos;
 			vertex[1].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y);
 			vertex[2].texCoords = sf::Vector2f(pos.x + texSize.x, pos.y + texSize.y);

@@ -29,6 +29,7 @@ public:
 		{
 			Unknown = -1,
 			Font,
+			Map,
 			Music,
 			Sound,
 			Texture,

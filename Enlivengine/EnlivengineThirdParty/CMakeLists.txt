@@ -175,6 +175,13 @@ set(SRC_METRICSGUI
 )
 source_group("metrics_gui" FILES ${SRC_METRICSGUI})
 
+# miniz
+set(SRC_MINIZ
+	miniz/miniz.c
+	miniz/miniz.h
+)
+source_group("miniz" FILES ${SRC_MINIZ})
+
 # pugixml
 set(SRC_PUGIXML
 	pugixml/pugiconfig.hpp
@@ -193,6 +200,7 @@ add_library(EnlivengineThirdParty STATIC
 	${SRC_IMGUI}
 	${SRC_IMGUIFILEDIALOG}
 	${SRC_IMGUISFML}
+	${SRC_MINIZ}
 	${SRC_METRICSGUI}
 	${SRC_PUGIXML}
 )

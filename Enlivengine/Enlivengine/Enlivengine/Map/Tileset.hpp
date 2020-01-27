@@ -16,18 +16,6 @@ class Tileset : public Resource<Tileset>
 
 		bool LoadFromFile(const std::string& filename);
 
-        /*
-		void SetTileSize(const Vector2i& tileSize);
-		void SetSpacing(U32 spacing);
-		void SetMargin(U32 margin);
-		void SetTileCount(U32 tileCount);
-		void SetColumns(U32 columns);
-		void SetName(const std::string& name);
-		void SetPath(const std::string& path);
-		void SetImageSource(const std::string& source);
-		void SetImageTransparent(const Color& transparent);
-        */
-
 		const Vector2i& GetTileSize() const;
 		U32 GetSpacing() const;
 		U32 GetMargin() const;

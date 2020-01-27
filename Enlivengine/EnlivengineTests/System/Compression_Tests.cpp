@@ -8,30 +8,29 @@ DOCTEST_TEST_CASE("Compression determinism")
 	//DOCTEST_INFO(myStr);
 
 	std::string myStrEncode = myStr;
-	bool encode64Valid = en::Compression::encode64(myStrEncode);
+	bool encode64Valid = en::Compression::Encode64(myStrEncode);
 	//DOCTEST_INFO(myStrEncode);
 	DOCTEST_CHECK(myStr != myStrEncode);
-	bool decode64Valid = en::Compression::decode64(myStrEncode);
+	bool decode64Valid = en::Compression::Decode64(myStrEncode);
 	DOCTEST_CHECK(encode64Valid);
 	DOCTEST_CHECK(decode64Valid);
 	DOCTEST_CHECK(myStr == myStrEncode);
 
-	/*std::string myStrCompress = myStr;
-	bool compressValid = en::Compression::compress(myStrCompress);
+	std::string myStrCompress = myStr;
+	bool compressValid = en::Compression::Compress(myStrCompress);
 	//DOCTEST_INFO(myStrCompress);
 	DOCTEST_CHECK(myStr != myStrCompress);
-	bool decompressValid = en::Compression::decompress(myStrCompress);
+	bool decompressValid = en::Compression::Decompress(myStrCompress);
 	DOCTEST_CHECK(compressValid);
 	DOCTEST_CHECK(decompressValid);
 	DOCTEST_CHECK(myStr == myStrCompress);
 
 	std::string myStrCompress64 = myStr;
-	bool compress64Valid = en::Compression::compress(myStrCompress64);
+	bool compress64Valid = en::Compression::Compress(myStrCompress64);
 	//DOCTEST_INFO(myStrCompress64);
 	DOCTEST_CHECK(myStr != myStrCompress64);
-	bool decompress64Valid = en::Compression::decompress(myStrCompress64);
+	bool decompress64Valid = en::Compression::Decompress(myStrCompress64);
 	DOCTEST_CHECK(compress64Valid);
 	DOCTEST_CHECK(decompress64Valid);
 	DOCTEST_CHECK(myStr == myStrCompress64);
-	*/
 }

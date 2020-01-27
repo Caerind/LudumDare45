@@ -9,18 +9,18 @@ namespace en
 class Compression
 {
 	public:
-		static bool encode64(std::string& data);
-		static bool decode64(std::string& data);
-		static bool compress(std::string& data);
-		static bool decompress(std::string& data);
+		static bool Encode64(std::string& data);
+		static bool Decode64(std::string& data);
+		static bool Compress(std::string& data);
+		static bool Decompress(std::string& data);
 
-		static bool compress64(std::string& data);
-		static bool decompress64(std::string& data);
+		static bool Compress64(std::string& data);
+		static bool Decompress64(std::string& data);
 
 	private:
-		static const std::string mBase64Table;
+		static const std::string sBase64Table;
 
-		static bool isBase64(U8 c);
+		static bool IsBase64(U8 c);
 };
 
 } // namespace en

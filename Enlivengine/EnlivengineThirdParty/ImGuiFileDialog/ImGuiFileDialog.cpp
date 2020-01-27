@@ -408,7 +408,7 @@ void ImGuiFileDialog::ComposeNewPath(std::vector<std::string>::iterator vIter)
 
         if (vIter == m_CurrentPath_Decomposition.begin())
         {
-#if defined(LINUX) or defined(APPLE)
+#if defined(LINUX) || defined(APPLE)
             if (m_CurrentPath[0] != PATH_SEP)
                 m_CurrentPath = PATH_SEP + m_CurrentPath;
 #endif

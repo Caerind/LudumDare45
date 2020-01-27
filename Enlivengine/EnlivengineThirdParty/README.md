@@ -10,3 +10,4 @@
 - https://github.com/GameTechDev/MetricsGui  
 - https://github.com/aiekick/ImGuiFileDialog  
 - https://github.com/tronkko/dirent  
+- https://github.com/richgel999/miniz  

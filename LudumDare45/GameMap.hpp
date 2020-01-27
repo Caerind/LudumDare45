@@ -6,7 +6,7 @@
 #include <Enlivengine/Application/StateManager.hpp>
 #include <Enlivengine/Application/Application.hpp>
 #include <Enlivengine/Application/Window.hpp>
-#include <Enlivengine/Graphics/Tileset.hpp>
+#include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Graphics/View.hpp>
 
 #include "GameConfig.hpp"

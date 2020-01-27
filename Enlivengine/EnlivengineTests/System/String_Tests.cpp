@@ -49,9 +49,11 @@ DOCTEST_TEST_CASE("Strings")
 	DOCTEST_CHECK(giantString == "This is th");
 	DOCTEST_CHECK(smallString == "Hello !");
 
+	/*
 	std::string testTrimWhitespace = "   \t   \t Hello world !   \t   \t   ";
 	en::trimWhitespace(testTrimWhitespace);
 	DOCTEST_CHECK(testTrimWhitespace == "Hello world !");
+	*/
 
 	std::string testBoolString;
 	testBoolString = en::toBoolString(true);

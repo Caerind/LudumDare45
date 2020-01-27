@@ -9,6 +9,46 @@
 namespace en
 {
 
+void ltrim(std::string& s)
+{
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch)
+	{
+		return !std::isspace(ch);
+	}));
+}
+
+void rtrim(std::string& s)
+{
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
+	{
+		return !std::isspace(ch);
+	}).base(), s.end());
+}
+
+void trim(std::string& s)
+{
+	ltrim(s);
+	rtrim(s);
+}
+
+std::string ltrim_copy(std::string s)
+{
+	ltrim(s);
+	return s;
+}
+
+std::string rtrim_copy(std::string s)
+{
+	rtrim(s);
+	return s;
+}
+
+std::string trim_copy(std::string s)
+{
+	trim(s);
+	return s;
+}
+
 void toLower(std::string& string)
 {
 	std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c) -> unsigned char
@@ -93,11 +133,6 @@ bool limitSize(const std::string& string, std::string& result, U32 size)
 		result = string;
 		return false;
 	}
-}
-
-void trimWhitespace(std::string& string)
-{
-	string = string.substr(0, string.find_last_not_of(" \t") + 1).substr(string.find_first_not_of(" \t"));
 }
 
 /*

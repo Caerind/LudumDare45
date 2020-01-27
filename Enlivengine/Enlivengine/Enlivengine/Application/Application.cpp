@@ -19,7 +19,8 @@
 #endif // ENLIVE_ENABLE_IMGUI
 
 // Resources
-#include <Enlivengine/Graphics/Tileset.hpp>
+#include <Enlivengine/Map/Tileset.hpp>
+#include <Enlivengine/Map/Map.hpp>
 
 namespace en
 {
@@ -164,11 +165,12 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 #ifdef ENLIVE_ENABLE_IMGUI
 	assert(-1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Unknown));
 	assert(0 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Font));
-	assert(1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
-	assert(2 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
-	assert(3 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Texture));
-	assert(4 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Tileset));
-	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
+	assert(1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Map));
+	assert(2 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
+	assert(3 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
+	assert(4 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Texture));
+	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Tileset));
+	assert(6 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
 #endif // ENLIVE_ENABLE_IMGUI
 
 	ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -196,7 +198,22 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 1: // ResourceInfo::Type::Music
+	case 1: // ResourceInfo::Type::Map
+	{
+		MapPtr mapPtr = resourceManager.Create<Map>(identifier.c_str(), MapLoader::FromFile(resourceFilename));
+		if (!mapPtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = mapPtr.GetID();
+		}
+		break;
+	}
+	case 2: // ResourceInfo::Type::Music
 	{
 		MusicID musicID = AudioSystem::GetInstance().PrepareMusic(identifier.c_str(), resourceFilename);
 		if (musicID == InvalidMusicID)
@@ -211,7 +228,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 2: // ResourceInfo::Type::Sound
+	case 3: // ResourceInfo::Type::Sound
 	{
 		SoundID soundID = AudioSystem::GetInstance().PrepareSound(identifier.c_str(), resourceFilename);
 		if (soundID == InvalidSoundID)
@@ -226,7 +243,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 3: // ResourceInfo::Type::Texture
+	case 4: // ResourceInfo::Type::Texture
 	{
 		TexturePtr texturePtr = resourceManager.Create<Texture>(identifier.c_str(), TextureLoader::FromFile(resourceFilename));
 		if (!texturePtr.IsValid())
@@ -241,7 +258,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 4: // ResourceInfo::Type::Tileset
+	case 5: // ResourceInfo::Type::Tileset
 	{
 		TilesetPtr tilesetPtr = resourceManager.Create<Tileset>(identifier.c_str(), TilesetLoader::FromFile(resourceFilename));
 		if (!tilesetPtr.IsValid())

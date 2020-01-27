@@ -6,7 +6,7 @@
 #include <Enlivengine/Application/ResourceManager.hpp>
 #include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Graphics/SFMLResources.hpp>
-#include <Enlivengine/Graphics/Tileset.hpp>
+#include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Graphics/Animation.hpp>
 #include <entt/entt.hpp>
 

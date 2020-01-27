@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.5" orientation="orthogonal" renderorder="left-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="1" backgroundcolor="#2317d517" nextlayerid="6" nextobjectid="36">
+ <properties>
+  <property name="test" type="bool" value="true"/>
+ </properties>
+ <tileset firstgid="1" name="tilesetEmbed" tilewidth="16" tileheight="16" spacing="5" margin="2" tilecount="90" columns="6">
+  <image source="../Textures/tileset.png" trans="4be1ff" width="128" height="320"/>
+ </tileset>
+ <layer id="1" name="Map" width="64" height="48">
+  <data encoding="base64" compression="gzip">
+   <chunk x="0" y="0" width="16" height="16">
+   H4sIAAAAAAAAC6XS0QaAQBBG4a2WiIiIWKL3f8jmZjjGtKbp4rs7dtf6Wymlwf3T+dEoJlHFlTAk6b1zkp6zJuk5exDfXMH+51tHC0Q72iDa0QHRjrjXaEfeDmqnsbwd9BrL20GvsbiLSGNxLw/lIjUjAAQAAA==
+  </chunk>
+   <chunk x="16" y="0" width="16" height="16">
+   H4sIAAAAAAAAC6XT4QrCMAwE4DiFwqAqVIVNYbPv/5BGSPA42jDc4PvTdunRNlVE6g5TYNlpVW/bBz+cO5l/v8NGgzraXjieAq1/UWqM8XySfo6sxkA2nAlrXAPFZKqFeR4BfweFamGeV8e3tr+DiWphnt594R4L1cI8vbvL5KwujTy8zhVyU3c7F8zD6xz30qyecD7eX1t7b5VfL1UY+wCUFTj3AAQAAA==
+  </chunk>
+   <chunk x="32" y="0" width="16" height="16">
+   H4sIAAAAAAAAC1NiYGBQIhMLALE8FCsAsSJUXAYNi+HBxNiDbh4yxgYYKcTsFGJeCrEwhViSBMwExMxAzIIkJk8CRg87ZPOUyAhXbOaQEq74zCEm7HCZg24WrvDEZQ4uN6GHJy5zcPkNlucUoGxc5uDyGwDWARJ6AAQAAA==
+  </chunk>
+   <chunk x="48" y="0" width="16" height="16">
+   H4sIAAAAAAAACxNgYGAQAGJ5IFYAYkUgViKAZZCwGBQL4MFceMwHmcFIIWanEPNSiIUpxJIUYnkKMXK8jIY1/cIalG+YgZiFAZJHWJCwDJEYFi9MeMzChUFuAAD/6hI/AAQAAA==
+  </chunk>
+   <chunk x="0" y="16" width="16" height="16">
+   H4sIAAAAAAAAC5XSOwrAMAwD0PQzeSoECoVC29z/kHG3IIItDW+SsAe7llLqxBV4BkwHve5zjezY4ACW5OgEWY5ukOW/xa1uczuIMiZXekb22J3MPLwP3krZx4j2MbL/Uf9LNfsfRRN1BrESOAAEAAA=
+  </chunk>
+   <chunk x="16" y="16" width="16" height="16">
+   H4sIAAAAAAAAC83TuQqAMBAE0HhAVFADHuABav7/I51ibUJGjWksXhMmy26OTSm1eexwgIX8RhXJRBoDJZBCJv2vnrW3qsjzMKTu137+dD+xM1z7n+qwvhOhoYAycD4tamigJTn2zmrRQQ8Dya1EJyaYYSE5S0zC/cuuE1q5AxcABAAA
+  </chunk>
+   <chunk x="32" y="16" width="16" height="16">
+   H4sIAAAAAAAAC2NhYGBgAWIuJCyPhCWRsDAU80IxO5IeARwYm1nI5sDUiRGBsZnDQgZGNoeLAiyPx9/EYnLcz4IUJuS6HWYOue5GN2egMCXxhy/dEouJSbf4sAyFWIlCDABLtS34AAQAAA==
+  </chunk>
+   <chunk x="48" y="16" width="16" height="16">
+   H4sIAAAAAAAAC53SYQfAIBSF4bZFxIgxRkT//0eucS/XcbLqw0P24d2xFpxzodnE3hyNb6LhDfvsFAE6I63vfAns9DYl6DwCO2wT6xSBHbap10mkwzbZjjZuUEgLO7gBZdHr2A2R0E4V2vl77wz2X83Q7872j8DOLO3g/Y3STl6knbpIOy/9EvBhAAQAAA==
+  </chunk>
+   <chunk x="0" y="32" width="16" height="16">
+   H4sIAAAAAAAAC93QwQbAMBCE4S0llBBKCKW17/+QkcPQw6Qm9tbDd/vNYdzM/GX/cBBKA4VQGqiE0sBFKA04oTSwEUozJGLWqtjmihx0BrWgO+j5wYcdeT0gOQAEAAA=
+  </chunk>
+   <chunk x="16" y="32" width="16" height="16">
+   H4sIAAAAAAAAC43RwQbAMBCE4eQUQighhJK27/+Qbdmw1kyyh+/228NODiFkYIguqlKUg2jC3rG3GnEag9yy3fQs6FusiUoScSNt2gR4bk0FQB1rK4A61nYAdawdRiQdan/X5zb7oI616L+rxrMF+793C/Z/7xbs/94tXnC/FMYABAAA
+  </chunk>
+   <chunk x="32" y="32" width="16" height="16">
+   H4sIAAAAAAAAC42SywrAIAwE7QOEglAQCj31//+yuQSGJZEc5uJjXHV7a62DbcFuHMZpPMZnDKEviFxTUF/mds8rqC9ze4ZPUF/kZn5mGoEvcvMNmGmVfcLD+3N+lf3F/gFHNK/o35NsPOMSsn7pOucWqt3Nzql2l2dwf7W77B2pdtfRPNXuOprnB2y78nMABAAA
+  </chunk>
+   <chunk x="48" y="32" width="16" height="16">
+   H4sIAAAAAAAAC43TcQeAMBAF8FUjIkaMiFbf/0O22ON51nV//Ijurt1dKyGEq7qrQczirArFv6IRv4qt4TrIHaup1YsSD7s4JQcWI54VimfJiEfveMb3E8mdeJ0D3nPfuTmM2aEv5PO+uJY1Oz6bzs4LfensvHCW3u7/JNqJ7t3jKyc5cU5v9vkH18Jd0bvnhf9D757XA7cD2zEABAAA
+  </chunk>
+  </data>
+ </layer>
+ <objectgroup color="#f40000" id="4" name="Calque d'objets 1" locked="1" offsetx="23" offsety="56">
+  <object id="29" x="195.5" y="256" width="92" height="112.5"/>
+  <object id="30" x="332.5" y="245" width="103" height="157"/>
+  <object id="31" x="673" y="451">
+   <point/>
+  </object>
+  <object id="32" x="671" y="315">
+   <point/>
+  </object>
+  <object id="33" x="348" y="523" width="482" height="135">
+   <ellipse/>
+  </object>
+  <object id="34" x="475" y="89">
+   <polygon points="0,0 249,108 99,283 -8,99"/>
+  </object>
+  <object id="35" x="857" y="310">
+   <polygon points="0,0 65,157 -35,84 -102,167 -114,4"/>
+  </object>
+ </objectgroup>
+ <imagelayer id="5" name="Calque d'image 1"/>
+ <layer id="3" name="props" width="64" height="48">
+  <properties>
+   <property name="azert" type="int" value="3"/>
+   <property name="dfsdgsdfsdf" type="float" value="31"/>
+   <property name="ssdqsdq" type="color" value="#ff971b76"/>
+   <property name="test" value="testdqsd"/>
+   <property name="wxaezeaze" type="bool" value="true"/>
+  </properties>
+  <data encoding="base64" compression="gzip"/>
+ </layer>
+</map>
