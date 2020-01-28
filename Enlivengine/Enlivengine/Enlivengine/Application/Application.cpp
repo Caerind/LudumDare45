@@ -200,7 +200,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 	}
 	case 1: // ResourceInfo::Type::Map
 	{
-		MapPtr mapPtr = resourceManager.Create<Map>(identifier.c_str(), MapLoader::FromFile(resourceFilename));
+		tmx::MapPtr mapPtr = resourceManager.Create<tmx::Map>(identifier.c_str(), tmx::MapLoader::FromFile(resourceFilename));
 		if (!mapPtr.IsValid())
 		{
 			resourceID = InvalidResourceID;
@@ -260,7 +260,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 	}
 	case 5: // ResourceInfo::Type::Tileset
 	{
-		TilesetPtr tilesetPtr = resourceManager.Create<Tileset>(identifier.c_str(), TilesetLoader::FromFile(resourceFilename));
+		tmx::TilesetPtr tilesetPtr = resourceManager.Create<tmx::Tileset>(identifier.c_str(), tmx::TilesetLoader::FromFile(resourceFilename));
 		if (!tilesetPtr.IsValid())
 		{
 			resourceID = InvalidResourceID;

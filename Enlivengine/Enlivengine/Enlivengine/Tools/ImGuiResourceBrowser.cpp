@@ -263,7 +263,7 @@ void ImGuiResourceBrowser::Display()
                     ImGui::Text(ICON_FA_SEARCH);
                     if (ImGui::IsItemHovered())
                     {
-                        TilesetPtr tileset = ResourceManager::GetInstance().Get<Tileset>(resourceInfo.resourceID);
+						tmx::TilesetPtr tileset = ResourceManager::GetInstance().Get<tmx::Tileset>(resourceInfo.resourceID);
                         if (tileset.IsValid() && tileset.Get().GetTexture().IsValid())
                         {
                             ImGui::BeginTooltip();

@@ -53,7 +53,7 @@ en::Vector2f GameMap::coordsToWorld(const en::Vector2i& coords)
 	return p;
 }
 
-void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::TilesetPtr tileset /*= en::TilesetPtr()*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
+void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::TilesetPtr tileset /*= en::tmx::TilesetPtr()*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
 {
 	mTileGrid.clear();
 	mCollisions.clear();
@@ -242,7 +242,7 @@ bool GameMap::loadFromCode(const std::string& code)
 		mTileGrid[index] = gid;
 		if (mTileset.IsValid())
 		{
-			en::Tileset& tileset = mTileset.Get();
+			en::tmx::Tileset& tileset = mTileset.Get();
 			sf::Vertex* vertex(&mVertices[index * 4]);
 			const sf::Vector2f pos(toSF(mTileset.Get().ToPos(gid)));
 			const en::Vector2f texSize(static_cast<en::F32>(tileset.GetTileSize().x), static_cast<en::F32>(tileset.GetTileSize().y));
@@ -305,12 +305,12 @@ void GameMap::setName(const std::string& name)
 	mName = name;
 }
 
-en::TilesetPtr GameMap::getTileset() const
+en::tmx::TilesetPtr GameMap::getTileset() const
 {
 	return mTileset;
 }
 
-void GameMap::setTileset(en::TilesetPtr tileset)
+void GameMap::setTileset(en::tmx::TilesetPtr tileset)
 {
 	if (mTileset != tileset)
 	{

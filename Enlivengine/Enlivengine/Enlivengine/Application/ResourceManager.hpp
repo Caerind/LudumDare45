@@ -7,6 +7,7 @@
 
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 #include <Enlivengine/System/Singleton.hpp>
+#include <Enlivengine/System/NonCopyable.hpp>
 
 namespace en
 {
@@ -19,7 +20,7 @@ namespace priv
 
 ResourceID StringToResourceID(const std::string& str);
 
-class BaseResource
+class BaseResource : private NonCopyable
 {
 public:
 	BaseResource();

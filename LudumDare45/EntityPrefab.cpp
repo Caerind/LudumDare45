@@ -68,7 +68,7 @@ bool EntityPrefab::createNothing(entt::registry& world, entt::entity& nothingEnt
 }
 
 
-bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::TilesetPtr tileset)
+bool EntityPrefab::createProps(entt::registry& world, en::F32 x, en::F32 y, en::U32 gid, en::tmx::TilesetPtr tileset)
 {
 	auto entity = world.create();
 #ifdef ENLIVE_DEBUG

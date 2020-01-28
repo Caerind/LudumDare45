@@ -20,7 +20,7 @@ public:
 	en::Vector2i worldToCoords(const en::Vector2f& world);
 	en::Vector2f coordsToWorld(const en::Vector2i& coords);
 
-	void load(en::U32 mapID, const en::Vector2f& spawnPoint, en::TilesetPtr tileset = en::TilesetPtr(), const en::Vector2i& tileSize = en::Vector2i::zero);
+	void load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::TilesetPtr tileset = en::tmx::TilesetPtr(), const en::Vector2i& tileSize = en::Vector2i::zero);
 
 	std::string getCode();
 	bool loadFromCode(const std::string& code);
@@ -31,8 +31,8 @@ public:
 	const std::string& getName() const;
 	void setName(const std::string& name);
 
-	en::TilesetPtr getTileset() const;
-	void setTileset(en::TilesetPtr tileset);
+	en::tmx::TilesetPtr getTileset() const;
+	void setTileset(en::tmx::TilesetPtr tileset);
 
 	const en::Vector2i& getSize() const;
 	void setSize(const en::Vector2i& size);
@@ -66,7 +66,7 @@ private:
 	std::vector<bool> mCollisions;
 
 	std::string mName;
-	en::TilesetPtr mTileset;
+	en::tmx::TilesetPtr mTileset;
 	en::Vector2i mSize;
 	en::Vector2i mTileSize;
 

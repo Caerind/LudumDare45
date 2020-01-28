@@ -32,7 +32,7 @@ class GameSingleton
 		static bool mFirstIntroDone;
 		static bool mFirstThrowNothingDone;
 
-		static en::TilesetPtr mTileset;
+		static en::tmx::TilesetPtr mTileset;
 		static GameMap mMap;
 		static en::View mView;
 
