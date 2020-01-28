@@ -5,6 +5,8 @@
 
 namespace en
 {
+namespace tmx
+{
 
 Tileset::Tileset() 
 	: mTileSize()
@@ -151,4 +153,5 @@ Vector2f Tileset::ToPos(U32 tileId) const
 	return Vector2f::zero;
 }
 
+} // namespace tmx
 } // namespace en

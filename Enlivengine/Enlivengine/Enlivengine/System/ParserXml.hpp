@@ -22,6 +22,7 @@ class ParserXml
 		bool nextSibling(const std::string& sibling = "");
 		void closeNode();
 
+		bool hasChild(const std::string& nodeName) const;
 		bool createChild(const std::string& nodeName);
 		bool removeChild(const std::string& nodeName);
 		

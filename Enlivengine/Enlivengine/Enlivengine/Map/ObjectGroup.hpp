@@ -7,6 +7,8 @@
 
 namespace en
 {
+namespace tmx
+{
 
 class ObjectGroup : public LayerBase
 {
@@ -40,11 +42,10 @@ private:
 	friend class Map;
 	bool Parse(ParserXml& parser);
 
-	Map& mMap;
-
 	Color mColor;
 
 	std::vector<ObjectBase::Ptr> mObjects;
 };
 
+} // namespace tmx
 } // namespace en

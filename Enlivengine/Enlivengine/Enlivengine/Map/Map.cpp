@@ -8,6 +8,8 @@
 
 namespace en
 {
+namespace tmx
+{
 	
 Map::Map()
 	: mName("")
@@ -387,4 +389,5 @@ U32 Map::GetLayerCount() const
 	return static_cast<U32>(mLayers.size());
 }
 
+} // namespace tmx
 } // namespace en

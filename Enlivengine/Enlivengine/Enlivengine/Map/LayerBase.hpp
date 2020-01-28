@@ -10,6 +10,8 @@
 
 namespace en
 {
+namespace tmx
+{
 
 class Map;
 
@@ -26,9 +28,12 @@ public:
 
 	using Ptr = std::unique_ptr<LayerBase>;
 
-	LayerBase();
+	LayerBase(Map& map);
 
 	virtual LayerType GetLayerType() const = 0;
+
+	Map& GetMap();
+	const Map& GetMap() const;
 
 	U32 GetID() const;
 	const std::string& GetName() const;
@@ -40,6 +45,8 @@ public:
 protected:
 	bool Parse(ParserXml& parser);
 
+	Map& mMap;
+
 	U32 mID;
 	std::string mName;
 	Vector2f mOffset;
@@ -48,4 +55,5 @@ protected:
 	bool mLocked;
 };
 
+} // namespace tmx
 } // namespace en

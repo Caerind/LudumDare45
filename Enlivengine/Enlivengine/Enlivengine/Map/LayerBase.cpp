@@ -1,16 +1,31 @@
 #include <Enlivengine/Map/LayerBase.hpp>
 
+#include <Enlivengine/Map/Map.hpp>
+
 namespace en
 {
+namespace tmx
+{
 
-LayerBase::LayerBase()
-	: mID(0)
+LayerBase::LayerBase(Map& map)
+	: mMap(map)
+	, mID(0)
 	, mName("")
 	, mOffset(0.0f, 0.0f)
 	, mOpacity(1.0f)
 	, mVisible(true)
 	, mLocked(false)
 {
+}
+
+Map& LayerBase::GetMap()
+{
+	return mMap;
+}
+
+const Map& LayerBase::GetMap() const
+{
+	return mMap;
 }
 
 U32 LayerBase::GetID() const
@@ -65,4 +80,5 @@ bool LayerBase::Parse(ParserXml& parser)
 	return true;
 }
 
+} // namespace tmx
 } // namespace en

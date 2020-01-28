@@ -1,11 +1,17 @@
 #include <Enlivengine/Map/ObjectGroup.hpp>
 
+#include <Enlivengine/Map/RectangleObject.hpp>
+#include <Enlivengine/Map/PointObject.hpp>
+#include <Enlivengine/Map/EllipseObject.hpp>
+#include <Enlivengine/Map/PolygonObject.hpp>
+
 namespace en
+{
+namespace tmx
 {
 
 ObjectGroup::ObjectGroup(Map& map)
-	: LayerBase()
-	, mMap(map)
+	: LayerBase(map)
 	, mColor(Color::Transparent)
 	, mObjects()
 {
@@ -95,7 +101,51 @@ bool ObjectGroup::Parse(ParserXml& parser)
 
 	}
 
+	if (parser.readNode("object"))
+	{
+		do 
+		{
+			if (parser.hasChild("point"))
+			{
+				std::unique_ptr<PointObject> object = std::make_unique<PointObject>(*this);
+				if (object != nullptr && object->Parse(parser))
+				{
+					mObjects.emplace_back(std::move(object));
+				}
+			}
+			else if (parser.hasChild("ellipse"))
+			{
+				std::unique_ptr<EllipseObject> object = std::make_unique<EllipseObject>(*this);
+				if (object != nullptr && object->Parse(parser))
+				{
+					mObjects.emplace_back(std::move(object));
+				}
+			}
+			else if (parser.hasChild("polygon"))
+			{
+				std::unique_ptr<PolygonObject> object = std::make_unique<PolygonObject>(*this);
+				if (object != nullptr && object->Parse(parser))
+				{
+					mObjects.emplace_back(std::move(object));
+				}
+			}
+			else
+			{
+				// TODO : Do other object types
+
+				std::unique_ptr<RectangleObject> object = std::make_unique<RectangleObject>(*this);
+				if (object != nullptr && object->Parse(parser))
+				{
+					mObjects.emplace_back(std::move(object));
+				}
+			}
+
+		} while (parser.nextSibling("object"));
+		parser.closeNode();
+	}
+
 	return true;
 }
 
+} // namespace tmx
 } // namespace en

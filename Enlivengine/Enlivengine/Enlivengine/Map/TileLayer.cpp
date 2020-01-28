@@ -7,10 +7,11 @@
 
 namespace en
 {
+namespace tmx
+{
 
 TileLayer::TileLayer(Map& map)
-	: LayerBase()
-	, mMap(map)
+	: LayerBase(map)
 	, mSize(0, 0)
 	, mEncoding(EncodingType::Base64)
 	, mCompression(CompressionType::Zlib)
@@ -232,4 +233,5 @@ bool TileLayer::ParseXml(ParserXml& parser)
 	}
 }
 
+} // namespace tmx
 } // namespace en

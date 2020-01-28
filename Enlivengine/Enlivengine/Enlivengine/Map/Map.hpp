@@ -11,6 +11,8 @@
 
 namespace en
 {
+namespace tmx
+{
 
 class Map : public Resource<Map>
 {
@@ -120,4 +122,5 @@ public:
 	}
 };
 
+} // namespace tmx
 } // namespace en

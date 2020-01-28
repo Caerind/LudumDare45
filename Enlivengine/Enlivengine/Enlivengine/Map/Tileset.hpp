@@ -8,6 +8,8 @@
 
 namespace en
 {
+namespace tmx
+{
 
 class Tileset : public Resource<Tileset>
 {
@@ -65,4 +67,5 @@ public:
 	}
 };
 
+} // namespace tmx
 } // namespace en

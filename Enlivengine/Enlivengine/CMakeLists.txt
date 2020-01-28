@@ -47,6 +47,7 @@ set(SRC_MATH
 	Enlivengine/Math/Frustum.hpp
 	Enlivengine/Math/Intersection.cpp
 	Enlivengine/Math/Intersection.hpp
+	Enlivengine/Math/MathString.hpp
 	Enlivengine/Math/Matrix3.hpp
 	Enlivengine/Math/Matrix4.hpp
 	Enlivengine/Math/Noise.cpp
@@ -90,6 +91,8 @@ set(SRC_GRAPHICS
 source_group("Graphics" FILES ${SRC_GRAPHICS})
 
 set(SRC_MAP
+	Enlivengine/Map/EllipseObject.cpp
+	Enlivengine/Map/EllipseObject.hpp
 	Enlivengine/Map/LayerBase.cpp
 	Enlivengine/Map/LayerBase.hpp
 	Enlivengine/Map/Map.cpp
@@ -98,6 +101,12 @@ set(SRC_MAP
 	Enlivengine/Map/ObjectBase.hpp
 	Enlivengine/Map/ObjectGroup.cpp
 	Enlivengine/Map/ObjectGroup.hpp
+	Enlivengine/Map/PointObject.cpp
+	Enlivengine/Map/PointObject.hpp
+	Enlivengine/Map/PolygonObject.cpp
+	Enlivengine/Map/PolygonObject.hpp
+	Enlivengine/Map/RectangleObject.cpp
+	Enlivengine/Map/RectangleObject.hpp
 	Enlivengine/Map/TileLayer.cpp
 	Enlivengine/Map/TileLayer.hpp
 	Enlivengine/Map/Tileset.cpp

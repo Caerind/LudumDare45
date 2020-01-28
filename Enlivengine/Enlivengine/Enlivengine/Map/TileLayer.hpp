@@ -7,6 +7,8 @@
 
 namespace en
 {
+namespace tmx
+{
 
 class TileLayer : public LayerBase
 {
@@ -47,12 +49,11 @@ private:
 	bool ParseCsv(ParserXml& parser);
 	bool ParseXml(ParserXml& parser);
 
-	Map& mMap;
-
 	Vector2u mSize;
 	EncodingType mEncoding;
 	CompressionType mCompression;
 	sf::VertexArray mVertexArray; // Only one tileset for now. To support many tileset, we will need more VertexArray
 };
 
+} // namespace tmx
 } // namespace en
