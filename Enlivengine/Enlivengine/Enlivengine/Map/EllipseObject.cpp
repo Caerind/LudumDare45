@@ -16,6 +16,16 @@ const Vector2f& EllipseObject::GetSize() const
 	return mSize;
 }
 
+Vector2f EllipseObject::GetPointFromAngle(F32 angle) const
+{
+    return std::move(GetPointFromCosSine(Math::Cos(angle), Math::Sin(angle)));
+}
+
+Vector2f EllipseObject::GetPointFromCosSine(F32 cosValue, F32 sinValue) const
+{
+    return Vector2f(cosValue, sinValue) * mSize * 0.5f;
+}
+
 bool EllipseObject::Parse(ParserXml& parser)
 {
 	if (!ObjectBase::Parse(parser))

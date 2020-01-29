@@ -19,6 +19,9 @@ public:
 
 	const Vector2f& GetSize() const;
 
+    Vector2f GetPointFromAngle(F32 angle) const;
+    Vector2f GetPointFromCosSine(F32 cosValue, F32 sinValue) const;
+
 protected:
 	friend class ObjectGroup;
 	bool Parse(ParserXml& parser);

@@ -56,7 +56,7 @@ ObjectBase::ObjectType ObjectGroup::GetObjectTypeByID(U32 objectID) const
 		}
 	}
 	assert(false);
-	return ObjectBase::ObjectType::Rectangle; // TODO : First
+	return ObjectBase::ObjectType::Rectangle;
 }
 
 U32 ObjectGroup::GetObjectCount() const
@@ -86,7 +86,8 @@ bool ObjectGroup::Parse(ParserXml& parser)
 	}
 
 	// TODO : DrawOrder
-	attribStr = "";
+	/*
+    attribStr = "";
 	parser.getAttribute("draworder", attribStr);
 	if (attribStr == "")
 	{
@@ -100,6 +101,7 @@ bool ObjectGroup::Parse(ParserXml& parser)
 	{
 
 	}
+    */
 
 	if (parser.readNode("object"))
 	{

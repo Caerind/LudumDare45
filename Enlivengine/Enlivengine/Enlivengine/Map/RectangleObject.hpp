@@ -2,6 +2,8 @@
 
 #include <Enlivengine/Map/ObjectBase.hpp>
 
+#include <Enlivengine/Math/Rect.hpp>
+
 namespace en
 {
 namespace tmx
@@ -18,6 +20,8 @@ public:
 	}
 
 	const Vector2f& GetSize() const;
+
+    Rectf GetRect() const;
 
 private:
 	friend class ObjectGroup;

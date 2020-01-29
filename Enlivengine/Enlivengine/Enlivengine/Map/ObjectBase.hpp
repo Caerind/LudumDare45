@@ -35,16 +35,22 @@ public:
 	ObjectGroup& GetObjectGroup();
 	const ObjectGroup& GetObjectGroup() const;
 
+    const std::string& GetName() const;
+    const std::string& GetType() const;
 	U32 GetID() const;
 	const Vector2f& GetPosition() const;
+    F32 GetRotation() const;
 
 protected:
 	bool Parse(ParserXml& parser);
 
 	ObjectGroup& mObjectGroup;
 
-	U32 mID;
+    U32 mID;
+    std::string mName;
+    std::string mType;
 	Vector2f mPosition;
+    F32 mRotation;
 };
 
 } // namespace tmx

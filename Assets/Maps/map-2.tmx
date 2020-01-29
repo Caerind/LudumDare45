@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.5" orientation="orthogonal" renderorder="left-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="1" backgroundcolor="#2317d517" nextlayerid="6" nextobjectid="36">
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="left-down" compressionlevel="0" width="64" height="48" tilewidth="16" tileheight="16" infinite="1" backgroundcolor="#2317d517" nextlayerid="6" nextobjectid="53">
  <properties>
   <property name="test" type="bool" value="true"/>
  </properties>
@@ -9,44 +9,44 @@
  <layer id="1" name="Map" width="64" height="48">
   <data encoding="base64" compression="gzip">
    <chunk x="0" y="0" width="16" height="16">
-   H4sIAAAAAAAAC6XS0QaAQBBG4a2WiIiIWKL3f8jmZjjGtKbp4rs7dtf6Wymlwf3T+dEoJlHFlTAk6b1zkp6zJuk5exDfXMH+51tHC0Q72iDa0QHRjrjXaEfeDmqnsbwd9BrL20GvsbiLSGNxLw/lIjUjAAQAAA==
+   H4sIAAAAAAAECqWSUQfDQBCEr0kooZQQQij9/z8ysw/DZzjS68O4OfvNbWz2bK2d0Ff+Hx3K/6JJ/Cwt0mdAD2VG5L5P5Ufkni/lR+Sem/J3VP38zTUrK2fd48zXuUKePev25Ojfylv5Xo8zX+cOFc8aPTl67mu+1+OY8b/LWfUY8uX97+rMmu9k0nNfsuY7mfTcl6z5TiY9d+YC5SI1IwAEAAA=
   </chunk>
    <chunk x="16" y="0" width="16" height="16">
-   H4sIAAAAAAAAC6XT4QrCMAwE4DiFwqAqVIVNYbPv/5BGSPA42jDc4PvTdunRNlVE6g5TYNlpVW/bBz+cO5l/v8NGgzraXjieAq1/UWqM8XySfo6sxkA2nAlrXAPFZKqFeR4BfweFamGeV8e3tr+DiWphnt594R4L1cI8vbvL5KwujTy8zhVyU3c7F8zD6xz30qyecD7eX1t7b5VfL1UY+wCUFTj3AAQAAA==
+   H4sIAAAAAAAECqWTiQrCMBBE4wGC4AEe4AGm/f+PdAb6YAhGxBYek3R3J9PSjqWUcQY3zfZ4qTaHqvlBOF9e9qzCtfWE5K9roalfWKpvJXxe9m+070FfzpLX6rnct2t88bGm10777RdcN/hYW4+j7vU4qWbwwSvzXFXvwXeBD16Z56n5T/gMvh18rHiQKbPkOs/Ax4oHmbIv1/ije80epkyZh3qr+KNnzV6E31Xmod5qnuH1XTwE78r3eJ62l1qeU9U/CP9LxrUq3pQVOPcABAAA
   </chunk>
    <chunk x="32" y="0" width="16" height="16">
-   H4sIAAAAAAAAC1NiYGBQIhMLALE8FCsAsSJUXAYNi+HBxNiDbh4yxgYYKcTsFGJeCrEwhViSBMwExMxAzIIkJk8CRg87ZPOUyAhXbOaQEq74zCEm7HCZg24WrvDEZQ4uN6GHJy5zcPkNlucUoGxc5uDyGwDWARJ6AAQAAA==
+   H4sIAAAAAAAECqWRbQeAQBCErxf6FBERUd3//5HNcMuaLlYX47raeW7M5ZRS/qkFvrPownpDZB2iDfsvRc5Wnt8D/Xo6fGnRBH+LZvhbtMLfoh3+qHrMDtDoPHankVV79jzerf8f6dTmPcd8kU5ttsaJdGpnKIc8n+mrXztDOeTVMmnHxlUOeZqJeW6IPV/l3XjKIU8zMc8D1gESegAEAAA=
   </chunk>
    <chunk x="48" y="0" width="16" height="16">
-   H4sIAAAAAAAACxNgYGAQAGJ5IFYAYkUgViKAZZCwGBQL4MFceMwHmcFIIWanEPNSiIUpxJIUYnkKMXK8jIY1/cIalG+YgZiFAZJHWJCwDJEYFi9MeMzChUFuAAD/6hI/AAQAAA==
+   H4sIAAAAAAAECqWTTQfAMBBE0w9KKaGUUpr0///IvjnsJUQOc3g2xNvDrMkppQwvFKjwDXj4Dy7eQjt67Pz19mvPZLLhOxz4Die+w43voGwdCn7cfXQLJ2e5Ts5ynZzlOjnLdXJuO6DeLLCCOqIZRL9GM+414/Z2xc52quc//+oSPwAEAAA=
   </chunk>
    <chunk x="0" y="16" width="16" height="16">
-   H4sIAAAAAAAAC5XSOwrAMAwD0PQzeSoECoVC29z/kHG3IIItDW+SsAe7llLqxBV4BkwHve5zjezY4ACW5OgEWY5ukOW/xa1uczuIMiZXekb22J3MPLwP3krZx4j2MbL/Uf9LNfsfRRN1BrESOAAEAAA=
+   H4sIAAAAAAAECp2TzQqEMAyE68/J00JBEIRd9/0f0slhYAhREw8fSTOTlNbaW2s9YEPtii80kvHQy/hD/wH+Mocao3oW+MgHucI6o2pRvqJf8R7VonxHv+I9qjEf0DOCCcyOO828TzrnZXx2RxlfxmP7Zubxu0TR7r5yRp71Lkb7VGr+PVTX/j1U13wzb6P9UxVOBrESOAAEAAA=
   </chunk>
    <chunk x="16" y="16" width="16" height="16">
-   H4sIAAAAAAAAC83TuQqAMBAE0HhAVFADHuABav7/I51ibUJGjWksXhMmy26OTSm1eexwgIX8RhXJRBoDJZBCJv2vnrW3qsjzMKTu137+dD+xM1z7n+qwvhOhoYAycD4tamigJTn2zmrRQQ8Dya1EJyaYYSE5S0zC/cuuE1q5AxcABAAA
+   H4sIAAAAAAAECqXT2wqDMBRE0fQCtoVWQVvoBaL9/490z0NAwijEPCw0yRnJMRpDCNEYmZvwx3nDjbUaHfkaL/IlDtQfcYL6+iGf2+p3uaa+l2Pdl7wL9Z3nNd67H/eskv242r1nU9tDyqdrOq+8R7dnzSknDS64wtWu9aec3PFAC1e79u0pJz0GPOFq9f05yskbH3zh6vR/OsqJ/u0RE1zdDFq5AxcABAAA
   </chunk>
    <chunk x="32" y="16" width="16" height="16">
-   H4sIAAAAAAAAC2NhYGBgAWIuJCyPhCWRsDAU80IxO5IeARwYm1nI5sDUiRGBsZnDQgZGNoeLAiyPx9/EYnLcz4IUJuS6HWYOue5GN2egMCXxhy/dEouJSbf4sAyFWIlCDABLtS34AAQAAA==
+   H4sIAAAAAAAECsWRwQbAMBBEcwillFJKKaX//5GdpY89hMrk0MMzSzKTSVJLKVXMiUszHJph0xwsL5MU36q5BTmhrRw8u9a/ICvnRPdecg79HY0c+rva2539vJXTOzzkuL05l5y/lB6uuvfHxz+4euovRrjlH+EBS7Ut+AAEAAA=
   </chunk>
    <chunk x="48" y="16" width="16" height="16">
-   H4sIAAAAAAAAC53SYQfAIBSF4bZFxIgxRkT//0eucS/XcbLqw0P24d2xFpxzodnE3hyNb6LhDfvsFAE6I63vfAns9DYl6DwCO2wT6xSBHbap10mkwzbZjjZuUEgLO7gBZdHr2A2R0E4V2vl77wz2X83Q7872j8DOLO3g/Y3STl6knbpIOy/9EvBhAAQAAA==
+   H4sIAAAAAAAECpWR4QbDQBCEL20IpZRSQih9/4fsDPex1pLsjzG5ZO/bye42xtikZeomv0ur9AjyGfHe5+eUGZFj3hnLnPdU5kRW5LxUH/vvOluZY17OVHG+qrMyx7ycqZqR81iZU2WKecjy0d0oOFUm8uTZshf8ENOClf+N2ToDs4wO56fvFpyzvty74vS7UlvVMHc4XYcJp+v0i7vrPNOPXXWdXuyo6/T7A/0S8GEABAAA
   </chunk>
    <chunk x="0" y="32" width="16" height="16">
-   H4sIAAAAAAAAC93QwQbAMBCE4S0llBBKCKW17/+QkcPQw6Qm9tbDd/vNYdzM/GX/cBBKA4VQGqiE0sBFKA04oTSwEUozJGLWqtjmihx0BrWgO+j5wYcdeT0gOQAEAAA=
+   H4sIAAAAAAAECqWQ0QaAQBBFNyIiIiKi7P9/ZHceluuoh20ejp3b2bsytZRSjVHzF7Mc4V16z6v6xH3M9J53eeI+ZnrPpzxxHzO9Z99Tm93H3L6/nYM84T36lid1SXN/T77Xmxf9U4ZN/QyH+hku9TPc6vfujPcz+4tuZn/RfQB5PSA5AAQAAA==
   </chunk>
    <chunk x="16" y="32" width="16" height="16">
-   H4sIAAAAAAAAC43RwQbAMBCE4eQUQighhJK27/+Qbdmw1kyyh+/228NODiFkYIguqlKUg2jC3rG3GnEag9yy3fQs6FusiUoScSNt2gR4bk0FQB1rK4A61nYAdawdRiQdan/X5zb7oI616L+rxrMF+793C/Z/7xbs/94tXnC/FMYABAAA
+   H4sIAAAAAAAECo2SXQcDURBDt09lKaUspfTj///ITujhGHfoQyR3Jjd2s7tv27Yv8KxZcP/hVgwupcG19ApHzYOekzxywvg6P2pnkONnSpY91p/aTXDW5DnVfXAuHXCeGN/k9R79TxZeOjez62wP2r2j2XVmb+ZfMHtvbQ/avUfn3dl17t6cX4V3Id+M3la+ycudMH31PHvQeM305dmk8ZrpyrNJ4zXTl2eTxmumty9wvxTGAAQAAA==
   </chunk>
    <chunk x="32" y="32" width="16" height="16">
-   H4sIAAAAAAAAC42SywrAIAwE7QOEglAQCj31//+yuQSGJZEc5uJjXHV7a62DbcFuHMZpPMZnDKEviFxTUF/mds8rqC9ze4ZPUF/kZn5mGoEvcvMNmGmVfcLD+3N+lf3F/gFHNK/o35NsPOMSsn7pOucWqt3Nzql2l2dwf7W77B2pdtfRPNXuOprnB2y78nMABAAA
+   H4sIAAAAAAAECn2RQQrDMBADnbQQCBQKhUJO/f8vKx0Eg2BzEFZi76y8PtZaB7TJT9q195Ce0lf6Sa8SWe3JDeujeqp5/CYvrEv1FFntyXK9M/gOFFntw0utZ8FM5pPVPrxkd39mCn9aw3PPMHg2/GlNvXuGwbPZ75X39dtTeUf+u/On6qnco3vwDP1b9RTnT9adZ2bOn6zJd07On6zJdy7On6zJdy6+FVmT71x/bLvycwAEAAA=
   </chunk>
    <chunk x="48" y="32" width="16" height="16">
-   H4sIAAAAAAAAC43TcQeAMBAF8FUjIkaMiFbf/0O22ON51nV//Ijurt1dKyGEq7qrQczirArFv6IRv4qt4TrIHaup1YsSD7s4JQcWI54VimfJiEfveMb3E8mdeJ0D3nPfuTmM2aEv5PO+uJY1Oz6bzs4LfensvHCW3u7/JNqJ7t3jKyc5cU5v9vkH18Jd0bvnhf9D757XA7cD2zEABAAA
+   H4sIAAAAAAAECpWTfQeCQRDErxciIiIi2vr+H7IZ+jGW03N/jNl9zOztzVWNMd7CR9g1nNQnXupLQG/PUcCXWteXhpt6I+fg3ev7QfA8w1708EPfEp6THrznnze1rq1PlHp7rE9c1c/03L2kcc359oC76ryjc8osMoO8t33Gs+l7FuxW0pGfOWeRGZxZ5G5ktsrkkLmt1OzT996yh3PmHVO/9fyZh/f7x3kO+Wf2vOOMcz7/GeasMr8r5qzyF7cD2zEABAAA
   </chunk>
   </data>
  </layer>
- <objectgroup color="#f40000" id="4" name="Calque d'objets 1" locked="1" offsetx="23" offsety="56">
+ <objectgroup color="#f40000" id="4" name="Calque d'objets 1" offsetx="23" offsety="56">
   <object id="29" x="195.5" y="256" width="92" height="112.5"/>
   <object id="30" x="332.5" y="245" width="103" height="157"/>
   <object id="31" x="673" y="451">
@@ -58,14 +58,36 @@
   <object id="33" x="348" y="523" width="482" height="135">
    <ellipse/>
   </object>
-  <object id="34" x="475" y="89">
+  <object id="34" name="qsdqsd" type="dqsddddd" x="475" y="89">
    <polygon points="0,0 249,108 99,283 -8,99"/>
   </object>
-  <object id="35" x="857" y="310">
+  <object id="35" x="907" y="391" rotation="90">
    <polygon points="0,0 65,157 -35,84 -102,167 -114,4"/>
   </object>
+  <object id="36" type="dfsdf" x="224.333" y="-63.3333" width="113.333" height="106">
+   <ellipse/>
+  </object>
+  <object id="37" gid="9" x="185" y="462.667" width="16" height="16"/>
+  <object id="38" gid="9" x="153.667" y="490.667" width="16" height="16"/>
+  <object id="39" gid="9" x="202.333" y="498" width="16" height="16"/>
+  <object id="40" gid="9" x="215" y="519.333" width="16" height="16"/>
+  <object id="41" gid="9" x="94.3333" y="521.333" width="16" height="16"/>
+  <object id="42" gid="9" x="79.6667" y="501.333" width="16" height="16"/>
+  <object id="43" gid="9" x="96.3333" y="429.333" width="16" height="16"/>
+  <object id="44" gid="9" x="132.333" y="410.667" width="16" height="16"/>
+  <object id="45" gid="9" x="201.667" y="425.333" width="16" height="16"/>
+  <object id="46" gid="9" x="247.667" y="460" width="16" height="16"/>
+  <object id="47" gid="9" x="255.667" y="494.667" width="16" height="16"/>
+  <object id="48" gid="9" x="199" y="542.667" width="16" height="16"/>
+  <object id="49" gid="9" x="173.667" y="550.667" width="16" height="16"/>
+  <object id="50" gid="9" x="73.6667" y="567.333" width="16" height="16"/>
+  <object id="51" x="-141.5" y="266.5" width="121" height="19">
+   <text wrap="1">Lorem ipsum</text>
+  </object>
  </objectgroup>
- <imagelayer id="5" name="Calque d'image 1"/>
+ <imagelayer id="5" name="Calque d'image 1" locked="1" opacity="0.6" offsetx="10" offsety="80">
+  <image source="../Textures/atmog.png" trans="1a90ff" width="1024" height="768"/>
+ </imagelayer>
  <layer id="3" name="props" width="64" height="48">
   <properties>
    <property name="azert" type="int" value="3"/>

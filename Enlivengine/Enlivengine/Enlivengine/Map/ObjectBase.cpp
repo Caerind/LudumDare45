@@ -9,8 +9,11 @@ namespace tmx
 
 ObjectBase::ObjectBase(ObjectGroup& objectGroup)
 	: mObjectGroup(objectGroup)
+    , mName()
+    , mType()
 	, mID(0)
 	, mPosition(0.0f, 0.0f)
+    , mRotation(0.0f)
 {
 }
 
@@ -34,11 +37,19 @@ const Vector2f& ObjectBase::GetPosition() const
 	return mPosition;
 }
 
+F32 ObjectBase::GetRotation() const
+{
+    return mRotation;
+}
+
 bool ObjectBase::Parse(ParserXml& parser)
 {
 	parser.getAttribute("id", mID);
+    parser.getAttribute("name", mName);
+    parser.getAttribute("type", mType);
 	parser.getAttribute("x", mPosition.x);
 	parser.getAttribute("y", mPosition.y);
+    parser.getAttribute("rotation", mRotation);
 	return true;
 }
 
