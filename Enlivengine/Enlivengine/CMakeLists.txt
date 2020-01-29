@@ -105,6 +105,8 @@ set(SRC_MAP
 	Enlivengine/Map/PointObject.hpp
 	Enlivengine/Map/PolygonObject.cpp
 	Enlivengine/Map/PolygonObject.hpp
+	Enlivengine/Map/PropertyHolder.cpp
+	Enlivengine/Map/PropertyHolder.hpp
 	Enlivengine/Map/RectangleObject.cpp
 	Enlivengine/Map/RectangleObject.hpp
 	Enlivengine/Map/TileLayer.cpp

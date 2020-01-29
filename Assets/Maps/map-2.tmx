@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="left-down" compressionlevel="0" width="64" height="48" tilewidth="16" tileheight="16" infinite="1" backgroundcolor="#2317d517" nextlayerid="6" nextobjectid="53">
+<map version="1.2" tiledversion="1.3.2" orientation="orthogonal" renderorder="left-down" compressionlevel="0" width="64" height="48" tilewidth="16" tileheight="16" infinite="1" backgroundcolor="#2317d517" nextlayerid="6" nextobjectid="53">
  <properties>
+  <property name="dfghjk" value="sqdfgh"/>
   <property name="test" type="bool" value="true"/>
  </properties>
  <tileset firstgid="1" name="tilesetEmbed" tilewidth="16" tileheight="16" spacing="5" margin="2" tilecount="90" columns="6">
   <image source="../Textures/tileset.png" trans="4be1ff" width="128" height="320"/>
  </tileset>
  <layer id="1" name="Map" width="64" height="48">
+  <properties>
+   <property name="qsdqsdqsdqsdqsd" type="int" value="3"/>
+  </properties>
   <data encoding="base64" compression="gzip">
    <chunk x="0" y="0" width="16" height="16">
    H4sIAAAAAAAECqWSUQfDQBCEr0kooZQQQij9/z8ysw/DZzjS68O4OfvNbWz2bK2d0Ff+Hx3K/6JJ/Cwt0mdAD2VG5L5P5Ufkni/lR+Sem/J3VP38zTUrK2fd48zXuUKePev25Ojfylv5Xo8zX+cOFc8aPTl67mu+1+OY8b/LWfUY8uX97+rMmu9k0nNfsuY7mfTcl6z5TiY9d+YC5SI1IwAEAAA=
@@ -58,13 +62,19 @@
   <object id="33" x="348" y="523" width="482" height="135">
    <ellipse/>
   </object>
-  <object id="34" name="qsdqsd" type="dqsddddd" x="475" y="89">
+  <object id="34" name="qsdqsd" type="dqsddddd" x="477" y="56">
+   <properties>
+    <property name="dqsdqsd" type="bool" value="true"/>
+   </properties>
    <polygon points="0,0 249,108 99,283 -8,99"/>
   </object>
   <object id="35" x="907" y="391" rotation="90">
    <polygon points="0,0 65,157 -35,84 -102,167 -114,4"/>
   </object>
   <object id="36" type="dfsdf" x="224.333" y="-63.3333" width="113.333" height="106">
+   <properties>
+    <property name="qsdqsdqsd" type="float" value="1.2"/>
+   </properties>
    <ellipse/>
   </object>
   <object id="37" gid="9" x="185" y="462.667" width="16" height="16"/>

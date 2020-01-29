@@ -235,11 +235,11 @@ bool Map::LoadFromFile(const std::string& filename)
 				}
 				else if (nodeName == "group")
 				{
-					// TODO : Group
+					// TODO : LayerGroup
 				}
 				else if (nodeName == "properties")
 				{
-					// TODO : Properties
+					PropertyHolder::Parse(xml);
 				}
 				else
 				{
@@ -389,11 +389,165 @@ U32 Map::GetLayerCount() const
 	return static_cast<U32>(mLayers.size());
 }
 
+std::vector<Vector2u> Map::GetNeighbors(const Vector2u& tileCoords, bool diag /*= false*/) const
+{
+	// TODO : Filter out invalid pos ?
+	std::vector<Vector2u> n;
+	if (mOrientation == Orientation::Orthogonal)
+	{
+		n.resize(diag ? 8 : 4);
+		n[0].set(tileCoords.x, tileCoords.y - 1);
+		n[1].set(tileCoords.x, tileCoords.y + 1);
+		n[2].set(tileCoords.x - 1, tileCoords.y);
+		n[3].set(tileCoords.x + 1, tileCoords.y);
+		if (diag)
+		{
+			n[4].set(tileCoords.x + 1, tileCoords.y - 1);
+			n[5].set(tileCoords.x + 1, tileCoords.y + 1);
+			n[6].set(tileCoords.x - 1, tileCoords.y + 1);
+			n[7].set(tileCoords.x - 1, tileCoords.y - 1);
+		}
+	}
+	else if (mOrientation == Orientation::Isometric)
+	{
+		n.resize(diag ? 8 : 4);
+		n[0].set(tileCoords.x - 1, tileCoords.y);
+		n[1].set(tileCoords.x, tileCoords.y - 1);
+		n[2].set(tileCoords.x + 1, tileCoords.y);
+		n[3].set(tileCoords.x, tileCoords.y + 1);
+		if (diag)
+		{
+			n[4].set(tileCoords.x - 1, tileCoords.y - 1);
+			n[5].set(tileCoords.x + 1, tileCoords.y - 1);
+			n[6].set(tileCoords.x + 1, tileCoords.y + 1);
+			n[7].set(tileCoords.x - 1, tileCoords.y + 1);
+		}
+	}
+	else if (mOrientation == Orientation::Staggered)
+	{
+		n.resize(diag ? 8 : 4);
+		if (tileCoords.y % 2 == 0)
+		{
+			n[0].set(tileCoords.x - 1, tileCoords.y - 1);
+			n[1].set(tileCoords.x, tileCoords.y - 1);
+			n[2].set(tileCoords.x, tileCoords.y + 1);
+			n[3].set(tileCoords.x - 1, tileCoords.y + 1);
+		}
+		else
+		{
+			n[0].set(tileCoords.x, tileCoords.y - 1);
+			n[1].set(tileCoords.x + 1, tileCoords.y - 1);
+			n[2].set(tileCoords.x + 1, tileCoords.y + 1);
+			n[3].set(tileCoords.x, tileCoords.y + 1);
+		}
+
+		if (diag)
+		{
+			n[4].set(tileCoords.x, tileCoords.y - 2);
+			n[5].set(tileCoords.x + 1, tileCoords.y);
+			n[6].set(tileCoords.x, tileCoords.y + 2);
+			n[7].set(tileCoords.x - 1, tileCoords.y);
+		}
+	}
+	else if (mOrientation == Orientation::Hexagonal)
+	{
+		n.resize(6);
+		if (mStaggerAxis == StaggerAxis::Y) // Pointy
+		{
+			if ((tileCoords.y % 2) == static_cast<I32>(mStaggerIndex))
+			{
+				n[0].set(tileCoords.x - 1, tileCoords.y - 1);
+				n[1].set(tileCoords.x, tileCoords.y - 1);
+				n[2].set(tileCoords.x + 1, tileCoords.y);
+				n[3].set(tileCoords.x, tileCoords.y + 1);
+				n[4].set(tileCoords.x - 1, tileCoords.y + 1);
+				n[5].set(tileCoords.x - 1, tileCoords.y);
+			}
+			else
+			{
+				n[0].set(tileCoords.x, tileCoords.y - 1);
+				n[1].set(tileCoords.x + 1, tileCoords.y - 1);
+				n[2].set(tileCoords.x + 1, tileCoords.y);
+				n[3].set(tileCoords.x + 1, tileCoords.y + 1);
+				n[4].set(tileCoords.x, tileCoords.y + 1);
+				n[5].set(tileCoords.x - 1, tileCoords.y);
+			}
+		}
+		else // Flat
+		{
+			if ((tileCoords.x % 2) == static_cast<I32>(mStaggerIndex))
+			{
+				n[0].set(tileCoords.x - 1, tileCoords.y - 1);
+				n[1].set(tileCoords.x, tileCoords.y - 1);
+				n[2].set(tileCoords.x + 1, tileCoords.y - 1);
+				n[3].set(tileCoords.x + 1, tileCoords.y);
+				n[4].set(tileCoords.x, tileCoords.y + 1);
+				n[5].set(tileCoords.x - 1, tileCoords.y);
+			}
+			else
+			{
+				n[0].set(tileCoords.x - 1, tileCoords.y);
+				n[1].set(tileCoords.x, tileCoords.y - 1);
+				n[2].set(tileCoords.x + 1, tileCoords.y);
+				n[3].set(tileCoords.x + 1, tileCoords.y + 1);
+				n[4].set(tileCoords.x, tileCoords.y + 1);
+				n[5].set(tileCoords.x - 1, tileCoords.y + 1);
+			}
+		}
+	}
+	return std::move(n);
+}
+
 Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
 {
-	// TODO : CoordsToWorld
-	ENLIVE_UNUSED(tileCoords);
-	return Vector2f(0.0f, 0.0f);
+	if (mOrientation == Orientation::Orthogonal)
+	{
+		return Vector2f(
+			static_cast<F32>(tileCoords.x * mTileSize.x), 
+			static_cast<F32>(tileCoords.y * mTileSize.y)
+		);
+	}
+	else if (mOrientation == Orientation::Isometric)
+	{
+		return Vector2f(
+			static_cast<F32>((tileCoords.x - tileCoords.y) * mTileSize.x * 0.5f), 
+			static_cast<F32>((tileCoords.x + tileCoords.y) * mTileSize.y * 0.5f)
+		);
+	}
+	else if (mOrientation == Orientation::Staggered)
+	{
+		if (mStaggerAxis == StaggerAxis::Y)
+		{
+			return Vector2f(
+				static_cast<F32>((tileCoords.y % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.x * mTileSize.x : (tileCoords.x + 0.5f) * mTileSize.x),
+				tileCoords.y * mTileSize.y * 0.5f
+			);
+		}
+		else
+		{
+			return Vector2f(
+				tileCoords.x * mTileSize.x * 0.5f,
+				static_cast<F32>((tileCoords.x % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.y * mTileSize.y : (tileCoords.y + 0.5f) * mTileSize.y)
+			);
+		}
+	}
+	else if (mOrientation == Orientation::Hexagonal)
+	{
+		if (mStaggerAxis == StaggerAxis::Y) // Pointy
+		{
+			return Vector2f(
+				static_cast<F32>((tileCoords.y % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.x * mTileSize.x : (tileCoords.x + 0.5f) * mTileSize.x),
+				tileCoords.y* (mTileSize.y + mHexSideLength) * 0.5f
+			);
+		}
+		else // Flat
+		{
+			return Vector2f(
+				tileCoords.x * (mTileSize.x + mHexSideLength) * 0.5f,
+				static_cast<F32>((tileCoords.x % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.y * mTileSize.y : (tileCoords.y + 0.5f) * mTileSize.y)
+			);
+		}
+	}
 }
 
 Vector2u Map::WorldToCoords(const Vector2f& worldPos) const

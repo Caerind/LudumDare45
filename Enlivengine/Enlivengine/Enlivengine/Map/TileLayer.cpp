@@ -163,6 +163,12 @@ bool TileLayer::Parse(ParserXml& parser)
 		parser.closeNode();
 	}
 
+	if (parser.readNode("properties"))
+	{
+		PropertyHolder::Parse(parser);
+		parser.closeNode();
+	}
+
 	return true;
 }
 

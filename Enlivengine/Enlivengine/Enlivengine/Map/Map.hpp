@@ -6,6 +6,7 @@
 #include <Enlivengine/Graphics/SFMLResources.hpp>
 #include <Enlivengine/Graphics/Color.hpp>
 
+#include <Enlivengine/Map/PropertyHolder.hpp>
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/LayerBase.hpp>
 
@@ -14,7 +15,7 @@ namespace en
 namespace tmx
 {
 
-class Map : public Resource<Map>
+class Map : public Resource<Map>, public PropertyHolder
 {
 public:
 	enum class Orientation
@@ -35,14 +36,14 @@ public:
 
 	enum class StaggerAxis
 	{
-		X,
-		Y
+		X = 0,
+		Y = 1
 	};
 
 	enum class StaggerIndex
 	{
-		Odd,
-		Even
+		Odd = 0,
+		Even = 1
 	};
 
 	Map();
@@ -80,6 +81,7 @@ public:
 	}
 	U32 GetLayerCount() const;
 
+	std::vector<Vector2u> GetNeighbors(const Vector2u& tileCoords, bool diag = false) const;
 	Vector2f CoordsToWorld(const Vector2u& tileCoords) const;
 	Vector2u WorldToCoords(const Vector2f& worldPos) const;
 

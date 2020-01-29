@@ -5,6 +5,8 @@
 
 #include <Enlivengine/System/ParserXml.hpp>
 
+#include <Enlivengine/Map/PropertyHolder.hpp>
+
 #include <memory>
 #include <string>
 
@@ -15,7 +17,7 @@ namespace tmx
 
 class ObjectGroup;
 
-class ObjectBase
+class ObjectBase : public PropertyHolder
 {
 public:
 	enum class ObjectType

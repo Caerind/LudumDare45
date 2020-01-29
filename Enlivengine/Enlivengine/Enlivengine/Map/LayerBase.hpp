@@ -15,7 +15,7 @@ namespace tmx
 
 class Map;
 
-class LayerBase
+class LayerBase : public PropertyHolder
 {
 public:
 	enum class LayerType
