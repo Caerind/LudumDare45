@@ -70,7 +70,7 @@ bool Tileset::LoadFromFile(const std::string& filename)
 	return GetTexture().IsValid();
 }
 
-const Vector2i& Tileset::GetTileSize() const
+const Vector2u& Tileset::GetTileSize() const
 {
 	return mTileSize;
 }

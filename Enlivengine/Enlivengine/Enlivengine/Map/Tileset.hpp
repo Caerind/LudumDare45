@@ -18,7 +18,7 @@ class Tileset : public Resource<Tileset>
 
 		bool LoadFromFile(const std::string& filename);
 
-		const Vector2i& GetTileSize() const;
+		const Vector2u& GetTileSize() const;
 		U32 GetSpacing() const;
 		U32 GetMargin() const;
 		U32 GetTileCount() const;
@@ -33,7 +33,7 @@ class Tileset : public Resource<Tileset>
 		Vector2f ToPos(U32 tileId) const;
 
 	private:
-		Vector2i mTileSize;
+		Vector2u mTileSize;
 		U32 mSpacing;
 		U32 mMargin;
 		U32 mTileCount;

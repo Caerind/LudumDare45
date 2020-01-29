@@ -264,12 +264,12 @@ const std::string& Map::GetName() const
 	return mName;
 }
 
-const Vector2i& Map::GetSize() const
+const Vector2u& Map::GetSize() const
 {
 	return mSize;
 }
 
-const Vector2i& Map::GetTileSize() const
+const Vector2u& Map::GetTileSize() const
 {
 	return mTileSize;
 }
@@ -387,6 +387,18 @@ LayerBase::LayerType Map::GetLayerTypeByID(U32 layerID) const
 U32 Map::GetLayerCount() const
 {
 	return static_cast<U32>(mLayers.size());
+}
+
+Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
+{
+	// TODO : CoordsToWorld
+	return Vector2f(0.0f, 0.0f);
+}
+
+Vector2u Map::WorldToCoords(const Vector2f& worldPos) const
+{
+	// TODO : WorldToCoords
+	return Vector2u(0, 0);
 }
 
 } // namespace tmx

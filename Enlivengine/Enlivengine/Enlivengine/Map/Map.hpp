@@ -50,8 +50,8 @@ public:
 	bool LoadFromFile(const std::string& filename);
 
 	const std::string& GetName() const;
-	const Vector2i& GetSize() const;
-	const Vector2i& GetTileSize() const;
+	const Vector2u& GetSize() const;
+	const Vector2u& GetTileSize() const;
 	Orientation GetOrientation() const;
 	RenderOrder GetRenderOrder() const;
 	const Color& GetBackgroundColor() const;
@@ -80,10 +80,13 @@ public:
 	}
 	U32 GetLayerCount() const;
 
+	Vector2f CoordsToWorld(const Vector2u& tileCoords) const;
+	Vector2u WorldToCoords(const Vector2f& worldPos) const;
+
 private:
 	std::string mName;
-	Vector2i mSize;
-	Vector2i mTileSize;
+	Vector2u mSize;
+	Vector2u mTileSize;
 	Orientation mOrientation;
 	RenderOrder mRenderOrder;
 	Color mBackgroundColor;

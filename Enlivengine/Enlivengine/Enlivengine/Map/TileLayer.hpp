@@ -49,10 +49,13 @@ private:
 	bool ParseCsv(ParserXml& parser);
 	bool ParseXml(ParserXml& parser);
 
+	void Update();
+
 	Vector2u mSize;
 	EncodingType mEncoding;
 	CompressionType mCompression;
-	sf::VertexArray mVertexArray; // Only one tileset for now. To support many tileset, we will need more VertexArray
+	std::vector<U32> mTiles;
+	std::vector<sf::VertexArray> mVertexArrays;
 };
 
 } // namespace tmx
