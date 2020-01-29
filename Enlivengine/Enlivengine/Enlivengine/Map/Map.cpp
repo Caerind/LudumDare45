@@ -392,12 +392,14 @@ U32 Map::GetLayerCount() const
 Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
 {
 	// TODO : CoordsToWorld
+	ENLIVE_UNUSED(tileCoords);
 	return Vector2f(0.0f, 0.0f);
 }
 
 Vector2u Map::WorldToCoords(const Vector2f& worldPos) const
 {
 	// TODO : WorldToCoords
+	ENLIVE_UNUSED(worldPos);
 	return Vector2u(0, 0);
 }
 
