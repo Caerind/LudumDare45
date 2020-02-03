@@ -34,8 +34,9 @@ enum class LogChannel : U32
 	Math = 1 << 2,
 	Application = 1 << 3,
 	Graphics = 1 << 4,
+    Map = 1 << 5,
 	// TODO : Add others
-	All = (1 << 5) - 1,
+	All = (1 << 6) - 1,
 };
 const char* LogChannelToString(LogChannel type);
 

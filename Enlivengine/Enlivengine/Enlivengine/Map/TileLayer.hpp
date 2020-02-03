@@ -41,6 +41,8 @@ public:
 	void SetTile(const Vector2u& tileCoords, U32 tileID);
 	U32 GetTile(const Vector2u& tileCoords) const;
 
+    virtual void Render(sf::RenderTarget& target) const;
+
 private:
 	friend class Map;
 	bool Parse(ParserXml& parser);

@@ -10,6 +10,8 @@
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/LayerBase.hpp>
 
+#include <SFML/Graphics/RenderTarget.hpp>
+
 namespace en
 {
 namespace tmx
@@ -84,6 +86,8 @@ public:
 	std::vector<Vector2u> GetNeighbors(const Vector2u& tileCoords, bool diag = false) const;
 	Vector2f CoordsToWorld(const Vector2u& tileCoords) const;
 	Vector2u WorldToCoords(const Vector2f& worldPos) const;
+
+    void Render(sf::RenderTarget& target, bool renderObjects = false) const;
 
 private:
 	std::string mName;

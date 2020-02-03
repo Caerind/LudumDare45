@@ -5,6 +5,7 @@
 #include <Enlivengine/System/ParserXml.hpp>
 #include <Enlivengine/Graphics/Color.hpp>
 
+#include <memory>
 #include <unordered_map>
 
 namespace en
@@ -15,7 +16,7 @@ namespace tmx
 class PropertyHolder
 {
 protected:
-	PropertyHolder() = default;
+	PropertyHolder();
 
 	bool Parse(ParserXml& parser);
 
@@ -43,12 +44,12 @@ public:
 private:
 	std::unordered_map<U32, PropertyType> mTypeMap;
 
-	std::unordered_map<U32, bool> mBooleans;
-	std::unordered_map<U32, Color> mColors;
-	std::unordered_map<U32, F32> mFloats;
-	std::unordered_map<U32, std::string> mFiles;
-	std::unordered_map<U32, I32> mInts;
-	std::unordered_map<U32, std::string> mStrings;
+	std::unique_ptr<std::unordered_map<U32, bool>> mBooleans;
+    std::unique_ptr<std::unordered_map<U32, Color>> mColors;
+    std::unique_ptr<std::unordered_map<U32, F32>> mFloats;
+    std::unique_ptr<std::unordered_map<U32, std::string>> mFiles;
+    std::unique_ptr<std::unordered_map<U32, I32>> mInts;
+    std::unique_ptr<std::unordered_map<U32, std::string>> mStrings;
 };
 
 } // namespace tmx

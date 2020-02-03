@@ -89,6 +89,27 @@ U32 TileLayer::GetTile(const Vector2u& tileCoords) const
 	return mTiles[index];
 }
 
+void TileLayer::Render(sf::RenderTarget& target) const
+{
+    const U32 size = static_cast<U32>(mVertexArrays.size());
+    assert(size <= mMap.GetTilesetCount());
+    for (U32 i = 0; i < size; ++i)
+    {
+        sf::RenderStates states;
+
+        const TilesetPtr& tilesetPtr = mMap.GetTileset(i);
+        assert(tilesetPtr.IsValid());
+        const Tileset& tileset = tilesetPtr.Get();
+
+        const TexturePtr& texturePtr = tileset.GetTexture();
+        assert(texturePtr.IsValid());
+        const Texture& texture = texturePtr.Get();
+
+        states.texture = &texture;
+        target.draw(mVertexArrays[i], states);
+    }
+}
+
 bool TileLayer::Parse(ParserXml& parser)
 {
 	if (!LayerBase::Parse(parser))
@@ -119,7 +140,7 @@ bool TileLayer::Parse(ParserXml& parser)
 		}
 		else
 		{
-			LogError(en::LogChannel::Graphics, 7, "Unknown encoding %s", attribStr.c_str());
+			LogError(en::LogChannel::Map, 7, "Unknown encoding %s", attribStr.c_str());
 			return false;
 		}
 
@@ -139,7 +160,7 @@ bool TileLayer::Parse(ParserXml& parser)
 		}
 		else
 		{
-			LogError(en::LogChannel::Graphics, 7, "Unknown compression %s", attribStr.c_str());
+			LogError(en::LogChannel::Map, 7, "Unknown compression %s", attribStr.c_str());
 			return false;
 		}
 
@@ -180,7 +201,7 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 
 	if (!Compression::Decode64(data))
 	{
-		LogError(en::LogChannel::Graphics, 8, "Can't decode Base64");
+		LogError(en::LogChannel::Map, 8, "Can't decode Base64");
 		return false;
 	}
 
@@ -194,7 +215,7 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 	}
 	if (!decompression)
 	{
-		LogError(en::LogChannel::Graphics, 8, "Can't decompress %d", mCompression);
+		LogError(en::LogChannel::Map, 8, "Can't decompress %d", mCompression);
 		return false;
 	}
 

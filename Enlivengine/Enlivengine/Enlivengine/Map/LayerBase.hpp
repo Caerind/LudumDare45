@@ -1,9 +1,11 @@
 #pragma once
 
 #include <Enlivengine/System/PrimitiveTypes.hpp>
-#include <Enlivengine/Math/Vector2.hpp>
-
 #include <Enlivengine/System/ParserXml.hpp>
+#include <Enlivengine/Math/Vector2.hpp>
+#include <Enlivengine/Map/PropertyHolder.hpp>
+
+#include <SFML/Graphics/RenderTarget.hpp>
 
 #include <memory>
 #include <string>
@@ -41,6 +43,8 @@ public:
 	F32 GetOpacity() const;
 	bool IsVisible() const;
 	bool IsLocked() const;
+
+    virtual void Render(sf::RenderTarget& target) const;
 
 protected:
 	bool Parse(ParserXml& parser);

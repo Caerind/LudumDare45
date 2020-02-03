@@ -28,7 +28,7 @@ bool Tileset::LoadFromFile(const std::string& filename)
 	ParserXml xml;
 	if (!xml.loadFromFile(filename))
 	{
-		LogError(en::LogChannel::Graphics, 9, "Can't open tileset file at %s", filename.c_str());
+		LogError(en::LogChannel::Map, 9, "Can't open tileset file at %s", filename.c_str());
 		return false;
 	}
 
@@ -62,7 +62,7 @@ bool Tileset::LoadFromFile(const std::string& filename)
 	}
 	else
 	{
-		LogError(en::LogChannel::Graphics, 9, "Invalid tileset file at %s", filename.c_str());
+		LogError(en::LogChannel::Map, 9, "Invalid tileset file at %s", filename.c_str());
 		return false;
 	}
 
@@ -124,7 +124,7 @@ TexturePtr& Tileset::GetTexture()
 		const std::string filepath = mPath + mImageSource;
 		if (mImageTransparent != Color::Transparent)
 		{
-			LogWarning(en::LogChannel::Graphics, 8, "%s : Transparent color for Tileset isn't supported yet -> Use alpha values", filepath.c_str());
+			LogWarning(en::LogChannel::Map, 8, "%s : Transparent color for Tileset isn't supported yet -> Use alpha values", filepath.c_str());
 		}
 
         mTexture = ResourceManager::GetInstance().GetFromFilename<Texture>(filepath);
@@ -133,7 +133,7 @@ TexturePtr& Tileset::GetTexture()
             mTexture = ResourceManager::GetInstance().Create<Texture>(mName + "-texture", TextureLoader::FromFile(filepath));
             if (!mTexture.IsValid())
             {
-				LogError(en::LogChannel::Graphics, 10, "Can't load tileset texture : %s", filepath.c_str());
+				LogError(en::LogChannel::Map, 10, "Can't load tileset texture : %s", filepath.c_str());
 			}
 		}
 	}

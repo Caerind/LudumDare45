@@ -198,8 +198,41 @@ void ImGuiResourceBrowser::Display()
 				}
 
 				case ResourceInfo::Type::Map:
-				{
-					// TODO : Map Preview !
+                {
+                    ImGui::Text(ICON_FA_SEARCH);
+                    if (ImGui::IsItemHovered())
+                    {
+                        tmx::MapPtr mapPtr = ResourceManager::GetInstance().Get<tmx::Map>(resourceInfo.resourceID);
+                        if (mapPtr.IsValid())
+                        {
+                            ImGui::BeginTooltip();
+
+                            const Map& map = mapPtr.Get();
+
+                            const U32 sizeX = map.GetSize().x * map.GetTileSize().x;
+                            const U32 sizeY = map.GetSize().y * map.GetTileSize().y;
+                            sf::RenderTexture renderTexture;
+                            renderTexture.create(sizeX, sizeY);
+                            map.Render(renderTexture, true);
+
+                            constexpr F32 maxPreviewSize = 150.0f;
+                            sf::Sprite previewSprite;
+                            previewSprite.setTexture(renderTexture);
+                            Vector2f textureSize;
+                            textureSize.x = static_cast<F32>(renderTexture.getSize().x);
+                            textureSize.y = static_cast<F32>(renderTexture.getSize().y);
+                            if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+                            {
+                                const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+                                const F32 scale = maxPreviewSize / larger;
+                                previewSprite.setScale(scale, scale);
+                            }
+                            ImGui::Image(previewSprite);
+
+                            ImGui::EndTooltip();
+                        }
+                    }
+                    ImGui::SameLine();
 					break;
 				}
 				

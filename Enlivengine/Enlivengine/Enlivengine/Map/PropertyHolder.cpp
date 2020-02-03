@@ -8,6 +8,17 @@ namespace en
 namespace tmx
 {
 
+PropertyHolder::PropertyHolder()
+    : mTypeMap()
+    , mBooleans(nullptr)
+    , mColors(nullptr)
+    , mFloats(nullptr)
+    , mFiles(nullptr)
+    , mInts(nullptr)
+    , mStrings(nullptr)
+{
+}
+
 bool PropertyHolder::Parse(ParserXml& parser)
 {
 	if (parser.readNode("property"))
@@ -33,7 +44,11 @@ bool PropertyHolder::Parse(ParserXml& parser)
 			if (typeStr == "bool")
 			{
 				mTypeMap[hash] = PropertyType::Boolean;
-				mBooleans[hash] = fromString<bool>(valueStr);
+                if (mBooleans == nullptr)
+                {
+                    mBooleans = std::make_unique<std::unordered_map<U32, bool>>();
+                }
+				(*mBooleans)[hash] = fromString<bool>(valueStr);
 			}
 			else if (typeStr == "color")
 			{
@@ -42,31 +57,51 @@ bool PropertyHolder::Parse(ParserXml& parser)
 				{
 					valueStr = valueStr.substr(1);
 				}
-				mColors[hash].fromString(valueStr);
+                if (mColors == nullptr)
+                {
+                    mColors = std::make_unique<std::unordered_map<U32, Color>>();
+                }
+				(*mColors)[hash].fromString(valueStr);
 			}
 			else if (typeStr == "file")
 			{
 				mTypeMap[hash] = PropertyType::File;
-				mFiles[hash] = valueStr;
+                if (mFiles == nullptr)
+                {
+                    mFiles = std::make_unique<std::unordered_map<U32, std::string>>();
+                }
+				(*mFiles)[hash] = valueStr;
 			}
 			else if (typeStr == "float")
 			{
-				mTypeMap[hash] = PropertyType::Float;
-				mInts[hash] = fromString<F32>(valueStr);
+                mTypeMap[hash] = PropertyType::Float;
+                if (mFloats == nullptr)
+                {
+                    mFloats = std::make_unique<std::unordered_map<U32, F32>>();
+                }
+				(*mFloats)[hash] = fromString<F32>(valueStr);
 			}
 			else if (typeStr == "int")
 			{
-				mTypeMap[hash] = PropertyType::Int;
-				mInts[hash] = fromString<I32>(valueStr);
+                mTypeMap[hash] = PropertyType::Int;
+                if (mInts == nullptr)
+                {
+                    mInts = std::make_unique<std::unordered_map<U32, I32>>();
+                }
+				(*mInts)[hash] = fromString<I32>(valueStr);
 			}
 			else if (typeStr == "string")
 			{
-				mTypeMap[hash] = PropertyType::String;
-				mStrings[hash] = valueStr;
+                mTypeMap[hash] = PropertyType::String;
+                if (mStrings == nullptr)
+                {
+                    mStrings = std::make_unique<std::unordered_map<U32, std::string>>();
+                }
+				(*mStrings)[hash] = valueStr;
 			}
 			else
 			{
-				LogError(en::LogChannel::Graphics, 6, "Unknown property type %s, property ignored", typeStr.c_str());
+				LogError(en::LogChannel::Map, 6, "Unknown property type %s, property ignored", typeStr.c_str());
 			}
 
 		} while (parser.nextSibling("property"));
@@ -91,43 +126,49 @@ PropertyHolder::PropertyType PropertyHolder::GetPropertyType(const std::string& 
 bool PropertyHolder::GetBooleanProperty(const std::string& name) const
 {
 	assert(GetPropertyType(name) == PropertyType::Boolean);
+    assert(mBooleans != nullptr);
 	const U32 hash = Hash::CRC32(name.c_str());
-	return mBooleans.at(hash);
+	return mBooleans->at(hash);
 }
 
 const Color& PropertyHolder::GetColorProperty(const std::string& name) const
 {
-	assert(GetPropertyType(name) == PropertyType::Color);
+    assert(GetPropertyType(name) == PropertyType::Color);
+    assert(mColors != nullptr);
 	const U32 hash = Hash::CRC32(name.c_str());
-	return mColors.at(hash);
+	return mColors->at(hash);
 }
 
 F32 PropertyHolder::GetFloatProperty(const std::string& name) const
 {
-	assert(GetPropertyType(name) == PropertyType::Float);
+    assert(GetPropertyType(name) == PropertyType::Float);
+    assert(mFloats != nullptr);
 	const U32 hash = Hash::CRC32(name.c_str());
-	return mFloats.at(hash);
+	return mFloats->at(hash);
 }
 
 const std::string& PropertyHolder::GetFileProperty(const std::string& name) const
 {
-	assert(GetPropertyType(name) == PropertyType::File);
+    assert(GetPropertyType(name) == PropertyType::File);
+    assert(mFiles != nullptr);
 	const U32 hash = Hash::CRC32(name.c_str());
-	return mFiles.at(hash);
+	return mFiles->at(hash);
 }
 
 I32 PropertyHolder::GetIntProperty(const std::string& name) const
 {
-	assert(GetPropertyType(name) == PropertyType::Int);
+    assert(GetPropertyType(name) == PropertyType::Int);
+    assert(mInts != nullptr);
 	const U32 hash = Hash::CRC32(name.c_str());
-	return mInts.at(hash);
+	return mInts->at(hash);
 }
 
 const std::string& PropertyHolder::GetStringProperty(const std::string& name) const
 {
-	assert(GetPropertyType(name) == PropertyType::String);
+    assert(GetPropertyType(name) == PropertyType::String);
+    assert(mStrings != nullptr);
 	const U32 hash = Hash::CRC32(name.c_str());
-	return mStrings.at(hash);
+	return mStrings->at(hash);
 }
 
 } // namespace tmx

@@ -31,7 +31,7 @@ bool Map::LoadFromFile(const std::string& filename)
 	ParserXml xml;
 	if (!xml.loadFromFile(filename))
 	{
-		LogError(en::LogChannel::Graphics, 9, "Can't open file at %s", filename.c_str());
+		LogError(en::LogChannel::Map, 9, "Can't open file at %s", filename.c_str());
 		return false;
 	}
 
@@ -61,7 +61,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		}
 		else
 		{
-			LogError(en::LogChannel::Graphics, 9, "%s maps aren't supported yet", attribStr.c_str());
+			LogError(en::LogChannel::Map, 9, "%s maps aren't supported yet", attribStr.c_str());
 			return false;
 		}
 
@@ -85,7 +85,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		}
 		else
 		{
-			LogWarning(en::LogChannel::Graphics, 7, "Invalid renderorder %s", attribStr.c_str());
+			LogWarning(en::LogChannel::Map, 7, "Invalid renderorder %s", attribStr.c_str());
 		}
 
 		xml.getAttribute("width", mSize.x);
@@ -97,7 +97,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		xml.getAttribute("hexsidelength", mHexSideLength);
 		if (mOrientation == Orientation::Hexagonal && mHexSideLength <= 0)
 		{
-			LogWarning(en::LogChannel::Graphics, 7, "Invalid hexsidelength %s", attribStr.c_str());
+			LogWarning(en::LogChannel::Map, 7, "Invalid hexsidelength %s", attribStr.c_str());
 		}
 
 		attribStr = "y";
@@ -114,7 +114,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		{
 			if (mOrientation == Orientation::Staggered || mOrientation == Orientation::Hexagonal)
 			{
-				LogWarning(en::LogChannel::Graphics, 7, "Invalid staggeraxis %s", attribStr.c_str());
+				LogWarning(en::LogChannel::Map, 7, "Invalid staggeraxis %s", attribStr.c_str());
 			}
 		}
 
@@ -132,7 +132,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		{
 			if (mOrientation == Orientation::Staggered || mOrientation == Orientation::Hexagonal)
 			{
-				LogWarning(en::LogChannel::Graphics, 7, "Invalid staggerindex %s", attribStr.c_str());
+				LogWarning(en::LogChannel::Map, 7, "Invalid staggerindex %s", attribStr.c_str());
 			}
 		}
 
@@ -155,7 +155,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		if (infinite > 0)
 		{
 			// TODO : Infinite maps
-			LogError(en::LogChannel::Graphics, 9, "Infinite maps aren't supported yet");
+			LogError(en::LogChannel::Map, 9, "Infinite maps aren't supported yet");
 			return false;
 		}
 
@@ -179,7 +179,7 @@ bool Map::LoadFromFile(const std::string& filename)
 					if (tilesetData.firstGid <= 0)
 					{
 						validTileset = false;
-						LogWarning(en::LogChannel::Graphics, 7, "Invalid firstGid");
+						LogWarning(en::LogChannel::Map, 7, "Invalid firstGid");
 					}
 
 					std::string source = "";
@@ -197,14 +197,14 @@ bool Map::LoadFromFile(const std::string& filename)
 							if (!tilesetData.tileset.IsValid())
 							{
 								validTileset = false;
-								LogError(en::LogChannel::Graphics, 8, "Can't load tileset %s", source.c_str());
+								LogError(en::LogChannel::Map, 8, "Can't load tileset %s", source.c_str());
 							}
 						}
 					}
 					else
 					{
 						validTileset = false;
-						LogError(en::LogChannel::Graphics, 8, "Tileset inside maps aren't supported yet");
+						LogError(en::LogChannel::Map, 8, "Tileset inside maps aren't supported yet");
 						// TODO : Tilesets inside maps
 					}
 
@@ -243,7 +243,7 @@ bool Map::LoadFromFile(const std::string& filename)
 				}
 				else
 				{
-					LogError(en::LogChannel::Graphics, 8, "Unknown layer type %s", nodeName.c_str());
+					LogError(en::LogChannel::Map, 8, "Unknown layer type %s", nodeName.c_str());
 				}
 
 			} while (xml.nextSibling());
@@ -252,7 +252,7 @@ bool Map::LoadFromFile(const std::string& filename)
 	}
 	else
 	{
-		LogError(en::LogChannel::Graphics, 9, "Invalid map file at %s", filename.c_str());
+		LogError(en::LogChannel::Map, 9, "Invalid map file at %s", filename.c_str());
 		return false;
 	}
 
@@ -454,7 +454,7 @@ std::vector<Vector2u> Map::GetNeighbors(const Vector2u& tileCoords, bool diag /*
 		n.resize(6);
 		if (mStaggerAxis == StaggerAxis::Y) // Pointy
 		{
-			if ((tileCoords.y % 2) == static_cast<I32>(mStaggerIndex))
+			if ((tileCoords.y % 2) == static_cast<U32>(mStaggerIndex))
 			{
 				n[0].set(tileCoords.x - 1, tileCoords.y - 1);
 				n[1].set(tileCoords.x, tileCoords.y - 1);
@@ -475,7 +475,7 @@ std::vector<Vector2u> Map::GetNeighbors(const Vector2u& tileCoords, bool diag /*
 		}
 		else // Flat
 		{
-			if ((tileCoords.x % 2) == static_cast<I32>(mStaggerIndex))
+			if ((tileCoords.x % 2) == static_cast<U32>(mStaggerIndex))
 			{
 				n[0].set(tileCoords.x - 1, tileCoords.y - 1);
 				n[1].set(tileCoords.x, tileCoords.y - 1);
@@ -519,7 +519,7 @@ Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
 		if (mStaggerAxis == StaggerAxis::Y)
 		{
 			return Vector2f(
-				static_cast<F32>((tileCoords.y % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.x * mTileSize.x : (tileCoords.x + 0.5f) * mTileSize.x),
+				static_cast<F32>((tileCoords.y % 2 == static_cast<U32>(mStaggerIndex)) ? tileCoords.x * mTileSize.x : (tileCoords.x + 0.5f) * mTileSize.x),
 				tileCoords.y * mTileSize.y * 0.5f
 			);
 		}
@@ -527,7 +527,7 @@ Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
 		{
 			return Vector2f(
 				tileCoords.x * mTileSize.x * 0.5f,
-				static_cast<F32>((tileCoords.x % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.y * mTileSize.y : (tileCoords.y + 0.5f) * mTileSize.y)
+				static_cast<F32>((tileCoords.x % 2 == static_cast<U32>(mStaggerIndex)) ? tileCoords.y * mTileSize.y : (tileCoords.y + 0.5f) * mTileSize.y)
 			);
 		}
 	}
@@ -536,7 +536,7 @@ Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
 		if (mStaggerAxis == StaggerAxis::Y) // Pointy
 		{
 			return Vector2f(
-				static_cast<F32>((tileCoords.y % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.x * mTileSize.x : (tileCoords.x + 0.5f) * mTileSize.x),
+				static_cast<F32>((tileCoords.y % 2 == static_cast<U32>(mStaggerIndex)) ? tileCoords.x * mTileSize.x : (tileCoords.x + 0.5f) * mTileSize.x),
 				tileCoords.y* (mTileSize.y + mHexSideLength) * 0.5f
 			);
 		}
@@ -544,17 +544,57 @@ Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
 		{
 			return Vector2f(
 				tileCoords.x * (mTileSize.x + mHexSideLength) * 0.5f,
-				static_cast<F32>((tileCoords.x % 2 == static_cast<I32>(mStaggerIndex)) ? tileCoords.y * mTileSize.y : (tileCoords.y + 0.5f) * mTileSize.y)
+				static_cast<F32>((tileCoords.x % 2 == static_cast<U32>(mStaggerIndex)) ? tileCoords.y * mTileSize.y : (tileCoords.y + 0.5f) * mTileSize.y)
 			);
 		}
 	}
+
+    assert(false);
+    return Vector2f(0.0f, 0.0f);
 }
 
 Vector2u Map::WorldToCoords(const Vector2f& worldPos) const
 {
-	// TODO : WorldToCoords
-	ENLIVE_UNUSED(worldPos);
+    if (mOrientation == Orientation::Orthogonal)
+    {
+        return Vector2u(
+            static_cast<U32>(worldPos.x) / mTileSize.x,
+            static_cast<U32>(worldPos.y) / mTileSize.y
+        );
+    }
+    else if (mOrientation == Orientation::Isometric)
+    {
+        LogError(en::LogChannel::Map, 5, "Isometric WorldToCoords unimplemented");
+        return Vector2u(0, 0);
+    }
+    else if (mOrientation == Orientation::Staggered)
+    {
+        LogError(en::LogChannel::Map, 5, "Staggered WorldToCoords unimplemented");
+        return Vector2u(0, 0);
+    }
+    else if (mOrientation == Orientation::Hexagonal)
+    {
+        LogError(en::LogChannel::Map, 5, "Hexagonal WorldToCoords unimplemented");
+        return Vector2u(0, 0);
+    }
+
+    assert(false);
 	return Vector2u(0, 0);
+}
+
+void Map::Render(sf::RenderTarget& target, bool renderObjects /*= false*/) const
+{
+    for (const LayerBase::Ptr& layer : mLayers)
+    {
+        if (layer != nullptr)
+        {
+            LayerBase::LayerType layerType = layer->GetLayerType();
+            if (layer->IsVisible() && (layerType != LayerBase::LayerType::ObjectGroup || (renderObjects && layerType == LayerBase::LayerType::ObjectGroup)))
+            {
+                layer->Render(target);
+            }
+        }
+    }
 }
 
 } // namespace tmx

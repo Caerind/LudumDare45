@@ -58,6 +58,10 @@ bool LayerBase::IsLocked() const
 	return mLocked;
 }
 
+void LayerBase::Render(sf::RenderTarget& target) const
+{
+}
+
 bool LayerBase::Parse(ParserXml& parser)
 {
 	parser.getAttribute("id", mID);
