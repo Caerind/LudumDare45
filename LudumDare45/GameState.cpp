@@ -16,9 +16,9 @@ GameState::GameState(en::StateManager& manager)
 	, mText(en::ResourceManager::GetInstance().Get<en::Texture>("buble"), en::ResourceManager::GetInstance().Get<en::Font>("MainFont"))
 	, mCursorFrame(0)
 {
-	GameSingleton::clear();
+    GameSingleton::clear();
 
-	GameSingleton::mMap.load(1, en::Vector2f(408, 312), GameSingleton::mTileset, en::Vector2i(16, 16));
+    GameSingleton::mMap.load(en::ResourceManager::GetInstance().Get<en::tmx::Map>("map-1"));
 
 #ifdef ENLIVE_ENABLE_IMGUI
 	static bool editorRegisterDone = false;

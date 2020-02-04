@@ -54,10 +54,8 @@ public:
 	operator bool() const;
 	void Release();
 
-	T* GetPtr();
-	const T* GetPtr() const;
-	T& Get();
-	const T& Get() const;
+	T* GetPtr() const;
+	T& Get() const;
 
 	void ReleaseFromManager();
 

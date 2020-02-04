@@ -246,7 +246,7 @@ bool Map::LoadFromFile(const std::string& filename)
 					LogError(en::LogChannel::Map, 8, "Unknown layer type %s", nodeName.c_str());
 				}
 
-			} while (xml.nextSibling());
+			} while (xml.nextSibling()); // TODO : Hum
 			xml.closeNode();
 		}
 	}
@@ -306,8 +306,6 @@ U32 Map::GetHexSideLength() const
 
 U32 Map::GetTilesetIndexFromGID(U32 gid) const
 {
-	assert(GetTilesetCount() > 0);
-	assert(gid > 0);
 	const U32 tilesetCount = GetTilesetCount();
 	for (U32 tilesetIndex = 0; tilesetIndex < tilesetCount; ++tilesetIndex)
 	{
@@ -326,7 +324,6 @@ U32 Map::GetTilesetIndexFromGID(U32 gid) const
 			}
 		}
 	}
-	assert(false);
 	return U32_Max;
 }
 

@@ -31,26 +31,13 @@ void ResourcePtr<T>::Release()
 }
 
 template <typename T>
-T* ResourcePtr<T>::GetPtr()
+T* ResourcePtr<T>::GetPtr() const
 {
 	return (IsValid()) ? mManager->GetRawPtr<T>(mID) : nullptr;
 }
 
 template <typename T>
-const T* ResourcePtr<T>::GetPtr() const
-{
-	return (IsValid()) ? mManager->GetRawPtr<T>(mID) : nullptr;
-}
-
-template <typename T>
-T& ResourcePtr<T>::Get()
-{
-	assert(IsValid());
-	return *(mManager->GetRawPtr<T>(mID));
-}
-
-template <typename T>
-const T& ResourcePtr<T>::Get() const
+T& ResourcePtr<T>::Get() const
 {
 	assert(IsValid());
 	return *(mManager->GetRawPtr<T>(mID));

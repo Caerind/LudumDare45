@@ -18,8 +18,8 @@ public:
 
 	void load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::TilesetPtr tileset = en::tmx::TilesetPtr(), const en::Vector2i& tileSize = en::Vector2i::zero);
 
-	en::U32 getTileId(const en::Vector2i& coords);
-	void setTileId(const en::Vector2i& coords, en::U32 id);
+	en::U32 getTileId(const en::Vector2u& coords);
+	void setTileId(const en::Vector2u& coords, en::U32 id);
 
 	en::tmx::TilesetPtr getTileset() const;
 	void setTileset(en::tmx::TilesetPtr tileset);
@@ -27,10 +27,11 @@ public:
 	en::U32 getMapId() const { return mMapID; }
 	const en::Vector2f& getSpawnPoint() const { return mSpawnPoint; }
 
-	void setCollision(const en::Vector2i& coords, bool collide);
-	bool collide(const en::Vector2i& coords);
+	void setCollision(const en::Vector2u& coords, bool collide);
+	bool collide(const en::Vector2u& coords);
 
-	virtual void render(sf::RenderTarget& target);
+    void load(en::tmx::MapPtr mapPtr);
+	void render(sf::RenderTarget& target);
 
 private:
 	std::vector<bool> mCollisions;

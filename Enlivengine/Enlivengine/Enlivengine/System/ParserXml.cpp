@@ -63,7 +63,16 @@ bool ParserXml::readFirstNode()
 
 bool ParserXml::nextSibling(const std::string& sibling)
 {
-	pugi::xml_node n = mCurrentNode.next_sibling(sibling.c_str());
+    pugi::xml_node n;
+    if (sibling == "")
+    {
+        n = mCurrentNode.next_sibling();
+    }
+    else
+    {
+        n = mCurrentNode.next_sibling(sibling.c_str());
+    }
+
 	if (n)
 	{
 		mCurrentNode = n;

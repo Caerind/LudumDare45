@@ -18,6 +18,8 @@
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/Map.hpp>
 
+#include <SFML/Graphics/RenderTexture.hpp>
+
 namespace en
 {
 
@@ -207,17 +209,19 @@ void ImGuiResourceBrowser::Display()
                         {
                             ImGui::BeginTooltip();
 
-                            const Map& map = mapPtr.Get();
+                            const tmx::Map& map = mapPtr.Get();
 
                             const U32 sizeX = map.GetSize().x * map.GetTileSize().x;
                             const U32 sizeY = map.GetSize().y * map.GetTileSize().y;
                             sf::RenderTexture renderTexture;
                             renderTexture.create(sizeX, sizeY);
+                            renderTexture.clear(sf::Color::Transparent);
                             map.Render(renderTexture, true);
+                            renderTexture.display();
 
                             constexpr F32 maxPreviewSize = 150.0f;
                             sf::Sprite previewSprite;
-                            previewSprite.setTexture(renderTexture);
+                            previewSprite.setTexture(renderTexture.getTexture());
                             Vector2f textureSize;
                             textureSize.x = static_cast<F32>(renderTexture.getSize().x);
                             textureSize.y = static_cast<F32>(renderTexture.getSize().y);

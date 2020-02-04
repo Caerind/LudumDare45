@@ -190,27 +190,44 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::Tiles
     */
 }
 
-en::U32 GameMap::getTileId(const en::Vector2i& coords)
+en::U32 GameMap::getTileId(const en::Vector2u& coords)
 {
-	
+    if (mMap.IsValid())
+    {
+        return 0;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-void GameMap::setTileId(const en::Vector2i& coords, en::U32 id)
+void GameMap::setTileId(const en::Vector2u& coords, en::U32 id)
 {
-	
+    if (mMap.IsValid())
+    {
+    }
 }
 
-void GameMap::setCollision(const en::Vector2i& coords, bool collide)
+void GameMap::setCollision(const en::Vector2u& coords, bool collide)
 {
 
 }
 
-bool GameMap::collide(const en::Vector2i& coords)
+bool GameMap::collide(const en::Vector2u& coords)
 {
 	return false;
 }
 
+void GameMap::load(en::tmx::MapPtr mapPtr)
+{
+    mMap = mapPtr;
+}
+
 void GameMap::render(sf::RenderTarget& target)
 {
-
+    if (mMap.IsValid())
+    {
+        mMap.Get().Render(target);
+    }
 }

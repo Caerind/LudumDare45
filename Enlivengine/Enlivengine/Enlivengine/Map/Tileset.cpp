@@ -19,7 +19,6 @@ Tileset::Tileset()
 	, mImageSource()
 	, mImageTransparent(Color::Transparent)
 	, mTexture()
-	, mTextureChanged(true)
 {
 }
 
@@ -66,8 +65,23 @@ bool Tileset::LoadFromFile(const std::string& filename)
 		return false;
 	}
 
-    mTextureChanged = true;
-	return GetTexture().IsValid();
+    // Update texture
+    const std::string filepath = mPath + mImageSource;
+    if (mImageTransparent != Color::Transparent)
+    {
+        LogWarning(en::LogChannel::Map, 8, "%s : Transparent color for Tileset isn't supported yet -> Use alpha values", filepath.c_str());
+    }
+    mTexture = ResourceManager::GetInstance().GetFromFilename<Texture>(filepath);
+    if (!mTexture.IsValid())
+    {
+        mTexture = ResourceManager::GetInstance().Create<Texture>(mName + "-texture", TextureLoader::FromFile(filepath));
+        if (!mTexture.IsValid())
+        {
+            LogError(en::LogChannel::Map, 10, "Can't load tileset texture : %s", filepath.c_str());
+        }
+    }
+
+	return mTexture.IsValid();
 }
 
 const Vector2u& Tileset::GetTileSize() const
@@ -117,28 +131,12 @@ const Color& Tileset::GetImageTransparent() const
 
 TexturePtr& Tileset::GetTexture()
 {
-	if (mTextureChanged)
-    {
-        mTextureChanged = false;
-
-		const std::string filepath = mPath + mImageSource;
-		if (mImageTransparent != Color::Transparent)
-		{
-			LogWarning(en::LogChannel::Map, 8, "%s : Transparent color for Tileset isn't supported yet -> Use alpha values", filepath.c_str());
-		}
-
-        mTexture = ResourceManager::GetInstance().GetFromFilename<Texture>(filepath);
-		if (!mTexture.IsValid())
-		{
-            mTexture = ResourceManager::GetInstance().Create<Texture>(mName + "-texture", TextureLoader::FromFile(filepath));
-            if (!mTexture.IsValid())
-            {
-				LogError(en::LogChannel::Map, 10, "Can't load tileset texture : %s", filepath.c_str());
-			}
-		}
-	}
-
 	return mTexture;
+}
+
+const TexturePtr& Tileset::GetTexture() const
+{
+    return mTexture;
 }
 
 Vector2f Tileset::ToPos(U32 tileId) const

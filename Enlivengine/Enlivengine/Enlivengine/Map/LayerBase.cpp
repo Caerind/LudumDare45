@@ -60,6 +60,7 @@ bool LayerBase::IsLocked() const
 
 void LayerBase::Render(sf::RenderTarget& target) const
 {
+    ENLIVE_UNUSED(target);
 }
 
 bool LayerBase::Parse(ParserXml& parser)

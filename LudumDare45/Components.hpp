@@ -100,7 +100,7 @@ struct VelocityComponent
 struct PropsComponent
 {
 	sf::Sprite sprite;
-	en::Vector2i coords;
+	en::Vector2u coords;
 
 	en::U32 gid{ 0 };
 

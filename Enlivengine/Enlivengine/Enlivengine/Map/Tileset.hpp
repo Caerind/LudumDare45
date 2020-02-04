@@ -29,6 +29,7 @@ class Tileset : public Resource<Tileset>
 		const Color& GetImageTransparent() const;
 
 		TexturePtr& GetTexture();
+        const TexturePtr& GetTexture() const;
 
 		Vector2f ToPos(U32 tileId) const;
 
@@ -45,7 +46,6 @@ class Tileset : public Resource<Tileset>
 		Color mImageTransparent;
 
 		TexturePtr mTexture;
-		bool mTextureChanged;
 };
 
 using TilesetPtr = ResourcePtr<Tileset>;
