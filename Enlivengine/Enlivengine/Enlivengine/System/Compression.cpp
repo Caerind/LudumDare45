@@ -84,7 +84,7 @@ bool Compression::Decode64(std::string& data)
     return true;
 }
 
-bool Compression::Compress(std::string& data)
+bool Compression::CompressZlib(std::string& data)
 {
 	mz_stream zs; // mz_stream is zlib's control structure
     std::memset(&zs, 0, sizeof(zs));
@@ -93,7 +93,7 @@ bool Compression::Compress(std::string& data)
         return false;
     }
     zs.next_in = (U8*)data.data();
-    zs.avail_in = static_cast<unsigned int>(data.size()); // set the z_stream's input
+    zs.avail_in = (U32)data.size(); // set the z_stream's input
     I32 ret;
     char outbuffer[32768];
     std::string outstring;
@@ -118,14 +118,14 @@ bool Compression::Compress(std::string& data)
     return true;
 }
 
-bool Compression::Decompress(std::string& data)
+bool Compression::DecompressZlib(std::string& data)
 {
 	mz_stream zstream;
 	zstream.zalloc = 0;
 	zstream.zfree = 0;
 	zstream.opaque = 0;
 	zstream.next_in = const_cast<U8*>(reinterpret_cast<const U8*>(data.data()));
-	zstream.avail_in = static_cast<unsigned int>(data.size());
+	zstream.avail_in = (U32)data.size();
 	I32 result(mz_inflateInit(&zstream));
 	if (result != MZ_OK)
 	{
@@ -160,16 +160,6 @@ bool Compression::Decompress(std::string& data)
 	mz_inflateEnd(&zstream);
 	data = outstring;
 	return true;
-}
-
-bool Compression::Compress64(std::string& data)
-{
-	return Compression::Compress(data) && Compression::Encode64(data);
-}
-
-bool Compression::Decompress64(std::string& data)
-{
-	return Compression::Decode64(data) && Compression::Decompress(data);
 }
 
 bool Compression::IsBase64(U8 c)

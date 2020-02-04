@@ -199,7 +199,8 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 	parser.getValue(data);
 	trim(data);
 
-	if (!Compression::Decode64(data))
+	const bool decode = Compression::Decode64(data);
+	if (!decode)
 	{
 		LogError(en::LogChannel::Map, 8, "Can't decode Base64");
 		return false;
@@ -208,7 +209,7 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 	bool decompression = false;
 	switch (mCompression)
 	{
-	case CompressionType::Zlib: decompression = Compression::Decompress(data); break;
+	case CompressionType::Zlib: decompression = Compression::DecompressZlib(data); break;
 	case CompressionType::Gzip: decompression = false; break; // TODO : Gzip decompression
 	case CompressionType::None: decompression = true; break;
 	default: decompression = false; break;
@@ -230,7 +231,7 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 	Vector2u coords(0, 0);
 	for (std::size_t i = 0; i < byteVector.size() - 3; i += 4)
 	{
-		U32 gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
+		const U32 gid = (byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24);
 		// TODO : Read Flip Flag
 		SetTile(coords, gid);
 		coords.x = (coords.x + 1) % mSize.x;

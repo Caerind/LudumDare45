@@ -16,6 +16,58 @@ GameMap::GameMap()
 {
 }
 
+void GameMap::load(en::tmx::MapPtr mapPtr)
+{
+	mMap = mapPtr;
+}
+
+void GameMap::render(sf::RenderTarget& target)
+{
+	if (mMap.IsValid())
+	{
+		mMap.Get().Render(target);
+	}
+}
+
+en::U32 GameMap::getMapId() const
+{
+	return mMapID;
+}
+
+const en::Vector2f& GameMap::getSpawnPoint() const
+{
+	return mSpawnPoint;
+}
+
+void GameMap::setCollision(const en::Vector2u& coords, bool collide)
+{
+
+}
+
+bool GameMap::collide(const en::Vector2u& coords)
+{
+	return false;
+}
+
+en::U32 GameMap::getTileId(const en::Vector2u& coords)
+{
+	if (mMap.IsValid())
+	{
+		return 0;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+void GameMap::setTileId(const en::Vector2u& coords, en::U32 id)
+{
+	if (mMap.IsValid())
+	{
+	}
+}
+
 std::vector<en::Vector2u> GameMap::getNeighbors(const en::Vector2u& coords, bool diag /*= false*/)
 {
     if (mMap.IsValid())
@@ -55,41 +107,6 @@ en::Vector2f GameMap::coordsToWorld(const en::Vector2u& coords)
 void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::TilesetPtr tileset /*= en::tmx::TilesetPtr()*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
 {
     /*
-
-    mTileGrid.clear();
-    mCollisions.clear();
-
-    mMapID = mapID;
-    mSpawnPoint = spawnPoint;
-    mTileset = tileset;
-    mTileSize = tileSize;
-
-    en::ParserXml xml;
-    std::string filename = en::PathManager::GetInstance().GetMapsPath() + "map-" + std::to_string(mMapID) + ".tmx";
-    if (!xml.loadFromFile(filename))
-    {
-        LogError(en::LogChannel::Global, 10, "Cant read map : %s", filename.c_str());
-        return;
-    }
-    if (!xml.readNode("map"))
-    {
-        LogError(en::LogChannel::Global, 10, ("Cant read map xml"));
-        return;
-    }
-
-    en::Vector2i size;
-    xml.getAttribute("width", size.x);
-    xml.getAttribute("height", size.y);
-    mSize = size;
-
-    const en::U32 max = size.x * size.y;
-    mTileGrid.resize(max * 4); // TODO : Why 4 ?
-    mCollisions.resize(max);
-    for (en::U32 i = 0; i < max; i++)
-    {
-        mCollisions[i] = false;
-    }
-    ensureUpdateGeometry();
 
     if (xml.readNode("layer"))
     {
@@ -188,46 +205,4 @@ void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::Tiles
     updateRender();
 
     */
-}
-
-en::U32 GameMap::getTileId(const en::Vector2u& coords)
-{
-    if (mMap.IsValid())
-    {
-        return 0;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-void GameMap::setTileId(const en::Vector2u& coords, en::U32 id)
-{
-    if (mMap.IsValid())
-    {
-    }
-}
-
-void GameMap::setCollision(const en::Vector2u& coords, bool collide)
-{
-
-}
-
-bool GameMap::collide(const en::Vector2u& coords)
-{
-	return false;
-}
-
-void GameMap::load(en::tmx::MapPtr mapPtr)
-{
-    mMap = mapPtr;
-}
-
-void GameMap::render(sf::RenderTarget& target)
-{
-    if (mMap.IsValid())
-    {
-        mMap.Get().Render(target);
-    }
 }

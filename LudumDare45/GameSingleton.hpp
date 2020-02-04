@@ -6,7 +6,6 @@
 #include <Enlivengine/Application/ResourceManager.hpp>
 #include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Graphics/SFMLResources.hpp>
-#include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Graphics/Animation.hpp>
 #include <entt/entt.hpp>
 
@@ -32,7 +31,6 @@ class GameSingleton
 		static bool mFirstIntroDone;
 		static bool mFirstThrowNothingDone;
 
-		static en::tmx::TilesetPtr mTileset;
 		static GameMap mMap;
 		static en::View mView;
 

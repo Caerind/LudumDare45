@@ -2,14 +2,16 @@
 
 #include <doctest/doctest.h>
 
+#include <iostream>
+
 DOCTEST_TEST_CASE("Compression determinism")
 {
 	const std::string myStr = "AZERTYUIOPQSDFGHJKLMwxcvbn1234567890";
-	//DOCTEST_INFO(myStr);
+	std::cout << myStr << std::endl;
 
 	std::string myStrEncode = myStr;
 	bool encode64Valid = en::Compression::Encode64(myStrEncode);
-	//DOCTEST_INFO(myStrEncode);
+	std::cout << myStrEncode << std::endl;
 	DOCTEST_CHECK(myStr != myStrEncode);
 	bool decode64Valid = en::Compression::Decode64(myStrEncode);
 	DOCTEST_CHECK(encode64Valid);
@@ -17,20 +19,40 @@ DOCTEST_TEST_CASE("Compression determinism")
 	DOCTEST_CHECK(myStr == myStrEncode);
 
 	std::string myStrCompress = myStr;
-	bool compressValid = en::Compression::Compress(myStrCompress);
-	//DOCTEST_INFO(myStrCompress);
+	bool compressValid = en::Compression::CompressZlib(myStrCompress);
+	std::cout << myStrCompress << std::endl;
 	DOCTEST_CHECK(myStr != myStrCompress);
-	bool decompressValid = en::Compression::Decompress(myStrCompress);
+	bool decompressValid = en::Compression::DecompressZlib(myStrCompress);
 	DOCTEST_CHECK(compressValid);
 	DOCTEST_CHECK(decompressValid);
 	DOCTEST_CHECK(myStr == myStrCompress);
+}
 
-	std::string myStrCompress64 = myStr;
-	bool compress64Valid = en::Compression::Compress(myStrCompress64);
-	//DOCTEST_INFO(myStrCompress64);
-	DOCTEST_CHECK(myStr != myStrCompress64);
-	bool decompress64Valid = en::Compression::Decompress(myStrCompress64);
-	DOCTEST_CHECK(compress64Valid);
-	DOCTEST_CHECK(decompress64Valid);
-	DOCTEST_CHECK(myStr == myStrCompress64);
+DOCTEST_TEST_CASE("Encode64")
+{
+	const std::string inputStr = "AzertyuiopQsdfghjklmWxcvbn1234567890";
+	const std::string outputStr = "QXplcnR5dWlvcFFzZGZnaGprbG1XeGN2Ym4xMjM0NTY3ODkw";
+	std::string input = inputStr;
+	bool encode64Valid = en::Compression::Encode64(input);
+	DOCTEST_CHECK(encode64Valid);
+	DOCTEST_CHECK(outputStr == input);
+}
+
+DOCTEST_TEST_CASE("Decode64")
+{
+}
+
+DOCTEST_TEST_CASE("Zlib Compression")
+{
+	const std::string inputStr = "AzertyuiopQsdfghjklmWxcvbn1234567890";
+	const std::string outputStr = "eJxzrEotKqkszcwvCCxOSUvPyMrOyQ2vSC5LyjM0MjYxNTO3sDQAAAeaDM0=";
+	std::string input = inputStr;
+	bool zlibCompression = en::Compression::CompressZlib(input);
+	DOCTEST_CHECK(zlibCompression);
+	DOCTEST_CHECK(outputStr == input);
+}
+
+DOCTEST_TEST_CASE("Zlib Decompression")
+{
+
 }

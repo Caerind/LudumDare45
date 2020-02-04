@@ -245,8 +245,7 @@ bool Map::LoadFromFile(const std::string& filename)
 				{
 					LogError(en::LogChannel::Map, 8, "Unknown layer type %s", nodeName.c_str());
 				}
-
-			} while (xml.nextSibling()); // TODO : Hum
+			} while (xml.nextSibling());
 			xml.closeNode();
 		}
 	}

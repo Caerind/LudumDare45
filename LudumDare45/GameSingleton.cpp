@@ -15,7 +15,6 @@ en::Application* GameSingleton::application;
 bool GameSingleton::mFirstIntroDone = false;
 bool GameSingleton::mFirstThrowNothingDone = false;
 
-en::tmx::TilesetPtr GameSingleton::mTileset;
 GameMap GameSingleton::mMap;
 en::View GameSingleton::mView;
 
@@ -80,9 +79,6 @@ void GameSingleton::loadResourcesGame()
 	mNothingAISound = en::AudioSystem::GetInstance().PrepareSound("nai", soundsPath + "Nia.wav");
 	mPieceSound = en::AudioSystem::GetInstance().PrepareSound("piece", soundsPath + "Piece.wav");
 	mPieceGetSound = en::AudioSystem::GetInstance().PrepareSound("pieceGet", soundsPath + "PieceGet.wav");
-
-	// Tileset & Map
-	mTileset = en::ResourceManager::GetInstance().Get<en::tmx::Tileset>("tileset");
 
 	// Idle
 	en::Animation animIdleBG;

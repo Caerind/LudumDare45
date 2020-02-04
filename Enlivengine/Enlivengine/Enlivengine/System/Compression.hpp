@@ -11,11 +11,8 @@ class Compression
 	public:
 		static bool Encode64(std::string& data);
 		static bool Decode64(std::string& data);
-		static bool Compress(std::string& data);
-		static bool Decompress(std::string& data);
-
-		static bool Compress64(std::string& data);
-		static bool Decompress64(std::string& data);
+		static bool CompressZlib(std::string& data);
+		static bool DecompressZlib(std::string& data);
 
 	private:
 		static const std::string sBase64Table;
