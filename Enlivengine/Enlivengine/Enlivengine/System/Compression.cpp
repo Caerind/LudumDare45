@@ -86,80 +86,58 @@ bool Compression::Decode64(std::string& data)
 
 bool Compression::CompressZlib(std::string& data)
 {
-	mz_stream zs; // mz_stream is zlib's control structure
-    std::memset(&zs, 0, sizeof(zs));
-    if (mz_deflateInit(&zs, MZ_BEST_COMPRESSION) != MZ_OK)
-    {
-        return false;
-    }
-    zs.next_in = (U8*)data.data();
-    zs.avail_in = (U32)data.size(); // set the z_stream's input
-    I32 ret;
-    char outbuffer[32768];
-    std::string outstring;
-    // retrieve the compressed bytes blockwise
-    do
-    {
-        zs.next_out = reinterpret_cast<unsigned char*>(outbuffer);
-        zs.avail_out = sizeof(outbuffer);
-        ret = mz_deflate(&zs, MZ_FINISH);
-        if (outstring.size() < zs.total_out)
-        {
-            // append the block to the output string
-            outstring.append(outbuffer, zs.total_out - outstring.size());
-        }
-    } while (ret == MZ_OK);
-    mz_deflateEnd(&zs);
-    if (ret != MZ_STREAM_END) // an error occurred that was not EOF
-    {
-        return false;
-    }
-    data = outstring;
+    ENLIVE_UNUSED(data);
     return true;
 }
 
 bool Compression::DecompressZlib(std::string& data)
 {
-	mz_stream zstream;
-	zstream.zalloc = 0;
-	zstream.zfree = 0;
-	zstream.opaque = 0;
-	zstream.next_in = const_cast<U8*>(reinterpret_cast<const U8*>(data.data()));
-	zstream.avail_in = (U32)data.size();
-	I32 result(mz_inflateInit(&zstream));
-	if (result != MZ_OK)
-	{
-		return false;
-	}
-	char outbuffer[32768];
-	std::string outstring;
-	do
-	{
-		zstream.next_out = reinterpret_cast<U8*>(outbuffer);
-		zstream.avail_out = sizeof(outbuffer);
-		result = mz_inflate(&zstream, MZ_SYNC_FLUSH);
-		switch (result)
-		{
-		case MZ_NEED_DICT:
-		case MZ_STREAM_ERROR:
-			result = MZ_DATA_ERROR;
-		case MZ_DATA_ERROR:
-		case MZ_MEM_ERROR:
-			mz_inflateEnd(&zstream);
-			return false;
-		}
-		if (outstring.size() < zstream.total_out)
-		{
-			outstring.append(outbuffer, zstream.total_out - outstring.size());
-		}
-	} while (result != MZ_STREAM_END);
-	if (zstream.avail_in != 0)
-	{
-		return false;
-	}
-	mz_inflateEnd(&zstream);
-	data = outstring;
-	return true;
+    if (data.size() == 0)
+        return false;
+
+    std::string output;
+    output.resize(256);
+
+    mz_stream stream;
+    memset(&stream, 0, sizeof(stream));
+    stream.next_in = (unsigned char*)data.data();
+    stream.avail_in = (mz_uint32)data.size();
+    stream.next_out = (unsigned char*)output.data();
+    stream.avail_out = (mz_uint32)output.size();
+
+    if (mz_inflateInit(&stream))
+    {
+        return false;
+    }
+
+    for(;;)
+    {
+        int status = mz_inflate(&stream, MZ_SYNC_FLUSH);
+
+        if (!stream.avail_out)
+        {
+            U32 oldSize = static_cast<U32>(output.size());
+            output.resize(oldSize * 2);
+            stream.next_out = (unsigned char*)(output.data() + oldSize);
+            stream.avail_out = (mz_uint32)oldSize;
+            return false;
+        }
+
+        if (status == MZ_STREAM_END)
+        {
+            break;
+        }
+        else if (status != MZ_OK)
+        {
+            return false;
+        }
+    }
+    if (mz_inflateEnd(&stream) != Z_OK)
+    {
+        return false;
+    }
+    data = output;
+    return true;
 }
 
 bool Compression::IsBase64(U8 c)
