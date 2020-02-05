@@ -199,17 +199,10 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 	parser.getValue(data);
 	trim(data);
 
-	const bool decode = Compression::Decode64(data);
-	if (!decode)
-	{
-		LogError(en::LogChannel::Map, 8, "Can't decode Base64");
-		return false;
-	}
-
 	bool decompression = false;
 	switch (mCompression)
 	{
-	case CompressionType::Zlib: decompression = Compression::DecompressZlib(data); break;
+	case CompressionType::Zlib: decompression = false; /*Compression::DecompressZlib(data);*/ break;
 	case CompressionType::Gzip: decompression = false; break; // TODO : Gzip decompression
 	case CompressionType::None: decompression = true; break;
 	default: decompression = false; break;
