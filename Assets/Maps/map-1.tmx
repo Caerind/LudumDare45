@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.5" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="31">
+<map version="1.2" tiledversion="1.3.1" orientation="orthogonal" renderorder="right-down" compressionlevel="0" width="64" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="32">
  <tileset firstgid="1" source="tileset.tsx"/>
  <layer id="1" name="Map" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJztl09vgzAMxaMOkEq57M8Felo5UU4bX3AffYnmJ6yMpGWbRMLe4aemaRr87NgxR2PMkRBCCCGEEEIIUbxaLgH6G2v6P3j+1to7y9nSWE6Wq6W2PFtGWTfI9xf5/Sprx18+f+t4d6L1oHhQjMpHpVBYKhm3Jr8zMUisEecqor8N+Ai4c4Mz0wht4j4YVPwQS+0DrR9nfkk7KNV+lUk/Lwax9dHyJDYXAf0gpt/t8y57wQep64eNGIfiDx/F9EPrm/JnTvoLM+eC1u+0T7LmHv3+3lvrjOkvxEYXM5xdXz9qe7dj/ZiDH+ALpx/3Q7NSv793atyK0WDW1b+96Ucd07Vdnw1/flqxdwo4G8sFG/2+0OlEDejVf/W8T5eJ/mJBg7Nd9/gHM/d1+j1Az7tex/WAtYybTPRXZq5veJdxOkL57usP9YG4R1PXjzu/Mt/7n3t7HL82aKbI87dG33VLtW0JnSs55PhP/aJ9oN8PUBfqr8+PPer3zwZ6X+Q08gXjPeqP+SOnHCeEEEIIIYQQ8j/4BDwlfr0=
+   eAHtl8tOw0AMRSteUls2FDbAClgBK+AH+XR8pBzJGk2KVAllgry4sjOZTH3tayfdbjabbaFyUBooDZQGSgOlgdJAaaA0UBooDZQGSgNJA0/hP8/gZdo3t8f7a/2vCa+HwGPgOrAPvAV2gdvAewBur9P1XVjuA/Z6f038cy3hDtezhPPwBfzM0WX44CJwNfn3YVvtjK4JakmtqSHc4TLHH369HLkf3aADzuJMwDMj5wD+1s9a5hxYeyw9gObl27NowvOwo/cF/In5JnAIEDN5kFvmr++9nuWczwBnmYuR54L1J0b9ufqbox5v1+T6MeWAs1zbhj8a5Cx/au9cg5M1h/tXgP1y7dnMNZ89Gm/jIUY4Ezc1U7v2gPyd7cy/Hm/X1szfnJgHc0EOfD8w0+Xasy1/c+vZo1nqf6xHua8GtD3erv03/s4x+DED0IQ4hN+uMyOs8W+5dd+SlhiZd7luxNN+F8LTGfASPnt4Nq8/x3UGs+KYtjhjacCBHpWb8RO73zv0Pjz9rjNX8nd9H3v4BtwF8JkVa+BPjHAgbqw85vq95U9uWqAp36PuX7rWvd+3/sRKHkTLJ1/Lx9nAM+1scEZg80zoxbDkGhxyrPqHWM+cs597ZQ09fkp+ra28qS85odbOBfol/g99s6YmTvmtUZ/J2kDDrwF72n5hduL/R/5tXXI+7BPtyD3e8qjr5b87qgZVg9JAaaA0UBooDZQGSgOlgdJAaeAvNPADPCV+vQ==
   </data>
  </layer>
+ <objectgroup id="6" name="Objects">
+  <object id="31" name="Spawn" x="244" y="311">
+   <point/>
+  </object>
+ </objectgroup>
  <layer id="3" name="props" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJzt1jEKgDAMheGuXsUbdHR0dHT0CN5/UVFBApaAhdbX/4MO0ggpSaMhAAAAAAAAay2dQAWGa91Gsx8TsYomR0wrfaNc67vPYzLqNO9reTx73qndW597zmZnhDpbf8+M+IvUHVe+/x4K9zyHZx/EQF8AKv+Axzns981LcT62PtsUa5pDXzoBAMBnXekEAAAAgAw2a8oKRg==
+   eAHt1jEKwzAMQNGsvUpv0LFjxo4Ze4Tcf0kMMQiBhRaBLP9AqV25tfSiJN02DgQQQAABBBBAAAEEEEAAAQQQ0AKn/mDB+feuub36sffB8/4Rc71WhMoMf45KVukb2RcOlqmW9D6X/T0q4LgDfxH0fEcsTzkc9bmntm6XsrCApPT5H9kFbB3+k9Y1bsXCE0uwgedaSJBmeAqyD5qJnIdvzgYIJBSo8h+w1aGfb17uivfH1e9tFc+pt5+tdW8rSAwBBBBAYAqB1xRZkiQCCCCAAAIIIIAAArbABWvKCkY=
   </data>
  </layer>
 </map>

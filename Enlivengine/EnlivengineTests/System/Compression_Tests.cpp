@@ -65,15 +65,15 @@ DOCTEST_TEST_CASE("Base64 determinism")
 
 DOCTEST_TEST_CASE("Zlib Compression")
 {
-	
+	// TODO
 }
 
 DOCTEST_TEST_CASE("Zlib Decompression")
 {
-	
+    // TODO
 }
 
-DOCTEST_TEST_CASE("Compression determinism")
+DOCTEST_TEST_CASE("Zlib Compression determinism")
 {
-	
+    // TODO
 }

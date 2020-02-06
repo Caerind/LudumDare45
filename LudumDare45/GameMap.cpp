@@ -12,6 +12,9 @@
 #include "EditorComponents.hpp"
 #include "GameSingleton.hpp"
 
+#include <Enlivengine/Map/ObjectGroup.hpp>
+#include <Enlivengine/Map/PointObject.hpp>
+
 GameMap::GameMap()
 {
 }
@@ -19,6 +22,26 @@ GameMap::GameMap()
 void GameMap::load(en::tmx::MapPtr mapPtr)
 {
 	mMap = mapPtr;
+    if (mMap.IsValid())
+    {
+        en::tmx::Map& map = mMap.Get();
+        for (en::U32 i = 0; i < map.GetLayerCount(); ++i)
+        {
+            en::tmx::LayerBase* layer = map.GetLayerByIndex(i);
+            if (layer != nullptr && layer->GetLayerType() == en::tmx::LayerBase::LayerType::ObjectGroup && layer->GetName() == "Objects")
+            {
+                en::tmx::ObjectGroup& objects = map.GetLayerByIndexAs<en::tmx::ObjectGroup>(i);
+                for (en::U32 j = 0; j < objects.GetObjectCount(); ++j)
+                {
+                    en::tmx::ObjectBase* object = objects.GetObjectByIndex(j);
+                    if (object != nullptr && object->GetObjectType() == en::tmx::ObjectBase::ObjectType::Point && object->GetName() == "Spawn")
+                    {
+                        mSpawnPoint = object->GetPosition();
+                    }
+                }
+            }
+        }
+    }
 }
 
 void GameMap::render(sf::RenderTarget& target)
@@ -102,107 +125,4 @@ en::Vector2f GameMap::coordsToWorld(const en::Vector2u& coords)
     {
         return en::Vector2f(0.0f, 0.0f);
     }
-}
-
-void GameMap::load(en::U32 mapID, const en::Vector2f& spawnPoint, en::tmx::TilesetPtr tileset /*= en::tmx::TilesetPtr()*/, const en::Vector2i& tileSize /*= en::Vector2i::zero*/)
-{
-    /*
-
-    if (xml.readNode("layer"))
-    {
-        if (xml.readNode("data"))
-        {
-            std::string code;
-            xml.getValue(code);
-            en::Vector2i coords{ en::Vector2i::zero };
-            std::string data;
-            std::stringstream ss;
-            ss << code;
-            ss >> data;
-            if (!en::Compression::Decompress64(data))
-            {
-                return;
-            }
-            std::vector<en::U8> byteVector;
-            byteVector.reserve(max * 4);
-            for (std::string::iterator i = data.begin(); i != data.end(); ++i)
-            {
-                byteVector.push_back(*i);
-            }
-            for (en::U32 i = 0; i < byteVector.size() - 3; i += 4)
-            {
-                en::U32 gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
-
-                if (mTileset.IsValid() && gid > mTileset.Get().GetColumns())
-                {
-                    mCollisions[coords.x + coords.y * size.x] = true;
-                }
-
-                setTileId(coords, gid);
-
-                coords.x = (coords.x + 1) % size.x;
-                if (coords.x == 0)
-                {
-                    coords.y++;
-                }
-            }
-
-            xml.closeNode();
-        }
-
-        if (xml.nextSibling("layer"))
-        {
-            if (xml.readNode("data"))
-            {
-                std::string code;
-                xml.getValue(code);
-                en::Vector2i coords{ en::Vector2i::zero };
-                std::string data;
-                std::stringstream ss;
-                ss << code;
-                ss >> data;
-                if (!en::Compression::Decompress64(data))
-                {
-                    return;
-                }
-                std::vector<en::U8> byteVector;
-                byteVector.reserve(max * 4);
-                for (std::string::iterator i = data.begin(); i != data.end(); ++i)
-                {
-                    byteVector.push_back(*i);
-                }
-
-                for (en::U32 i = 0; i < byteVector.size() - 3; i += 4)
-                {
-                    en::U32 gid = byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24;
-
-                    if (gid != 0 && mTileset.IsValid())
-                    {
-                        const en::Vector2f worldPos = coordsToWorld(coords);
-                        EntityPrefab::createProps(GameSingleton::world, worldPos.x, worldPos.y, gid, mTileset);
-                        mCollisions[coords.x + coords.y * size.x] = true;
-                    }
-
-                    coords.x = (coords.x + 1) % size.x;
-                    if (coords.x == 0)
-                    {
-                        coords.y++;
-                    }
-                }
-
-                xml.closeNode();
-            }
-
-            xml.closeNode();
-        }
-        else
-        {
-            xml.closeNode();
-        }
-    }
-
-    updateGeometry();
-    updateRender();
-
-    */
 }

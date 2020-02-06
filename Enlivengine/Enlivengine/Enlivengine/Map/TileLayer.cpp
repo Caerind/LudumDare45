@@ -39,12 +39,11 @@ void TileLayer::SetTile(const Vector2u& tileCoords, U32 tileID)
 {
 	assert(tileCoords.x < mSize.x);
 	assert(tileCoords.y < mSize.y);
-	const U32 index = tileCoords.y * mSize.x + tileCoords.x;
-	assert(index < static_cast<U32>(mTiles.size()));
+	const U32 tileIndex = tileCoords.y * mSize.x + tileCoords.x;
+	assert(tileIndex < static_cast<U32>(mTiles.size()));
+	const U32 vertexIndex = tileIndex * 4;
 
-	const U32 vertexIndex = (tileCoords.x + tileCoords.y * mSize.x) * 4;
-
-	const U32 previousTileID = mTiles[index];
+	const U32 previousTileID = mTiles[tileIndex];
 	const U32 previousTilesetIndex = mMap.GetTilesetIndexFromGID(previousTileID);
 	const U32 tilesetIndex = mMap.GetTilesetIndexFromGID(tileID);
 	
@@ -59,7 +58,7 @@ void TileLayer::SetTile(const Vector2u& tileCoords, U32 tileID)
 	}
 
 	// Update new tile if needed
-	mTiles[index] = tileID;
+	mTiles[tileIndex] = tileID;
 	if (tileID > 0 && tilesetIndex < mMap.GetTilesetCount())
 	{
 		TilesetPtr tilesetPtr = mMap.GetTileset(tilesetIndex);
@@ -67,8 +66,9 @@ void TileLayer::SetTile(const Vector2u& tileCoords, U32 tileID)
 		{
 			const Tileset& tileset = tilesetPtr.Get();
 
+            const U32 localTileID = tileID - mMap.GetTilesetFirstGid(tilesetIndex);
 			const Vector2u& tilesetTileSize = tileset.GetTileSize();
-			const Vector2f pos(tileset.ToPos(tileID));
+			const Vector2f pos(tileset.ToPos(localTileID));
 			const Vector2f texSize(static_cast<F32>(tilesetTileSize.x), static_cast<F32>(tilesetTileSize.y));
 
 			sf::Vertex* quad = &mVertexArrays[tilesetIndex][vertexIndex];
