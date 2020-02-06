@@ -63,40 +63,17 @@ DOCTEST_TEST_CASE("Base64 determinism")
 	DOCTEST_CHECK(decodeTemp == input);
 }
 
-DOCTEST_TEST_CASE("Compression determinism")
-{
-	/*
-	std::string myStrCompress = myStr;
-	bool compressValid = en::Compression::CompressZlib(myStrCompress);
-	DOCTEST_CHECK(myStr != myStrCompress);
-	bool decompressValid = en::Compression::DecompressZlib(myStrCompress);
-	DOCTEST_CHECK(compressValid);
-	DOCTEST_CHECK(decompressValid);
-	DOCTEST_CHECK(myStr == myStrCompress);
-	*/
-}
-
 DOCTEST_TEST_CASE("Zlib Compression")
 {
-	/*
-	const std::string inputStr = "AzertyuiopQsdfghjklmWxcvbn1234567890";
-	const en::Compression::CompressionLevel compressionLevel = en::Compression::CompressionLevel::Default;
-	const std::string outputStr = "eAEBJADb/0F6ZXJ0eXVpb3BRc2RmZ2hqa2xtV3hjdmJuMTIzNDU2Nzg5MAeaDM0=";
-	std::string data = inputStr;
-	bool zlibCompression = en::Compression::CompressZlib(data, compressionLevel);
-	DOCTEST_CHECK(zlibCompression);
-	DOCTEST_CHECK(outputStr == data);
-	*/
+	
 }
 
 DOCTEST_TEST_CASE("Zlib Decompression")
 {
-	/*
-	const std::string inputStr = "eAEBJADb/0F6ZXJ0eXVpb3BRc2RmZ2hqa2xtV3hjdmJuMTIzNDU2Nzg5MAeaDM0=";
-    const std::string outputStr = "AzertyuiopQsdfghjklmWxcvbn1234567890";
-    std::string data = inputStr;
-    bool zlibDecompression = en::Compression::DecompressZlib(data);
-    DOCTEST_CHECK(zlibDecompression);
-    DOCTEST_CHECK(outputStr == data);
-	*/
+	
+}
+
+DOCTEST_TEST_CASE("Compression determinism")
+{
+	
 }

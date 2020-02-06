@@ -199,10 +199,18 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 	parser.getValue(data);
 	trim(data);
 
+	std::vector<U8> decodedBytes;
+	if (!Compression::Decode64(data, decodedBytes))
+	{
+		return false;
+	}
+
+	std::vector<U8> bytes;
+	bytes.resize(mSize.x * mSize.y * 4);
 	bool decompression = false;
 	switch (mCompression)
 	{
-	case CompressionType::Zlib: decompression = false; /*Compression::DecompressZlib(data);*/ break;
+	case CompressionType::Zlib: decompression = Compression::DecompressZlib(decodedBytes, bytes); break;
 	case CompressionType::Gzip: decompression = false; break; // TODO : Gzip decompression
 	case CompressionType::None: decompression = true; break;
 	default: decompression = false; break;
@@ -213,18 +221,10 @@ bool TileLayer::ParseBase64(ParserXml& parser)
 		return false;
 	}
 
-	std::vector<U8> byteVector;
-	const U32 byteVectorSize = mSize.x * mSize.y * 4;
-	byteVector.reserve(byteVectorSize);
-	for (std::string::iterator i = data.begin(); i != data.end(); ++i)
-	{
-		byteVector.push_back(*i);
-	}
-
 	Vector2u coords(0, 0);
-	for (std::size_t i = 0; i < byteVector.size() - 3; i += 4)
+	for (std::size_t i = 0; i < bytes.size() - 3; i += 4)
 	{
-		const U32 gid = (byteVector[i] | byteVector[i + 1] << 8 | byteVector[i + 2] << 16 | byteVector[i + 3] << 24);
+		const U32 gid = (bytes[i] | bytes[i + 1] << 8 | bytes[i + 2] << 16 | bytes[i + 3] << 24);
 		// TODO : Read Flip Flag
 		SetTile(coords, gid);
 		coords.x = (coords.x + 1) % mSize.x;
