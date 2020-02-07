@@ -168,6 +168,12 @@ set(SRC_IMGUISFML
 )
 source_group("imgui-sfml" FILES ${SRC_IMGUISFML})
 
+# json
+set(SRC_JSON
+	json/json.hpp
+)
+source_group("json" FILES ${SRC_JSON})
+
 # metrics-gui
 set(SRC_METRICSGUI
 	metrics_gui/metrics_gui.cpp
@@ -200,6 +206,7 @@ add_library(EnlivengineThirdParty STATIC
 	${SRC_IMGUI}
 	${SRC_IMGUIFILEDIALOG}
 	${SRC_IMGUISFML}
+	${SRC_JSON}
 	${SRC_MINIZ}
 	${SRC_METRICSGUI}
 	${SRC_PUGIXML}

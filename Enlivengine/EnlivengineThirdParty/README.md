@@ -11,3 +11,4 @@
 - https://github.com/aiekick/ImGuiFileDialog  
 - https://github.com/tronkko/dirent  
 - https://github.com/richgel999/miniz  
+- https://github.com/nlohmann/json  
