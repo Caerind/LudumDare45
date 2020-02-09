@@ -73,7 +73,8 @@ bool Tileset::LoadFromFile(const std::string& filename)
     }
     mTexture = ResourceManager::GetInstance().GetFromFilename<Texture>(filepath);
     if (!mTexture.IsValid())
-    {
+	{
+		LogWarning(en::LogChannel::Map, 5, "ResourceDependencyNeeded: %s from %s", filepath.c_str(), filename.c_str());
         mTexture = ResourceManager::GetInstance().Create<Texture>(mName + "-texture", TextureLoader::FromFile(filepath));
         if (!mTexture.IsValid())
         {

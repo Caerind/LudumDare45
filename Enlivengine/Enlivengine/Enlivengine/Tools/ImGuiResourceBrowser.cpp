@@ -17,6 +17,7 @@
 #include <Enlivengine/Graphics/SFMLResources.hpp>
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/Map.hpp>
+#include <Enlivengine/Graphics/Animation.hpp>
 
 #include <SFML/Graphics/RenderTexture.hpp>
 
@@ -43,6 +44,7 @@ ImGuiResourceBrowser::ImGuiResourceBrowser()
 	ImGuiFileDialog::Instance()->SetFilterColor(".hpp", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".inl", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
 
+	ImGuiFileDialog::Instance()->SetFilterColor(".json", LinearColor::LightGreen.withAlpha(0.8f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".xml", LinearColor::LightBlue.withAlpha(0.8f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".txt", LinearColor::Magenta.withAlpha(0.8f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".md", LinearColor::Mint.withAlpha(0.8f).toImGuiColor());
@@ -188,147 +190,13 @@ void ImGuiResourceBrowser::Display()
 			{
 				switch (resourceInfo.type)
 				{
-				case ResourceInfo::Type::Sound:
-				{
-					ImGui::Text(ICON_FA_PLAY_CIRCLE);
-					if (ImGui::IsItemClicked())
-					{
-						AudioSystem::GetInstance().PlaySound(resourceInfo.resourceID);
-					}
-					ImGui::SameLine();
-					break;
-				}
-
-				case ResourceInfo::Type::Map:
-                {
-                    ImGui::Text(ICON_FA_SEARCH);
-                    if (ImGui::IsItemHovered())
-                    {
-                        tmx::MapPtr mapPtr = ResourceManager::GetInstance().Get<tmx::Map>(resourceInfo.resourceID);
-                        if (mapPtr.IsValid())
-                        {
-                            ImGui::BeginTooltip();
-
-                            const tmx::Map& map = mapPtr.Get();
-
-                            const U32 sizeX = map.GetSize().x * map.GetTileSize().x;
-                            const U32 sizeY = map.GetSize().y * map.GetTileSize().y;
-                            sf::RenderTexture renderTexture;
-                            renderTexture.create(sizeX, sizeY);
-                            renderTexture.clear(sf::Color::Transparent);
-                            map.Render(renderTexture, true);
-                            renderTexture.display();
-
-                            constexpr F32 maxPreviewSize = 150.0f;
-                            sf::Sprite previewSprite;
-                            previewSprite.setTexture(renderTexture.getTexture());
-                            Vector2f textureSize;
-                            textureSize.x = static_cast<F32>(renderTexture.getSize().x);
-                            textureSize.y = static_cast<F32>(renderTexture.getSize().y);
-                            if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
-                            {
-                                const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
-                                const F32 scale = maxPreviewSize / larger;
-                                previewSprite.setScale(scale, scale);
-                            }
-                            ImGui::Image(previewSprite);
-
-                            ImGui::EndTooltip();
-                        }
-                    }
-                    ImGui::SameLine();
-					break;
-				}
-				
-				case ResourceInfo::Type::Music:
-				{
-					static MusicPtr music;
-					if (music.IsValid() && music.GetMusicID() == resourceInfo.resourceID)
-					{
-						ImGui::Text(ICON_FA_STOP_CIRCLE);
-						if (ImGui::IsItemClicked())
-						{
-							music.Stop();
-							AudioSystem::GetInstance().PlayMusics();
-						}
-						ImGui::SameLine();
-					}
-					else
-					{
-						ImGui::Text(ICON_FA_PLAY_CIRCLE);
-						if (ImGui::IsItemClicked())
-						{
-							AudioSystem::GetInstance().PauseMusics();
-							music = AudioSystem::GetInstance().PlayMusic(resourceInfo.resourceID, false);
-						}
-						ImGui::SameLine();
-					}
-					break;
-				}
-
-				case ResourceInfo::Type::Texture:
-				{
-					ImGui::Text(ICON_FA_SEARCH);
-					if (ImGui::IsItemHovered())
-					{
-						ImGui::BeginTooltip();
-
-						const Texture& texture = ResourceManager::GetInstance().Get<Texture>(resourceInfo.resourceID).Get();
-
-						constexpr F32 maxPreviewSize = 150.0f;
-						sf::Sprite previewSprite;
-						previewSprite.setTexture(texture);
-						Vector2f textureSize;
-						textureSize.x = static_cast<F32>(texture.getSize().x);
-						textureSize.y = static_cast<F32>(texture.getSize().y);
-						if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
-						{
-							const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
-							const F32 scale = maxPreviewSize / larger;
-							previewSprite.setScale(scale, scale);
-						}
-						ImGui::Image(previewSprite);
-
-						ImGui::EndTooltip();
-					}
-					ImGui::SameLine();
-					break;
-				}
-
-                case ResourceInfo::Type::Tileset:
-                {
-                    ImGui::Text(ICON_FA_SEARCH);
-                    if (ImGui::IsItemHovered())
-                    {
-						tmx::TilesetPtr tileset = ResourceManager::GetInstance().Get<tmx::Tileset>(resourceInfo.resourceID);
-                        if (tileset.IsValid() && tileset.Get().GetTexture().IsValid())
-                        {
-                            ImGui::BeginTooltip();
-
-                            const Texture& texture = tileset.Get().GetTexture().Get();
-
-                            constexpr F32 maxPreviewSize = 150.0f;
-                            sf::Sprite previewSprite;
-                            previewSprite.setTexture(texture);
-                            Vector2f textureSize;
-                            textureSize.x = static_cast<F32>(texture.getSize().x);
-                            textureSize.y = static_cast<F32>(texture.getSize().y);
-                            if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
-                            {
-                                const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
-                                const F32 scale = maxPreviewSize / larger;
-                                previewSprite.setScale(scale, scale);
-                            }
-                            ImGui::Image(previewSprite);
-
-                            ImGui::EndTooltip();
-                        }
-                        
-                    }
-                    ImGui::SameLine();
-                    break;
-                }
-
+				case ResourceInfo::Type::Font: FontPreview(resourceInfo); break;
+				case ResourceInfo::Type::Texture: TexturePreview(resourceInfo); break;
+				case ResourceInfo::Type::Tileset: TilesetPreview(resourceInfo); break;
+				case ResourceInfo::Type::Map: MapPreview(resourceInfo); break;
+				case ResourceInfo::Type::Animation: AnimationPreview(resourceInfo); break;
+				case ResourceInfo::Type::Music: MusicPreview(resourceInfo); break;
+				case ResourceInfo::Type::Sound: SoundPreview(resourceInfo); break;
 				default: break;
 				}
 			}
@@ -461,9 +329,21 @@ ImGuiResourceBrowser::ResourceInfo::Type ImGuiResourceBrowser::ResourceInfo::Det
 	{
 		return Type::Font;
 	}
+	if (ext == ".png" || ext == ".jpg")
+	{
+		return Type::Texture;
+	}
+	if (ext == ".tsx")
+	{
+		return Type::Tileset;
+	}
 	if (ext == ".tmx")
 	{
 		return Type::Map;
+	}
+	if (ext == ".json")
+	{
+		return Type::Animation;
 	}
 	if (ext == ".ogg")
 	{
@@ -472,14 +352,6 @@ ImGuiResourceBrowser::ResourceInfo::Type ImGuiResourceBrowser::ResourceInfo::Det
 	if (ext == ".wav")
 	{
 		return Type::Sound;
-	}
-	if (ext == ".png" || ext == ".jpg")
-	{
-		return Type::Texture;
-	}
-	if (ext == ".tsx")
-	{
-		return Type::Tileset;
 	}
 	return Type::Unknown;
 }
@@ -490,11 +362,12 @@ const char* ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToString(Type ty
 	{
 	case ResourceInfo::Type::Unknown: return "Unknown"; break;
 	case ResourceInfo::Type::Font: return "Font"; break;
-	case ResourceInfo::Type::Map: return "Map"; break;
-	case ResourceInfo::Type::Music: return "Music"; break;
-	case ResourceInfo::Type::Sound: return "Sound"; break;
 	case ResourceInfo::Type::Texture: return "Texture"; break;
 	case ResourceInfo::Type::Tileset: return "Tileset"; break;
+	case ResourceInfo::Type::Map: return "Map"; break;
+	case ResourceInfo::Type::Animation: return "Animation"; break;
+	case ResourceInfo::Type::Music: return "Music"; break;
+	case ResourceInfo::Type::Sound: return "Sound"; break;
 	default: assert(false); break;
 	}
 	return "";
@@ -506,11 +379,12 @@ const LinearColor& ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToColor(T
 	static LinearColor resourceInfoTypeColors[static_cast<U32>(ResourceInfo::Type::Count)] = 
 	{
 		LinearColor::Orange, // Font
-		LinearColor::Lime, // Map
-		LinearColor::BabyPink, // Music
-		LinearColor::HotPink, // Sound
 		LinearColor::Cyan, // Texture
 		LinearColor::Peach, // Tileset
+		LinearColor::Lime, // Map
+		LinearColor::LightGreen, // Animation
+		LinearColor::BabyPink, // Music
+		LinearColor::HotPink, // Sound
 	};
 	if (type == ResourceInfo::Type::Unknown)
 	{
@@ -520,6 +394,180 @@ const LinearColor& ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToColor(T
 	{
 		return resourceInfoTypeColors[static_cast<U32>(type)];
 	}
+}
+
+void ImGuiResourceBrowser::FontPreview(ResourceInfo& resourceInfo)
+{
+	ENLIVE_UNUSED(resourceInfo);
+}
+
+void ImGuiResourceBrowser::TexturePreview(ResourceInfo& resourceInfo)
+{
+	ImGui::Text(ICON_FA_SEARCH);
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+
+		const Texture& texture = ResourceManager::GetInstance().Get<Texture>(resourceInfo.resourceID).Get();
+
+		constexpr F32 maxPreviewSize = 150.0f;
+		sf::Sprite previewSprite;
+		previewSprite.setTexture(texture);
+		Vector2f textureSize;
+		textureSize.x = static_cast<F32>(texture.getSize().x);
+		textureSize.y = static_cast<F32>(texture.getSize().y);
+		if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+		{
+			const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+			const F32 scale = maxPreviewSize / larger;
+			previewSprite.setScale(scale, scale);
+		}
+		ImGui::Image(previewSprite);
+
+		ImGui::EndTooltip();
+	}
+	ImGui::SameLine();
+}
+
+void ImGuiResourceBrowser::TilesetPreview(ResourceInfo& resourceInfo)
+{
+	ImGui::Text(ICON_FA_SEARCH);
+	if (ImGui::IsItemHovered())
+	{
+		tmx::TilesetPtr tileset = ResourceManager::GetInstance().Get<tmx::Tileset>(resourceInfo.resourceID);
+		if (tileset.IsValid() && tileset.Get().GetTexture().IsValid())
+		{
+			ImGui::BeginTooltip();
+
+			const Texture& texture = tileset.Get().GetTexture().Get();
+
+			constexpr F32 maxPreviewSize = 150.0f;
+			sf::Sprite previewSprite;
+			previewSprite.setTexture(texture);
+			Vector2f textureSize;
+			textureSize.x = static_cast<F32>(texture.getSize().x);
+			textureSize.y = static_cast<F32>(texture.getSize().y);
+			if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+			{
+				const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+				const F32 scale = maxPreviewSize / larger;
+				previewSprite.setScale(scale, scale);
+			}
+			ImGui::Image(previewSprite);
+
+			ImGui::EndTooltip();
+		}
+
+	}
+	ImGui::SameLine();
+}
+
+void ImGuiResourceBrowser::MapPreview(ResourceInfo& resourceInfo)
+{
+	ImGui::Text(ICON_FA_SEARCH);
+	if (ImGui::IsItemHovered())
+	{
+		tmx::MapPtr mapPtr = ResourceManager::GetInstance().Get<tmx::Map>(resourceInfo.resourceID);
+		if (mapPtr.IsValid())
+		{
+			ImGui::BeginTooltip();
+
+			const tmx::Map& map = mapPtr.Get();
+
+			const U32 sizeX = map.GetSize().x * map.GetTileSize().x;
+			const U32 sizeY = map.GetSize().y * map.GetTileSize().y;
+			sf::RenderTexture renderTexture;
+			renderTexture.create(sizeX, sizeY);
+			renderTexture.clear(sf::Color::Transparent);
+			map.Render(renderTexture, true);
+			renderTexture.display();
+
+			constexpr F32 maxPreviewSize = 150.0f;
+			sf::Sprite previewSprite;
+			previewSprite.setTexture(renderTexture.getTexture());
+			Vector2f textureSize;
+			textureSize.x = static_cast<F32>(renderTexture.getSize().x);
+			textureSize.y = static_cast<F32>(renderTexture.getSize().y);
+			if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+			{
+				const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+				const F32 scale = maxPreviewSize / larger;
+				previewSprite.setScale(scale, scale);
+			}
+			ImGui::Image(previewSprite);
+
+			ImGui::EndTooltip();
+		}
+	}
+	ImGui::SameLine();
+}
+
+void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo)
+{
+	ImGui::Text(ICON_FA_SEARCH);
+	if (ImGui::IsItemHovered())
+	{
+		AnimationPtr animation = ResourceManager::GetInstance().Get<Animation>(resourceInfo.resourceID);
+		if (animation.IsValid() && animation.Get().GetTexture().IsValid())
+		{
+			ImGui::BeginTooltip();
+
+			const Texture& texture = animation.Get().GetTexture().Get();
+
+			constexpr F32 maxPreviewSize = 150.0f;
+			sf::Sprite previewSprite;
+			previewSprite.setTexture(texture);
+			Vector2f textureSize;
+			textureSize.x = static_cast<F32>(texture.getSize().x);
+			textureSize.y = static_cast<F32>(texture.getSize().y);
+			if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
+			{
+				const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
+				const F32 scale = maxPreviewSize / larger;
+				previewSprite.setScale(scale, scale);
+			}
+			ImGui::Image(previewSprite);
+
+			ImGui::EndTooltip();
+		}
+
+	}
+	ImGui::SameLine();
+}
+
+void ImGuiResourceBrowser::MusicPreview(ResourceInfo& resourceInfo)
+{
+	static MusicPtr music;
+	if (music.IsValid() && music.GetMusicID() == resourceInfo.resourceID)
+	{
+		ImGui::Text(ICON_FA_STOP_CIRCLE);
+		if (ImGui::IsItemClicked())
+		{
+			music.Stop();
+			AudioSystem::GetInstance().PlayMusics();
+		}
+		ImGui::SameLine();
+	}
+	else
+	{
+		ImGui::Text(ICON_FA_PLAY_CIRCLE);
+		if (ImGui::IsItemClicked())
+		{
+			AudioSystem::GetInstance().PauseMusics();
+			music = AudioSystem::GetInstance().PlayMusic(resourceInfo.resourceID, false);
+		}
+		ImGui::SameLine();
+	}
+}
+
+void ImGuiResourceBrowser::SoundPreview(ResourceInfo& resourceInfo)
+{
+	ImGui::Text(ICON_FA_PLAY_CIRCLE);
+	if (ImGui::IsItemClicked())
+	{
+		AudioSystem::GetInstance().PlaySound(resourceInfo.resourceID);
+	}
+	ImGui::SameLine();
 }
 
 } // namespace en

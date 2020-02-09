@@ -21,6 +21,7 @@
 // Resources
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/Map.hpp>
+#include <Enlivengine/Graphics/Animation.hpp>
 
 namespace en
 {
@@ -165,12 +166,13 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 #ifdef ENLIVE_ENABLE_IMGUI
 	assert(-1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Unknown));
 	assert(0 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Font));
-	assert(1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Map));
-	assert(2 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
-	assert(3 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
-	assert(4 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Texture));
-	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Tileset));
-	assert(6 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
+	assert(1 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Texture));
+	assert(2 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Tileset));
+	assert(3 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Map));
+	assert(4 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Animation));
+	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
+	assert(6 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
+	assert(7 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
 #endif // ENLIVE_ENABLE_IMGUI
 
 	ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -198,52 +200,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 1: // ResourceInfo::Type::Map
-	{
-		tmx::MapPtr mapPtr = resourceManager.Create<tmx::Map>(identifier.c_str(), tmx::MapLoader::FromFile(resourceFilename));
-		if (!mapPtr.IsValid())
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = mapPtr.GetID();
-		}
-		break;
-	}
-	case 2: // ResourceInfo::Type::Music
-	{
-		MusicID musicID = AudioSystem::GetInstance().PrepareMusic(identifier.c_str(), resourceFilename);
-		if (musicID == InvalidMusicID)
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = musicID;
-		}
-		break;
-	}
-	case 3: // ResourceInfo::Type::Sound
-	{
-		SoundID soundID = AudioSystem::GetInstance().PrepareSound(identifier.c_str(), resourceFilename);
-		if (soundID == InvalidSoundID)
-		{
-			resourceID = InvalidResourceID;
-			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
-			return false;
-		}
-		else
-		{
-			resourceID = soundID;
-		}
-		break;
-	}
-	case 4: // ResourceInfo::Type::Texture
+	case 1: // ResourceInfo::Type::Texture
 	{
 		TexturePtr texturePtr = resourceManager.Create<Texture>(identifier.c_str(), TextureLoader::FromFile(resourceFilename));
 		if (!texturePtr.IsValid())
@@ -258,7 +215,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 5: // ResourceInfo::Type::Tileset
+	case 2: // ResourceInfo::Type::Tileset
 	{
 		tmx::TilesetPtr tilesetPtr = resourceManager.Create<tmx::Tileset>(identifier.c_str(), tmx::TilesetLoader::FromFile(resourceFilename));
 		if (!tilesetPtr.IsValid())
@@ -272,6 +229,65 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 			resourceID = tilesetPtr.GetID();
 		}
 		break;
+	}
+	case 3: // ResourceInfo::Type::Map
+	{
+		tmx::MapPtr mapPtr = resourceManager.Create<tmx::Map>(identifier.c_str(), tmx::MapLoader::FromFile(resourceFilename));
+		if (!mapPtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = mapPtr.GetID();
+		}
+		break;
+	}
+	case 4: // ResourceInfo::Type::Animation
+	{
+		AnimationPtr animPtr = resourceManager.Create<Animation>(identifier.c_str(), AnimationLoader::FromFile(resourceFilename));
+		if (!animPtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = animPtr.GetID();
+		}
+		break;
+	}
+	case 5: // ResourceInfo::Type::Music
+	{
+		MusicID musicID = AudioSystem::GetInstance().PrepareMusic(identifier.c_str(), resourceFilename);
+		if (musicID == InvalidMusicID)
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = musicID;
+		}
+		break;
+	}
+	case 6: // ResourceInfo::Type::Sound
+	{
+		SoundID soundID = AudioSystem::GetInstance().PrepareSound(identifier.c_str(), resourceFilename);
+		if (soundID == InvalidSoundID)
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = soundID;
+		}
 		break;
 	}
 	default: assert(false); return false;

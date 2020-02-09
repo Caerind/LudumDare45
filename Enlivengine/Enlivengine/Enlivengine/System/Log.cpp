@@ -36,6 +36,10 @@ const char* LogChannelToString(LogChannel channel)
 	case LogChannel::Global: return "Global";
 	case LogChannel::System: return "System";
 	case LogChannel::Math: return "Math";
+	case LogChannel::Application: return "Application";
+	case LogChannel::Graphics: return "Graphics";
+	case LogChannel::Map: return "Map";
+	case LogChannel::Animation: return "Animation";
 	default: break;
 	}
 	return "None";

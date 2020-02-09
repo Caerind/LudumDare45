@@ -857,12 +857,14 @@ void GameState::animations(en::Time dt)
 			}
 		}
 
-		if (human.frameTime >= GameSingleton::mAnimations[human.getAnimIdx()].getFrame(human.currentFrame).duration)
+		const en::Animation& anima = GameSingleton::mAnimations[human.getAnimIdx()];
+		if (human.frameTime >= anima.GetFrame(human.currentFrame).duration)
 		{
 			human.frameTime = en::Time::Zero;
 
 			human.currentFrame++;
-			if (human.currentFrame >= GameSingleton::mAnimations[human.getAnimIdx()].getFrameCount())
+			const en::Animation& animaBefore = GameSingleton::mAnimations[human.getAnimIdx()];
+			if (human.currentFrame >= animaBefore.GetFrameCount())
 			{
 				human.currentFrame = 0;
 
@@ -880,7 +882,10 @@ void GameState::animations(en::Time dt)
 				}
 			}
 
-			human.body.setTextureRect(en::toSF(GameSingleton::mAnimations[human.getAnimIdx()].getFrame(human.currentFrame).rect));
+			const en::Animation& anim = GameSingleton::mAnimations[human.getAnimIdx()];
+			const en::Rectu& rectu = anim.GetFrame(human.currentFrame).rect;
+			const en::Recti recti(static_cast<en::Vector2i>(rectu.getMinimum()), static_cast<en::Vector2i>(rectu.getSize()));
+			human.body.setTextureRect(en::toSF(recti));
 		}
 	}
 

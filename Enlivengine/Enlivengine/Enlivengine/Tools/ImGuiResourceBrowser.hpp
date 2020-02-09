@@ -29,11 +29,12 @@ public:
 		{
 			Unknown = -1,
 			Font,
-			Map,
-			Music,
-			Sound,
 			Texture,
 			Tileset,
+			Map,
+			Animation,
+			Music,
+			Sound,
 			Count
 		};
 
@@ -46,6 +47,15 @@ public:
 		static const char* ResourceInfoTypeToString(Type type);
 		static const LinearColor& ResourceInfoTypeToColor(Type type);
 	};
+
+private:
+	void FontPreview(ResourceInfo& resourceInfo);
+	void TexturePreview(ResourceInfo& resourceInfo);
+	void TilesetPreview(ResourceInfo& resourceInfo);
+	void MapPreview(ResourceInfo& resourceInfo);
+	void AnimationPreview(ResourceInfo& resourceInfo);
+	void MusicPreview(ResourceInfo& resourceInfo);
+	void SoundPreview(ResourceInfo& resourceInfo);
 
 private:
 	static constexpr U32 kBufferSize{ 256 };

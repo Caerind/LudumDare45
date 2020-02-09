@@ -64,7 +64,8 @@ struct HumanComponent
 		Chopped = 7,
 		ChoppingWalking = 8,
 		ChoppingIdle = 9,
-		Throw = 10
+		Throw = 10,
+		Count
 	};
 
 	Animation currentAnimation;
@@ -82,14 +83,7 @@ struct HumanComponent
 	en::U32 getAnimIdx() const { return ((en::U32)currentAnimation * 4) + (en::U32)direction; }
 
 private:
-	void playAnim(Animation anim)
-	{
-		currentAnimation = anim;
-		frameTime = en::Time::Zero;
-		currentFrame = 0; 
-		en::U32 animIdx = getAnimIdx();
-		body.setTextureRect(en::toSF(GameSingleton::mAnimations[animIdx].getFrame(currentFrame).rect));
-	}
+	void playAnim(Animation anim);
 };
 
 struct VelocityComponent

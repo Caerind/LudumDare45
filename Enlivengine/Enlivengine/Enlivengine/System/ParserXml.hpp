@@ -44,6 +44,7 @@ class ParserXml
 		const std::string getNodeName() const;
 
 		const std::string& getFilename() const;
+
 	private:
 		pugi::xml_document mDocument;
 		pugi::xml_node mCurrentNode;

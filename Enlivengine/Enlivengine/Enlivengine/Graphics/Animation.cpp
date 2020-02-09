@@ -1,19 +1,39 @@
 #include <Enlivengine/Graphics/Animation.hpp>
 
+#include <fstream>
+#include <filesystem>
+#include <json/json.hpp>
+
 namespace en
 {
 
 Animation::Frame::Frame()
-	: texture(0)
-	, rect(Recti())
+	: rect(Rectu())
 	, duration(Time::Zero)
 {
 }
 
-Animation::Frame::Frame(ResourceID texture, const Recti& rect, Time duration)
-	: texture(texture)
-	, rect(rect)
+Animation::Frame::Frame(const Rectu& rect, Time duration)
+	: rect(rect)
 	, duration(duration)
+{
+}
+
+Animation::Clip::Clip()
+	: name("")
+	, hashedName(0)
+	, from(0)
+	, to(0)
+	, direction(Direction::Forward)
+{
+}
+
+Animation::Clip::Clip(const std::string& name, U32 from, U32 to, Direction direction)
+	: name(name)
+	, hashedName(Hash::CRC32(name.c_str()))
+	, from(from)
+	, to(to)
+	, direction(direction)
 {
 }
 
@@ -21,52 +41,158 @@ Animation::Animation()
 {
 }
 
-void Animation::addFrame(const Animation::Frame& frame)
+bool Animation::LoadFromFile(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (file)
+	{
+		nlohmann::json document;
+		// Don't know why, but it seems the operator>> is not recognized...
+		nlohmann::detail::parser<nlohmann::json>(nlohmann::detail::input_adapter(file)).parse(false, document);
+
+		if (!document.is_null())
+		{
+			nlohmann::json::iterator itr = document.find("frames");
+			if (itr != document.end())
+			{
+				for (auto& frame : itr.value())
+				{
+					const Rectu rect{ { frame["frame"]["x"].get<U32>(), frame["frame"]["y"].get<U32>() }, { frame["frame"]["w"].get<U32>(), frame["frame"]["h"].get<U32>() } };
+					const Time duration{ milliseconds(frame["duration"].get<I32>()) };
+					AddFrame(rect, duration);
+				}
+			}
+
+			itr = document.find("meta");
+			if (itr != document.end())
+			{
+				nlohmann::json meta = itr.value();
+				for (auto& frameTag : meta["frameTags"])
+				{
+					const std::string name = frameTag["name"].get<std::string>();
+					const U32 from = frameTag["from"].get<U32>();
+					const U32 to = frameTag["to"].get<U32>();
+					const std::string directionStr = frameTag["direction"].get<std::string>();
+					Clip::Direction direction = Clip::Direction::Forward;
+					if (directionStr == "forward")
+					{
+						direction = Clip::Direction::Forward;
+					}
+					else if (directionStr == "reverse")
+					{
+						direction = Clip::Direction::Reverse;
+					}
+					else if (directionStr == "pingpong")
+					{
+						direction = Clip::Direction::PingPong;
+					}
+					AddClip(name, from, to, direction);
+				}
+
+				std::string path = std::filesystem::path(filename).remove_filename().string();
+				const std::string filepath = path + meta["image"].get<std::string>();
+				mTexture = ResourceManager::GetInstance().GetFromFilename<Texture>(filepath);
+				if (!mTexture.IsValid())
+				{
+					LogWarning(en::LogChannel::Animation, 5, "ResourceDependencyNeeded: %s from %s", filepath.c_str(), filename.c_str());
+					mTexture = ResourceManager::GetInstance().Create<Texture>("-texture", TextureLoader::FromFile(filepath));
+					if (!mTexture.IsValid())
+					{
+						LogError(en::LogChannel::Animation, 10, "Can't load tileset texture : %s", filepath.c_str());
+					}
+				}
+			}
+
+			return true;
+		}
+	}
+	return false;
+}
+
+void Animation::AddFrame(const Animation::Frame& frame)
 {
 	mFrames.push_back(frame);
 }
 
-void Animation::addFrame(ResourceID texture, const Recti& rect, Time duration)
+void Animation::AddFrame(const Rectu& rect, Time duration)
 {
-	mFrames.emplace_back(texture, rect, duration);
+	mFrames.emplace_back(rect, duration);
 }
 
-U32 Animation::getFrameCount() const
+U32 Animation::GetFrameCount() const
 {
 	return static_cast<U32>(mFrames.size());
 }
 
-Animation::Frame& Animation::getFrame(U32 index)
+Animation::Frame& Animation::GetFrame(U32 index)
 {
-	return mFrames.at(index);
+	assert(index < GetFrameCount());
+	return mFrames[index];
 }
 
-const Animation::Frame& Animation::getFrame(U32 index) const
+const Animation::Frame& Animation::GetFrame(U32 index) const
 {
-	return mFrames.at(index);
+	assert(index < GetFrameCount());
+	return mFrames[index];
 }
 
-void Animation::removeFrame(U32 index)
+void Animation::RemoveFrame(U32 index)
 {
-	if (index < getFrameCount())
-	{
-		mFrames.erase(index + mFrames.begin());
-	}
+	assert(index < GetFrameCount());
+	mFrames.erase(mFrames.begin() + index);
 }
 
-void Animation::removeAllFrames()
+void Animation::RemoveAllFrames()
 {
 	mFrames.clear();
 }
 
-Time Animation::getDuration() const
+void Animation::AddClip(const Animation::Clip& clip)
 {
-	Time duration;
-	for (const auto& frame : mFrames)
-	{
-		duration += frame.duration;
-	}
-	return duration;
+	mClips.push_back(clip);
+}
+
+void Animation::AddClip(const std::string& name, U32 from, U32 to, Animation::Clip::Direction direction)
+{
+	mClips.emplace_back(name, from, to, direction);
+}
+
+U32 Animation::GetClipCount() const
+{
+	return static_cast<U32>(mClips.size());
+}
+
+Animation::Clip& Animation::GetClip(U32 index)
+{
+	assert(index < GetClipCount());
+	return mClips[index];
+}
+
+const Animation::Clip& Animation::GetClip(U32 index) const
+{
+	assert(index < GetClipCount());
+	return mClips[index];
+}
+
+void Animation::RemoveClip(U32 index)
+{
+	assert(index < GetClipCount());
+	mClips.erase(mClips.begin() + index);
+}
+
+void Animation::RemoveAllClips()
+{
+	mClips.clear();
+}
+
+TexturePtr Animation::GetTexture()
+{
+	return mTexture;
+}
+
+const TexturePtr& Animation::GetTexture() const
+{
+	return mTexture;
 }
 
 } // namespace en

@@ -24,6 +24,8 @@ set(SRC_SYSTEM
     Enlivengine/System/NonCopyable.hpp
     Enlivengine/System/ParserIni.cpp
     Enlivengine/System/ParserIni.hpp
+    Enlivengine/System/ParserJson.cpp
+    Enlivengine/System/ParserJson.hpp
     Enlivengine/System/ParserXml.cpp
     Enlivengine/System/ParserXml.hpp
     Enlivengine/System/PlatformDetection.hpp

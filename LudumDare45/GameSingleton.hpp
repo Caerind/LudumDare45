@@ -55,7 +55,7 @@ class GameSingleton
 		static en::SoundID mPieceSound;
 		static en::SoundID mPieceGetSound;
 
-		static std::vector<en::Animation> mAnimations;
+		static en::Animation mAnimations[44]; // static_cast<std::size_t>(HumanComponent::Animation::Count) * 4
 
 		static en::F32 hitLife;
 		static en::F32 aiNothingLife;
