@@ -1,16 +1,15 @@
 <?xml version="1.0"?>
-<Resources resourceCount="25" typeCount="7">
+<Resources resourceCount="22" typeCount="7">
 	<Resource identifier="MainFont" filename="Fonts/EndlessBossBattle.ttf" type="0" />
-	<Resource identifier="aitexture" filename="Textures/perso_IA.png" type="1" />
 	<Resource identifier="buble" filename="Textures/buble.png" type="1" />
 	<Resource identifier="coin" filename="Textures/coin.png" type="1" />
 	<Resource identifier="cursor" filename="Textures/cursor.png" type="1" />
-	<Resource identifier="nothingtexture" filename="Textures/perso_nothing.png" type="1" />
-	<Resource identifier="everythingtexture" filename="Textures/perso_everything.png" type="1" />
 	<Resource identifier="atmog" filename="Textures/atmog.png" type="1" />
 	<Resource identifier="tileset" filename="Maps/tileset.tsx" type="2" />
 	<Resource identifier="map-1" filename="Maps/map-1.tmx" type="3" />
-	<Resource identifier="anim_everything" filename="Animations/perso_everything.json" type="4" />
+	<Resource identifier="anim_perso_everything" filename="Animations/perso_everything.json" type="4" />
+	<Resource identifier="anim_perso_nothing" filename="Animations/perso_nothing.json" type="4" />
+	<Resource identifier="anim_perso_IA" filename="Animations/perso_IA.json" type="4" />
 	<Resource identifier="mainTheme" filename="Musics/MainTheme.ogg" type="5" />
 	<Resource identifier="blablaTest" filename="Musics/MainTheme.ogg" type="5" />
 	<Resource identifier="chop" filename="Sounds/Chop.wav" type="6" />

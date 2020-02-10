@@ -40,6 +40,9 @@ class GameSingleton
 
 		static en::FontPtr mFont;
 
+        static en::AnimationPtr mNothingAnim;
+        static en::AnimationPtr mEverythingAnim;
+        static en::AnimationPtr mAIAnim;
 		static en::TexturePtr mNothingTexture;
 		static en::TexturePtr mEverythingTexture;
 		static en::TexturePtr mAITexture;

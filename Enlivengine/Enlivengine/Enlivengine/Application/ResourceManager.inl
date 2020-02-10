@@ -86,10 +86,10 @@ ResourcePtr<T> ResourceManager::Create(const std::string& str, const ResourceLoa
 	{
 		std::unique_ptr<T> resource = std::make_unique<T>();
 		if (T* resourcePtr = resource.get())
-		{
+        {
+            resourcePtr->mIdentifier = str;
 			resourcePtr->mLoaded = loader.Load(*resourcePtr);
 			resourcePtr->mID = id;
-			resourcePtr->mIdentifier = str;
 
 			mResources[resourcePtr->mID] = std::move(resource);
 

@@ -26,6 +26,9 @@ entt::entity GameSingleton::nothingEntity;
 
 en::FontPtr GameSingleton::mFont;
 
+en::AnimationPtr GameSingleton::mNothingAnim;
+en::AnimationPtr GameSingleton::mEverythingAnim;
+en::AnimationPtr GameSingleton::mAIAnim;
 en::TexturePtr GameSingleton::mNothingTexture;
 en::TexturePtr GameSingleton::mEverythingTexture;
 en::TexturePtr GameSingleton::mAITexture;
@@ -64,10 +67,21 @@ void GameSingleton::loadResourcesMain(en::Application& app)
 void GameSingleton::loadResourcesGame()
 {
 	// Textures
-	const std::string& texturesPath = en::PathManager::GetInstance().GetTexturesPath();
-	mNothingTexture = en::ResourceManager::GetInstance().Get<en::Texture>("nothingtexture");
-	mEverythingTexture = en::ResourceManager::GetInstance().Get<en::Texture>("everythingtexture");
-	mAITexture = en::ResourceManager::GetInstance().Get<en::Texture>("aitexture");
+    mNothingAnim = en::ResourceManager::GetInstance().Get<en::Animation>("anim_perso_nothing");
+    if (mNothingAnim.IsValid())
+    {
+        mNothingTexture = mNothingAnim.Get().GetTexture();
+    }
+    mEverythingAnim = en::ResourceManager::GetInstance().Get<en::Animation>("anim_perso_everything");
+    if (mEverythingAnim.IsValid())
+    {
+        mEverythingTexture = mEverythingAnim.Get().GetTexture();
+    }
+    mAIAnim = en::ResourceManager::GetInstance().Get<en::Animation>("anim_perso_IA");
+    if (mAIAnim.IsValid())
+    {
+        mAITexture = mAIAnim.Get().GetTexture();
+    }
 
 	// Sound
 	const std::string& soundsPath = en::PathManager::GetInstance().GetSoundsPath();
