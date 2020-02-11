@@ -8,33 +8,73 @@ namespace en
 {
 
 Animation::Frame::Frame()
-	: rect(Rectu())
-	, duration(Time::Zero)
+	: mRect(Rectu())
+	, mDuration(Time::Zero)
 {
 }
 
 Animation::Frame::Frame(const Rectu& rect, Time duration)
-	: rect(rect)
-	, duration(duration)
+	: mRect(rect)
+	, mDuration(duration)
 {
 }
 
 Animation::Clip::Clip()
-	: name("")
-	, hashedName(0)
-	, from(0)
-	, to(0)
-	, direction(Direction::Forward)
+	: mName("")
+	, mHashedName(0)
+	, mFrom(0)
+	, mTo(0)
+	, mDirection(Direction::Forward)
 {
 }
 
 Animation::Clip::Clip(const std::string& name, U32 from, U32 to, Direction direction)
-	: name(name)
-	, hashedName(Hash::CRC32(name.c_str()))
-	, from(from)
-	, to(to)
-	, direction(direction)
+	: mName(name)
+	, mHashedName(Hash::CRC32(name.c_str()))
+	, mFrom(from)
+	, mTo(to)
+	, mDirection(direction)
 {
+}
+
+U32 Animation::Clip::GetFrameCount() const
+{
+    assert(mTo >= mFrom);
+    const U32 distance = (mTo - mFrom);
+    if (mDirection != Direction::PingPong)
+    {
+        return distance + 1;
+    }
+    else
+    {
+        return distance * 2 + 1;
+    }
+}
+
+U32 Animation::Clip::GetFrameIndex(U32 index) const
+{
+    assert(index < GetFrameCount());
+    if (mDirection == Direction::Forward)
+    {
+        return mFrom + index;
+    }
+    else if (mDirection == Direction::Reverse)
+    {
+        return mTo - index;
+    }
+    else if (mDirection == Direction::PingPong)
+    {
+        if (index <= mTo)
+        {
+            return mFrom + index;
+        }
+        else
+        {
+            return 2 * mTo - index;
+        }
+    }
+    assert(false);
+    return 0;
 }
 
 Animation::Animation()
@@ -124,27 +164,10 @@ U32 Animation::GetFrameCount() const
 	return static_cast<U32>(mFrames.size());
 }
 
-Animation::Frame& Animation::GetFrame(U32 index)
-{
-	assert(index < GetFrameCount());
-	return mFrames[index];
-}
-
 const Animation::Frame& Animation::GetFrame(U32 index) const
 {
 	assert(index < GetFrameCount());
 	return mFrames[index];
-}
-
-void Animation::RemoveFrame(U32 index)
-{
-	assert(index < GetFrameCount());
-	mFrames.erase(mFrames.begin() + index);
-}
-
-void Animation::RemoveAllFrames()
-{
-	mFrames.clear();
 }
 
 void Animation::AddClip(const Animation::Clip& clip)
@@ -162,27 +185,10 @@ U32 Animation::GetClipCount() const
 	return static_cast<U32>(mClips.size());
 }
 
-Animation::Clip& Animation::GetClip(U32 index)
-{
-	assert(index < GetClipCount());
-	return mClips[index];
-}
-
 const Animation::Clip& Animation::GetClip(U32 index) const
 {
 	assert(index < GetClipCount());
 	return mClips[index];
-}
-
-void Animation::RemoveClip(U32 index)
-{
-	assert(index < GetClipCount());
-	mClips.erase(mClips.begin() + index);
-}
-
-void Animation::RemoveAllClips()
-{
-	mClips.clear();
 }
 
 TexturePtr Animation::GetTexture()

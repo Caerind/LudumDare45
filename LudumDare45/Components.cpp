@@ -48,8 +48,5 @@ void HumanComponent::playAnim(Animation anim)
 	frameTime = en::Time::Zero;
 	currentFrame = 0;
 	const en::U32 animIdx = getAnimIdx();
-	const en::Animation& anima = GameSingleton::mAnimations[animIdx];
-	const en::Rectu& rectu = anima.GetFrame(currentFrame).rect;
-	const en::Recti recti(static_cast<en::Vector2i>(rectu.getMinimum()), static_cast<en::Vector2i>(rectu.getSize()));
-	body.setTextureRect(en::toSF(recti));
+	body.setTextureRect(en::toSF(GameSingleton::mAnimations[animIdx].GetFrame(currentFrame).GetRect()));
 }

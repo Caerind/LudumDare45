@@ -46,6 +46,11 @@ inline sf::IntRect toSF(const Recti& rect)
 	return sf::IntRect(rect.left(), rect.top(), rect.width(), rect.height());
 }
 
+inline sf::IntRect toSF(const Rectu& rect)
+{
+    return sf::IntRect(static_cast<int>(rect.left()), static_cast<int>(rect.top()), static_cast<int>(rect.width()), static_cast<int>(rect.height()));
+}
+
 inline Matrix4f toEN(const sf::Transform& transform)
 {
 	return Matrix4f(transform.getMatrix()[0], transform.getMatrix()[1], transform.getMatrix()[2],  transform.getMatrix()[3],

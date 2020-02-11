@@ -11,17 +11,23 @@ namespace en
 class Animation : public Resource<Animation>
 {
 	public:
-		struct Frame
+		class Frame
 		{
+        public:
 			Frame();
 			Frame(const Rectu& rect, Time duration);
 
-			Rectu rect;
-			Time duration;
+            const Rectu& GetRect() const { return mRect; }
+            const Time& GetDuration() const { return mDuration; }
+
+        private:
+			Rectu mRect;
+			Time mDuration;
 		};
 
-		struct Clip
+		class Clip
 		{
+        public:
 			enum class Direction
 			{
 				Forward,
@@ -30,13 +36,23 @@ class Animation : public Resource<Animation>
 			};
 
 			Clip();
-			Clip(const std::string& name, U32 from, U32 to, Direction direction);
+            Clip(const std::string& name, U32 from, U32 to, Direction direction);
 
-			std::string name;
-			U32 hashedName;
-			U32 from;
-			U32 to;
-			Direction direction;
+            const std::string& GetName() const { return mName; }
+            U32 GetHashedName() const { return mHashedName; }
+            U32 GetFrom() const { return mFrom; }
+            U32 GetTo() const { return mTo; }
+            Direction GetDirection() const { return mDirection; }
+
+            U32 GetFrameCount() const;
+            U32 GetFrameIndex(U32 index) const;
+
+        private:
+			std::string mName;
+			U32 mHashedName;
+			U32 mFrom;
+			U32 mTo;
+			Direction mDirection;
 		};
 
 	public:
@@ -47,18 +63,12 @@ class Animation : public Resource<Animation>
 		void AddFrame(const Animation::Frame& frame = Animation::Frame());
 		void AddFrame(const Rectu& rect, Time duration);
 		U32 GetFrameCount() const;
-		Animation::Frame& GetFrame(U32 index);
 		const Animation::Frame& GetFrame(U32 index) const;
-		void RemoveFrame(U32 index);
-		void RemoveAllFrames();
 		
 		void AddClip(const Animation::Clip& clip = Animation::Clip());
 		void AddClip(const std::string& name, U32 from, U32 to, Animation::Clip::Direction direction);
 		U32 GetClipCount() const;
-		Animation::Clip& GetClip(U32 index);
 		const Animation::Clip& GetClip(U32 index) const;
-		void RemoveClip(U32 index);
-		void RemoveAllClips();
 
 		TexturePtr GetTexture();
 		const TexturePtr& GetTexture() const;
