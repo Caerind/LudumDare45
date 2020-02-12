@@ -14,7 +14,6 @@ class Animation : public Resource<Animation>
 		class Frame
 		{
         public:
-			Frame();
 			Frame(const Rectu& rect, Time duration);
 
             const Rectu& GetRect() const { return mRect; }
@@ -35,7 +34,6 @@ class Animation : public Resource<Animation>
 				PingPong
 			};
 
-			Clip();
             Clip(const std::string& name, U32 from, U32 to, Direction direction);
 
             const std::string& GetName() const { return mName; }

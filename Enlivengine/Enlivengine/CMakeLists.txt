@@ -76,6 +76,10 @@ source_group("Math" FILES ${SRC_MATH})
 set(SRC_GRAPHICS
 	Enlivengine/Graphics/Animation.cpp
 	Enlivengine/Graphics/Animation.hpp
+	Enlivengine/Graphics/AnimationController.cpp
+	Enlivengine/Graphics/AnimationController.hpp
+	Enlivengine/Graphics/AnimationStateMachine.cpp
+	Enlivengine/Graphics/AnimationStateMachine.hpp
 	Enlivengine/Graphics/Color.cpp
 	Enlivengine/Graphics/Color.hpp
 	Enlivengine/Graphics/DebugDraw.cpp
