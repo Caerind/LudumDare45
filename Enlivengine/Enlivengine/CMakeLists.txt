@@ -147,6 +147,8 @@ set(SRC_CORE
 source_group("Core" FILES ${SRC_CORE})
 
 set(SRC_TOOLS
+	Enlivengine/Tools/ImGuiAnimationEditor.cpp
+	Enlivengine/Tools/ImGuiAnimationEditor.hpp
 	Enlivengine/Tools/ImGuiConsole.cpp
 	Enlivengine/Tools/ImGuiConsole.hpp
 	Enlivengine/Tools/ImGuiDemoWindow.cpp

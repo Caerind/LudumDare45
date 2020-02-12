@@ -16,6 +16,7 @@
 #include <Enlivengine/Tools/ImGuiProfiler.hpp>
 #include <Enlivengine/Tools/ImGuiDemoWindow.hpp>
 #include <Enlivengine/Tools/ImGuiResourceBrowser.hpp>
+#include <Enlivengine/Tools/ImGuiAnimationEditor.hpp>
 #endif // ENLIVE_ENABLE_IMGUI
 
 // Resources
@@ -462,6 +463,7 @@ void Application::RegisterTools()
 	ImGuiLogger::GetInstance().Register();
 #endif // ENLIVE_ENABLE_LOG
 	ImGuiResourceBrowser::GetInstance().Register();
+    ImGuiAnimationEditor::GetInstance().Register();
 	ImGuiConsole::GetInstance().Register();
 	ImGuiDemoWindow::GetInstance().Register();
 

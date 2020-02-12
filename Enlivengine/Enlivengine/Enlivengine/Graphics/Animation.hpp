@@ -58,12 +58,12 @@ class Animation : public Resource<Animation>
 
 		bool LoadFromFile(const std::string& filename);
 
-		void AddFrame(const Animation::Frame& frame = Animation::Frame());
+		void AddFrame(const Animation::Frame& frame);
 		void AddFrame(const Rectu& rect, Time duration);
 		U32 GetFrameCount() const;
 		const Animation::Frame& GetFrame(U32 index) const;
 		
-		void AddClip(const Animation::Clip& clip = Animation::Clip());
+		void AddClip(const Animation::Clip& clip);
 		void AddClip(const std::string& name, U32 from, U32 to, Animation::Clip::Direction direction);
 		U32 GetClipCount() const;
 		const Animation::Clip& GetClip(U32 index) const;

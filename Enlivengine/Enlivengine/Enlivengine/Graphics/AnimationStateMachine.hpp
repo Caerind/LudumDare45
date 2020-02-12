@@ -9,47 +9,51 @@ namespace en
 class AnimationStateMachine : public Resource<AnimationStateMachine>
 {
 public:
-
-	/*
-
-	enum class ParameterType
-	{
-		Boolean,
-		Float,
-		Integer,
-		Trigger
-	};
-
-	// TODO : Make more private later
 	class State
 	{
 	public:
-		State()
-		{
-			name = "";
-			hashedName = 0;
-			clipIndex = 0;
-			speedScale = 1.0f;
-			exitOnlyAtEnd = false;
-		}
+        State(const std::string& name, U32 clipIndex);
 
-		std::string name;
-		U32 hashedName;
-		U32 clipIndex;
-		F32 speedScale;
-		bool exitOnlyAtEnd;
+        void SetName(const std::string& name);
+        const std::string& GetName() const { return mName; }
+        U32 GetHashedName() const { return mHashedName; }
+
+        void SetClipIndex(U32 clipIndex) { mClipIndex = clipIndex; }
+        U32 GetClipIndex() const { return mClipIndex; }
+
+        void SetSpeedScale(F32 speedScale) { mSpeedScale = speedScale; }
+        F32 GetSpeedScale() const { return mSpeedScale; }
+
+        void SetExitOnlyAtEnd(bool value) { mExitOnlyAtEnd = value; }
+        bool GetExitOnlyAtEnd() const { return mExitOnlyAtEnd; }
+
+    private:
+		std::string mName;
+		U32 mHashedName;
+		U32 mClipIndex;
+		F32 mSpeedScale;
+		bool mExitOnlyAtEnd;
 	};
 
 	class Parameter
 	{
-	public:
-		Parameter(const std::string& name, ParameterType type);
+    public:
+        enum class Type
+        {
+            Boolean,
+            Float,
+            Integer,
+            Trigger
+        };
 
+		Parameter(const std::string& name, Type type);
+
+        void SetName(const std::string& name);
 		const std::string& GetName() const { return mName; }
 		U32 GetHashedName() const { return mHashedName; }
 
-		void SetType(ParameterType type);
-		ParameterType GetType() const { return mType; }
+		void SetType(Type type);
+        Type GetType() const { return mType; }
 
 		void SetBooleanValue(bool value);
 		void SetFloatValue(F32 value);
@@ -63,7 +67,7 @@ public:
 	private:
 		std::string mName;
 		U32 mHashedName;
-		ParameterType mType;
+        Type mType;
 		union
 		{
 			bool bValue;
@@ -85,28 +89,23 @@ public:
 			GreaterEq
 		};
 
-		Condition()
-		{
-			mParameterID = 0;
-			mOperator = Operator::Equal;
-			mOperand.bValue = true;
-		}
+        Condition();
 
-		void SetParameterID(U32 parameterID) { mParameterID = parameterID; }
-		U32 GetParameterID() const { return mParameterID; }
+		void SetParameterIndex(U32 parameterIndex) { mParameterIndex = parameterIndex; }
+		U32 GetParameterIndex() const { return mParameterIndex; }
 
+        void SetOperator(Operator op) { mOperator = op; }
 		Operator GetOperator() const { return mOperator; }
-		void SetOperator(Operator op) { mOperator = op; }
 
-		bool GetOperandBoolean() const;
-		F32 GetOperandFloat() const;
-		I32 GetOperandInteger() const;
-		void SetOperandBoolean(bool value);
-		void SetOperandFloat(F32 value);
-		void SetOperandInteger(I32 value);
+        void SetOperandBoolean(bool value) { mOperand.bValue = value; }
+        void SetOperandFloat(F32 value) { mOperand.fValue = value; }
+        void SetOperandInteger(I32 value) { mOperand.iValue = value; }
+        bool GetOperandBoolean() const { return mOperand.bValue; }
+		F32 GetOperandFloat() const { return mOperand.fValue; }
+		I32 GetOperandInteger() const { return mOperand.iValue; }
 
 	private:
-		U32 mParameterID;
+		U32 mParameterIndex;
 		Operator mOperator;
 		union
 		{
@@ -116,18 +115,24 @@ public:
 		} mOperand;
 	};
 
-	// TODO : Make more private later
 	class Transition
 	{
 	public:
-		Transition()
-		{
-			from = 0;
-			to = 0;
-		}
+        Transition(U32 fromState, U32 toState);
 
-		U32 from; // HashedName, as Index is more subject to change
-		U32 to; // HashedName, as Index is more subject to change
+        void SetFromState(U32 fromState) { mFromState = fromState; }
+        U32 GetFromState() const { return mFromState; }
+
+        void SetToState(U32 toState) { mToState = toState; }
+        U32 GetToState() const { return mToState; }
+
+        void AddCondition(U32 conditionIndex);
+        void RemoveCondition(U32 conditionIndex);
+        void ClearConditions();
+
+    private:
+		U32 mFromState;
+		U32 mToState;
 		std::vector<U32> mConditions;
 	};
 
@@ -137,6 +142,7 @@ public:
 	// IO
 	bool LoadFromFile(const std::string& filename);
 	bool SaveToFile(const std::string& filename);
+    void Clean();
 
 	// Animation
 	void SetAnimation(AnimationPtr animation);
@@ -156,11 +162,11 @@ public:
 	U32 GetStateIndexByName(U32 hashedName) const;
 
 	// Parameters
-	U32 AddParameter(const std::string& name, ParameterType type);
+	U32 AddParameter(const std::string& name, Parameter::Type type);
 	void RemoveParameter(U32 index);
 	void ClearParameters();
 	void SetParameterName(U32 index, const std::string& name);
-	void SetParameterType(U32 index, ParameterType type);
+	void SetParameterType(U32 index, Parameter::Type type);
 	void SetParameterBoolean(U32 index, bool value);
 	void SetParameterFloat(U32 index, F32 value);
 	void SetParameterInteger(U32 index, I32 value);
@@ -169,17 +175,29 @@ public:
 	U32 GetParameterIndexByName(const std::string& name) const;
 	U32 GetParameterIndexByName(U32 hashedName) const;
 
-	U32 AddCondition(U32 parameterIndex);
+    // Conditions
+    U32 AddCondition(U32 parameterIndex);
+    void RemoveCondition(U32 index);
+    void ClearConditions();
+    void SetConditionParameter(U32 index, U32 parameterIndex);
+    void SetConditionOperator(U32 index, Condition::Operator operat);
+    void SetConditionOperandBoolean(U32 index, bool operand);
+    void SetConditionOperandFloat(U32 index, F32 operand);
+    void SetConditionOperandInteger(U32 index, I32 operand);
 	U32 GetConditionCount() const;
 	const AnimationStateMachine::Condition& GetCondition(U32 index) const;
-	void RemoveCondition(U32 index);
-	void ClearConditions();
 
-	U32 AddTransition(U32 fromState, U32 toState);
+    // Transitions
+    U32 AddTransition(U32 fromState, U32 toState);
+    void RemoveTransition(U32 index);
+    void ClearTransitions();
+    void SetTransitionFromState(U32 index, U32 fromState);
+    void SetTransitionToState(U32 index, U32 toState);
+    void AddConditionToTransition(U32 transitionIndex, U32 conditionIndex);
+    void RemoveConditionFromTransition(U32 transitionIndex, U32 conditionIndex);
+    void ClearConditionsFromTransition(U32 transitionIndex);
 	U32 GetTransitionCount() const;
 	const AnimationStateMachine::Transition& GetTransition(U32 index) const;
-	void RemoveTransition(U32 index);
-	void ClearTransitions();
 
 private:
 	AnimationPtr mAnimation;
@@ -187,9 +205,6 @@ private:
 	std::vector<Parameter> mParameters;
 	std::vector<Condition> mConditions;
 	std::vector<Transition> mTransitions;
-
-
-*/
 };
 
 using AnimationStateMachinePtr = ResourcePtr<AnimationStateMachine>;
@@ -204,7 +219,7 @@ public:
 	{
 		return ResourceLoader<AnimationStateMachine>([&filename](AnimationStateMachine& r)
 		{
-			const bool result = false; /* r.LoadFromFile(filename); */ // TODO : Don't miss me :)
+			const bool result = r.LoadFromFile(filename);
 			r.mFilename = (result) ? filename : "";
 			return result;
 		});

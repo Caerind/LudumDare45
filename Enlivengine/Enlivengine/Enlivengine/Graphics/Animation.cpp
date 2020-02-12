@@ -7,24 +7,9 @@
 namespace en
 {
 
-Animation::Frame::Frame()
-	: mRect(Rectu())
-	, mDuration(Time::Zero)
-{
-}
-
 Animation::Frame::Frame(const Rectu& rect, Time duration)
 	: mRect(rect)
 	, mDuration(duration)
-{
-}
-
-Animation::Clip::Clip()
-	: mName("")
-	, mHashedName(0)
-	, mFrom(0)
-	, mTo(0)
-	, mDirection(Direction::Forward)
 {
 }
 

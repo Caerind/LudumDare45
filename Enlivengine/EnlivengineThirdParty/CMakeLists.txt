@@ -160,6 +160,24 @@ set(SRC_IMGUIFILEDIALOG
 )
 source_group("ImGuiFileDialog" FILES ${SRC_IMGUIFILEDIALOG})
 
+# imgui-node-editor
+set(SRC_IMGUINODEEDITOR
+	imgui-node-editor/crude_json.cpp
+	imgui-node-editor/crude_json.h
+	imgui-node-editor/imgui_bezier_math.h
+	imgui-node-editor/imgui_bezier_math.inl
+	imgui-node-editor/imgui_canvas.cpp
+	imgui-node-editor/imgui_canvas.h
+	imgui-node-editor/imgui_extra_math.h
+	imgui-node-editor/imgui_extra_math.inl
+	imgui-node-editor/imgui_node_editor.cpp
+	imgui-node-editor/imgui_node_editor.h
+	imgui-node-editor/imgui_node_editor_api.cpp
+	imgui-node-editor/imgui_node_editor_internal.h
+	imgui-node-editor/imgui_node_editor_internal.inl
+)
+source_group("imgui-node-editor" FILES ${SRC_IMGUINODEEDITOR})
+
 # imgui-sfml
 set(SRC_IMGUISFML
 	imgui-sfml/imgui-SFML.cpp
@@ -205,6 +223,7 @@ add_library(EnlivengineThirdParty STATIC
 	${SRC_ICONFONTCPPHEADERS}
 	${SRC_IMGUI}
 	${SRC_IMGUIFILEDIALOG}
+	${SRC_IMGUINODEEDITOR}
 	${SRC_IMGUISFML}
 	${SRC_JSON}
 	${SRC_MINIZ}
