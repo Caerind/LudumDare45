@@ -1255,7 +1255,7 @@ struct EditorContext
     void End();
 
     bool DoLink(LinkId id, PinId startPinId, PinId endPinId, ImU32 color, float thickness);
-
+    bool DoLink(LinkId id, PinId startPinId, PinId endPinId, ImU32 colorStart, ImU32 colorEnd, float thickness);
 
     NodeBuilder& GetNodeBuilder() { return m_NodeBuilder; }
     HintBuilder& GetHintBuilder() { return m_HintBuilder; }

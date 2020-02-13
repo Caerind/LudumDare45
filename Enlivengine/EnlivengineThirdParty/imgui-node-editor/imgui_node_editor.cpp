@@ -641,7 +641,7 @@ void ed::Node::Draw(ImDrawList* drawList, DrawFlags flags)
         drawRect(GetRegionBounds(NodeRegion::Header), IM_COL32(0, 255, 255, 64));
 # endif
 
-        DrawBorder(drawList, m_BorderColor, m_BorderWidth);
+        DrawBorder(drawList, IM_COL32(255, 0, 0, 255), m_BorderWidth);
     }
     else if (flags & Selected)
     {
@@ -2013,15 +2013,16 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         ImGui::SetCursorScreenPos(rect.Min);
 
         // debug
-        //if (id < 0) return ImGui::Button(idString, to_imvec(rect.size));
-		if (rect.GetSize().x == 0.0f || rect.GetSize().y == 0.0f)
+        //return ImGui::Button(idString, ImVec2(rect.GetSize().x, rect.GetSize().y));
+
+		/*
+        if (rect.GetSize().x == 0.0f || rect.GetSize().y == 0.0f)
 		{
 			return false;
 		}
-        auto result = ImGui::InvisibleButton(idString, rect.GetSize());
+        */
 
-        // #debug
-        //ImGui::GetWindowDrawList()->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(0, 255, 0, 64));
+        auto result = ImGui::InvisibleButton(idString, rect.GetSize());
 
         return result;
     };
@@ -2054,7 +2055,8 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         for (auto pin = node->m_LastPin; pin; pin = pin->m_PreviousPin)
         {
             if (!pin->m_IsLive) continue;
-
+            if (ImRect_IsEmpty(pin->m_Bounds))
+                continue;
             checkInteractionsInArea(pin->m_ID, pin->m_Bounds, pin);
         }
 
