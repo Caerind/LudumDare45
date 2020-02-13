@@ -26,8 +26,13 @@ public:
 
     virtual void Display();
 
+	bool Initialize(AnimationStateMachinePtr stateMachinePtr);
+	void Uninitialize();
+	bool IsInitialized() const;
+
 private:
-    ax::NodeEditor::EditorContext* m_EditorContext;
+	AnimationStateMachinePtr mStateMachine;
+    ax::NodeEditor::EditorContext* mEditorContext;
 };
 
 } // namespace en

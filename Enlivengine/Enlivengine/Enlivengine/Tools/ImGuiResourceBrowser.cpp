@@ -13,11 +13,14 @@
 #include <Enlivengine/Graphics/LinearColor.hpp>
 #include <Enlivengine/System/ParserXml.hpp>
 
+#include <Enlivengine/Tools/ImGuiAnimationEditor.hpp>
+
 #include <Enlivengine/Application/AudioSystem.hpp>
 #include <Enlivengine/Graphics/SFMLResources.hpp>
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/Map.hpp>
 #include <Enlivengine/Graphics/Animation.hpp>
+#include <Enlivengine/Graphics/AnimationStateMachine.hpp>
 
 #include <SFML/Graphics/RenderTexture.hpp>
 
@@ -38,6 +41,8 @@ ImGuiResourceBrowser::ImGuiResourceBrowser()
 
 	ImGuiFileDialog::Instance()->SetFilterColor(".png", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Texture).withAlpha(0.8f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".jpg", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::Texture).withAlpha(0.8f).toImGuiColor());
+
+	ImGuiFileDialog::Instance()->SetFilterColor(".astm", ResourceInfo::ResourceInfoTypeToColor(ResourceInfo::Type::AnimationStateMachine).withAlpha(0.8f).toImGuiColor());
 
 	ImGuiFileDialog::Instance()->SetFilterColor(".cpp", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
 	ImGuiFileDialog::Instance()->SetFilterColor(".h", LinearColor::Yellow.withAlpha(0.8f).toImGuiColor());
@@ -195,6 +200,7 @@ void ImGuiResourceBrowser::Display()
 				case ResourceInfo::Type::Tileset: TilesetPreview(resourceInfo); break;
 				case ResourceInfo::Type::Map: MapPreview(resourceInfo); break;
 				case ResourceInfo::Type::Animation: AnimationPreview(resourceInfo); break;
+				case ResourceInfo::Type::AnimationStateMachine: AnimationStateMachinePreview(resourceInfo); break;
 				case ResourceInfo::Type::Music: MusicPreview(resourceInfo); break;
 				case ResourceInfo::Type::Sound: SoundPreview(resourceInfo); break;
 				default: break;
@@ -345,6 +351,10 @@ ImGuiResourceBrowser::ResourceInfo::Type ImGuiResourceBrowser::ResourceInfo::Det
 	{
 		return Type::Animation;
 	}
+	if (ext == ".astm")
+	{
+		return Type::AnimationStateMachine;
+	}
 	if (ext == ".ogg")
 	{
 		return Type::Music;
@@ -366,6 +376,7 @@ const char* ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToString(Type ty
 	case ResourceInfo::Type::Tileset: return "Tileset"; break;
 	case ResourceInfo::Type::Map: return "Map"; break;
 	case ResourceInfo::Type::Animation: return "Animation"; break;
+	case ResourceInfo::Type::AnimationStateMachine: return "AnimationStateMachine"; break;
 	case ResourceInfo::Type::Music: return "Music"; break;
 	case ResourceInfo::Type::Sound: return "Sound"; break;
 	default: assert(false); break;
@@ -382,7 +393,8 @@ const LinearColor& ImGuiResourceBrowser::ResourceInfo::ResourceInfoTypeToColor(T
 		LinearColor::Cyan, // Texture
 		LinearColor::Peach, // Tileset
 		LinearColor::Lime, // Map
-		LinearColor::LightGreen, // Animation
+		LinearColor::DarkGreen, // Animation
+		LinearColor::DarkYellow, // AnimationStateMachine
 		LinearColor::BabyPink, // Music
 		LinearColor::HotPink, // Sound
 	};
@@ -502,10 +514,13 @@ void ImGuiResourceBrowser::MapPreview(ResourceInfo& resourceInfo)
 	ImGui::SameLine();
 }
 
-void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo)
+void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo, bool onlyAnim)
 {
-	ImGui::Text(ICON_FA_SEARCH);
-	if (ImGui::IsItemHovered())
+	if (!onlyAnim)
+	{
+		ImGui::Text(ICON_FA_SEARCH);
+	}
+	if (onlyAnim || ImGui::IsItemHovered())
 	{
         static ResourceID lastResourceID = 654321;
         static U32 animationClipIndex;
@@ -565,7 +580,7 @@ void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo)
                 ImGui::TextColored(Color::Orange.toImGuiColor(), "Invalid animation");
             }
 
-            F32 maxPreviewSize = 150.0f;
+            F32 maxPreviewSize = 100.0f;
             if (animationValid || displaySize.x > maxPreviewSize || displaySize.y > maxPreviewSize)
             {
                 const F32 larger = (displaySize.x > displaySize.y) ? displaySize.x : displaySize.y;
@@ -576,9 +591,41 @@ void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo)
 
 			ImGui::EndTooltip();
 		}
-
 	}
-	ImGui::SameLine();
+	if (!onlyAnim)
+	{
+		ImGui::SameLine();
+	}
+}
+
+void ImGuiResourceBrowser::AnimationStateMachinePreview(ResourceInfo& resourceInfo)
+{
+	AnimationStateMachinePtr ptr = ResourceManager::GetInstance().Get<AnimationStateMachine>(resourceInfo.resourceID);
+	if (ptr.IsValid())
+	{
+		ImGui::Text(ICON_FA_DIRECTIONS);
+		if (ImGui::IsItemHovered())
+		{
+			const AnimationPtr& animPtr = ptr.Get().GetAnimation();
+			if (animPtr.IsValid())
+			{
+				const Animation& anim = animPtr.Get();
+
+				// Fake it to display its preview
+				ResourceInfo fakeAnimResourceInfo;
+				fakeAnimResourceInfo.identifier = anim.GetIdentifier();
+				fakeAnimResourceInfo.filename = anim.GetFilename();
+				fakeAnimResourceInfo.type = ResourceInfo::Type::Animation;
+				fakeAnimResourceInfo.resourceID = anim.GetID();
+				AnimationPreview(fakeAnimResourceInfo, /*onlyAnim=*/true);
+			}
+		}
+		if (ImGui::IsItemClicked())
+		{
+			ImGuiAnimationEditor::GetInstance().Initialize(ptr);
+		}
+		ImGui::SameLine();
+	}
 }
 
 void ImGuiResourceBrowser::MusicPreview(ResourceInfo& resourceInfo)

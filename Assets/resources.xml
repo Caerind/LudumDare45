@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Resources resourceCount="22" typeCount="7">
+<Resources resourceCount="25" typeCount="8">
 	<Resource identifier="MainFont" filename="Fonts/EndlessBossBattle.ttf" type="0" />
 	<Resource identifier="buble" filename="Textures/buble.png" type="1" />
 	<Resource identifier="coin" filename="Textures/coin.png" type="1" />
@@ -10,16 +10,19 @@
 	<Resource identifier="anim_perso_everything" filename="Animations/perso_everything.json" type="4" />
 	<Resource identifier="anim_perso_nothing" filename="Animations/perso_nothing.json" type="4" />
 	<Resource identifier="anim_perso_IA" filename="Animations/perso_IA.json" type="4" />
-	<Resource identifier="mainTheme" filename="Musics/MainTheme.ogg" type="5" />
-	<Resource identifier="blablaTest" filename="Musics/MainTheme.ogg" type="5" />
-	<Resource identifier="chop" filename="Sounds/Chop.wav" type="6" />
-	<Resource identifier="hit" filename="Sounds/Hit.wav" type="6" />
-	<Resource identifier="knockout" filename="Sounds/Knockout.wav" type="6" />
-	<Resource identifier="select" filename="Sounds/Select.wav" type="6" />
-	<Resource identifier="throw" filename="Sounds/Throw.wav" type="6" />
-	<Resource identifier="props" filename="Sounds/Props.wav" type="6" />
-	<Resource identifier="nwall" filename="Sounds/Nwall.wav" type="6" />
-	<Resource identifier="nai" filename="Sounds/Nia.wav" type="6" />
-	<Resource identifier="piece" filename="Sounds/Piece.wav" type="6" />
-	<Resource identifier="pieceGet" filename="Sounds/PieceGet.wav" type="6" />
+	<Resource identifier="astm_perso_everything" filename="Animations/perso_everything.astm" type="5" />
+	<Resource identifier="astm_perso_nothing" filename="Animations/perso_nothing.astm" type="5" />
+	<Resource identifier="astm_perso_IA" filename="Animations/perso_IA.astm" type="5" />
+	<Resource identifier="mainTheme" filename="Musics/MainTheme.ogg" type="6" />
+	<Resource identifier="blablaTest" filename="Musics/MainTheme.ogg" type="6" />
+	<Resource identifier="chop" filename="Sounds/Chop.wav" type="7" />
+	<Resource identifier="hit" filename="Sounds/Hit.wav" type="7" />
+	<Resource identifier="knockout" filename="Sounds/Knockout.wav" type="7" />
+	<Resource identifier="select" filename="Sounds/Select.wav" type="7" />
+	<Resource identifier="throw" filename="Sounds/Throw.wav" type="7" />
+	<Resource identifier="props" filename="Sounds/Props.wav" type="7" />
+	<Resource identifier="nwall" filename="Sounds/Nwall.wav" type="7" />
+	<Resource identifier="nai" filename="Sounds/Nia.wav" type="7" />
+	<Resource identifier="piece" filename="Sounds/Piece.wav" type="7" />
+	<Resource identifier="pieceGet" filename="Sounds/PieceGet.wav" type="7" />
 </Resources>

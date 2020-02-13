@@ -89,7 +89,7 @@ public:
 			GreaterEq
 		};
 
-        Condition();
+        Condition(U32 parameterIndex);
 
 		void SetParameterIndex(U32 parameterIndex) { mParameterIndex = parameterIndex; }
 		U32 GetParameterIndex() const { return mParameterIndex; }
@@ -126,6 +126,7 @@ public:
         void SetToState(U32 toState) { mToState = toState; }
         U32 GetToState() const { return mToState; }
 
+		U32 GetConditionCount() const;
         void AddCondition(U32 conditionIndex);
         void RemoveCondition(U32 conditionIndex);
         void ClearConditions();

@@ -102,43 +102,76 @@ bool AnimationStateMachine::Parameter::GetTriggerValue() const
 	return mValue.bValue;
 }
 
-AnimationStateMachine::Condition::Condition()
+AnimationStateMachine::Condition::Condition(U32 parameterIndex)
 {
     // TODO : No idea what to put here...
-    mParameterIndex = U32_Max;
+	mParameterIndex = parameterIndex;
     mOperator = Operator::Equal;
     mOperand.bValue = false;
 }
 
 AnimationStateMachine::Transition::Transition(U32 fromState, U32 toState)
+	: mFromState(fromState)
+	, mToState(toState)
 {
-    // TODO : TODO
+}
+
+U32 AnimationStateMachine::Transition::GetConditionCount() const
+{
+	return static_cast<U32>(mConditions.size());
 }
 
 void AnimationStateMachine::Transition::AddCondition(U32 conditionIndex)
 {
-    // TODO : TODO
+	for (U32 condition : mConditions)
+	{
+		if (condition == conditionIndex)
+		{
+			return;
+		}
+	}
+	mConditions.push_back(conditionIndex);
 }
 
 void AnimationStateMachine::Transition::RemoveCondition(U32 conditionIndex)
 {
-    // TODO : TODO
+	const U32 conditionCount = GetConditionCount();
+	for (U32 i = 0; i < conditionCount; ++i)
+	{
+		if (mConditions[i] == conditionIndex)
+		{
+			mConditions.erase(mConditions.begin() + i);
+			return;
+		}
+	}
 }
 
 void AnimationStateMachine::Transition::ClearConditions()
 {
-    // TODO : TODO
+	mConditions.clear();
+}
+
+AnimationStateMachine::AnimationStateMachine()
+{
 }
 
 bool AnimationStateMachine::LoadFromFile(const std::string& filename)
 {
     // TODO : TODO
-    return true;
+	ENLIVE_UNUSED(filename);
+
+	std::string str = filename.substr(0, filename.size() - 4);
+	str += "json";
+
+	mAnimation = ResourceManager::GetInstance().GetFromFilename<Animation>(str);
+
+    return mAnimation.IsValid();
 }
 
 bool AnimationStateMachine::SaveToFile(const std::string& filename)
 {
-    // TODO : TODO
+	// TODO : TODO
+	ENLIVE_UNUSED(filename);
     return true;
 }
 
@@ -159,135 +192,161 @@ const AnimationPtr& AnimationStateMachine::GetAnimation() const
 
 U32 AnimationStateMachine::AddState(const std::string& name, U32 clipIndex)
 {
-    // TODO : TODO
-    return 0;
+	assert(mAnimation.IsValid());
+	assert(clipIndex < mAnimation.Get().GetClipCount());
+	mStates.emplace_back(name, clipIndex);
+	return GetStateCount() - 1;
 }
 
 void AnimationStateMachine::RemoveState(U32 index)
 {
-    // TODO : TODO
+	assert(index < GetStateCount());
+	mStates.erase(mStates.begin() + index);
 }
 
 void AnimationStateMachine::ClearStates()
 {
-    // TODO : TODO
+	mStates.clear();
 }
 
 void AnimationStateMachine::SetStateName(U32 index, const std::string& name)
 {
-    // TODO : TODO
+	assert(index < GetStateCount());
+	mStates[index].SetName(name);
 }
 
 void AnimationStateMachine::SetStateClipIndex(U32 index, U32 clipIndex)
 {
-    // TODO : TODO
+	assert(index < GetStateCount());
+	assert(mAnimation.IsValid());
+	assert(clipIndex < mAnimation.Get().GetClipCount());
+	mStates[index].SetClipIndex(clipIndex);
 }
 
 void AnimationStateMachine::SetStateSpeedScale(U32 index, F32 speedScale)
 {
-    // TODO : TODO
+	assert(index < GetStateCount());
+	mStates[index].SetSpeedScale(speedScale);
 }
 
 void AnimationStateMachine::SetStateExitOnlyAtEnd(U32 index, bool exitOnlyAtEnd)
 {
-    // TODO : TODO
+	assert(index < GetStateCount());
+	mStates[index].SetExitOnlyAtEnd(exitOnlyAtEnd);
 }
 
 U32 AnimationStateMachine::GetStateCount() const
 {
-    // TODO : TODO
-    return 0;
+	return static_cast<U32>(mStates.size());
 }
 
 const AnimationStateMachine::State& AnimationStateMachine::GetState(U32 index) const
 {
-    // TODO : TODO
-    return mStates[0];
+	assert(index < GetStateCount());
+    return mStates[index];
 }
 
 U32 AnimationStateMachine::GetStateIndexByName(const std::string& name) const
 {
-    // TODO : TODO
-    return 0;
+	return GetStateIndexByName(Hash::CRC32(name.c_str()));
 }
 
 U32 AnimationStateMachine::GetStateIndexByName(U32 hashedName) const
 {
-    // TODO : TODO
-    return 0;
+	const U32 stateCount = GetStateCount();
+	for (U32 i = 0; i < stateCount; ++i)
+	{
+		if (mStates[i].GetHashedName() == hashedName)
+		{
+			return i;
+		}
+	}
+	return U32_Max;
 }
 
 U32 AnimationStateMachine::AddParameter(const std::string& name, Parameter::Type type)
 {
-    // TODO : TODO
-    return 0;
+	mParameters.emplace_back(name, type);
+	return GetParameterCount() - 1;
 }
 
 void AnimationStateMachine::RemoveParameter(U32 index)
 {
-    // TODO : TODO
+	assert(index < GetParameterCount());
+	// TODO : TODO
 }
 
 void AnimationStateMachine::ClearParameters()
 {
-    // TODO : TODO
+	// TODO : TODO
 }
 
 void AnimationStateMachine::SetParameterName(U32 index, const std::string& name)
 {
-    // TODO : TODO
+	assert(index < GetParameterCount());
+	mParameters[index].SetName(name);
 }
 
-void AnimationStateMachine::SetParameterType(U32 index, Parameter::Type type)
+void AnimationStateMachine::SetParameterType(U32 index, AnimationStateMachine::Parameter::Type type)
 {
-    // TODO : TODO
+	assert(index < GetParameterCount());
+	mParameters[index].SetType(type);
 }
 
 void AnimationStateMachine::SetParameterBoolean(U32 index, bool value)
 {
-    // TODO : TODO
+	assert(index < GetParameterCount());
+	assert(mParameters[index].GetType() == Parameter::Type::Boolean);
+	mParameters[index].SetBooleanValue(value);
 }
 
 void AnimationStateMachine::SetParameterFloat(U32 index, F32 value)
 {
-    // TODO : TODO
+	assert(index < GetParameterCount());
+	assert(mParameters[index].GetType() == Parameter::Type::Float);
+	mParameters[index].SetFloatValue(value);
 }
 
 void AnimationStateMachine::SetParameterInteger(U32 index, I32 value)
 {
-    // TODO : TODO
+	assert(index < GetParameterCount());
+	assert(mParameters[index].GetType() == Parameter::Type::Integer);
+	mParameters[index].SetIntegerValue(value);
 }
 
 U32 AnimationStateMachine::GetParameterCount() const
 {
-    // TODO : TODO
-    return 0;
+	return static_cast<U32>(mParameters.size());
 }
 
 const AnimationStateMachine::Parameter& AnimationStateMachine::GetParameter(U32 index) const
 {
-    // TODO : TODO
-    return mParameters[0];
+	assert(index < GetParameterCount());
+    return mParameters[index];
 }
 
 U32 AnimationStateMachine::GetParameterIndexByName(const std::string& name) const
 {
-    // TODO : TODO
-    return 0;
+	return GetParameterIndexByName(Hash::CRC32(name.c_str()));
 }
 
 U32 AnimationStateMachine::GetParameterIndexByName(U32 hashedName) const
 {
-    // TODO : TODO
-    return 0;
+	const U32 parameterCount = GetParameterCount();
+	for (U32 i = 0; i < parameterCount; ++i)
+	{
+		if (mParameters[i].GetHashedName() == hashedName)
+		{
+			return i;
+		}
+	}
+	return U32_Max;
 }
 
 U32 AnimationStateMachine::AddCondition(U32 parameterIndex)
 {
     assert(parameterIndex < GetParameterCount());
-    Condition cond;
-    cond.SetParameterIndex(parameterIndex);
-    mConditions.emplace_back(cond);
+    mConditions.emplace_back(parameterIndex);
     return GetConditionCount() - 1;
 }
 
@@ -309,17 +368,18 @@ void AnimationStateMachine::SetConditionParameter(U32 index, U32 parameterIndex)
 
     mConditions[index].SetParameterIndex(parameterIndex);
 
+	Parameter::Type type = mParameters[parameterIndex].GetType();
     switch (type)
     {
-    case Parameter::Type::Boolean: mConditions[index].SetBooleanValue(false); break;
-    case Parameter::Type::Float: mConditions[index].SetFloatValue(0.0f); break;
-    case Parameter::Type::Integer: mConditions[index].SetIntegerValue(0); break;
-    case Parameter::Type::Trigger: mConditions[index].SetTriggerValue(false); break;
+    case Parameter::Type::Boolean: mConditions[index].SetOperandBoolean(false); break;
+    case Parameter::Type::Float: mConditions[index].SetOperandFloat(0.0f); break;
+    case Parameter::Type::Integer: mConditions[index].SetOperandInteger(0); break;
+    case Parameter::Type::Trigger: /* Nothing */ break;
     default: assert(false); break;
     }
 }
 
-void AnimationStateMachine::SetConditionOperator(U32 index, Condition::Operator operat)
+void AnimationStateMachine::SetConditionOperator(U32 index, AnimationStateMachine::Condition::Operator operat)
 {
     assert(index < GetConditionCount());
 
@@ -331,7 +391,7 @@ void AnimationStateMachine::SetConditionOperator(U32 index, Condition::Operator 
     assert(parameterType != Parameter::Type::Trigger);
     if (parameterType == Parameter::Type::Boolean)
     {
-        assert(operat == Condition::Operator::Equal || Condition::Operator::NotEqual);
+        assert(operat == Condition::Operator::Equal || operat == Condition::Operator::NotEqual);
     }
 #endif // ENLIVE_ENABLE_ASSERT
 
@@ -369,8 +429,8 @@ void AnimationStateMachine::SetConditionOperandInteger(U32 index, I32 operand)
 #ifdef ENLIVE_ENABLE_ASSERT
     assert(index < GetConditionCount());
     const U32 parameterIndex = mConditions[index].GetParameterIndex();
-    assert(parameterIndex < GetParameterCount());
-    const Parameter::Type parameterType = mParameters[parameterIndex].GetType();
+	assert(parameterIndex < GetParameterCount());
+	const Parameter::Type parameterType = mParameters[parameterIndex].GetType();
     assert(parameterType == Parameter::Type::Integer);
 #endif // ENLIVE_ENABLE_ASSERT
 
@@ -407,14 +467,14 @@ void AnimationStateMachine::ClearTransitions()
 
 void AnimationStateMachine::SetTransitionFromState(U32 index, U32 fromState)
 {
-    assert(transitionIndex < GetTransitionCount());
+    assert(index < GetTransitionCount());
     assert(fromState < GetStateCount());
     mTransitions[index].SetFromState(fromState);
 }
 
 void AnimationStateMachine::SetTransitionToState(U32 index, U32 toState)
 {
-    assert(transitionIndex < GetTransitionCount());
+    assert(index < GetTransitionCount());
     assert(toState < GetStateCount());
     mTransitions[index].SetToState(toState);
 }
@@ -430,13 +490,13 @@ void AnimationStateMachine::RemoveConditionFromTransition(U32 transitionIndex, U
 {
     assert(transitionIndex < GetTransitionCount());
     assert(conditionIndex < GetConditionCount());
-    // TODO : TODO
+	mTransitions[transitionIndex].RemoveCondition(conditionIndex);
 }
 
 void AnimationStateMachine::ClearConditionsFromTransition(U32 transitionIndex)
 {
     assert(transitionIndex < GetTransitionCount());
-    // TODO : TODO
+	mTransitions[transitionIndex].ClearConditions();
 }
 
 U32 AnimationStateMachine::GetTransitionCount() const

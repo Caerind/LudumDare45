@@ -23,6 +23,7 @@
 #include <Enlivengine/Map/Tileset.hpp>
 #include <Enlivengine/Map/Map.hpp>
 #include <Enlivengine/Graphics/Animation.hpp>
+#include <Enlivengine/Graphics/AnimationStateMachine.hpp>
 
 namespace en
 {
@@ -171,9 +172,10 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 	assert(2 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Tileset));
 	assert(3 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Map));
 	assert(4 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Animation));
-	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
-	assert(6 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
-	assert(7 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
+	assert(5 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::AnimationStateMachine));
+	assert(6 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Music));
+	assert(7 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Sound));
+	assert(8 == static_cast<I32>(ImGuiResourceBrowser::ResourceInfo::Type::Count));
 #endif // ENLIVE_ENABLE_IMGUI
 
 	ResourceManager& resourceManager = ResourceManager::GetInstance();
@@ -261,7 +263,22 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 5: // ResourceInfo::Type::Music
+	case 5: // ResourceInfo::Type::AnimationStateMachine
+	{
+		AnimationStateMachinePtr animPtr = resourceManager.Create<AnimationStateMachine>(identifier.c_str(), AnimationStateMachineLoader::FromFile(resourceFilename));
+		if (!animPtr.IsValid())
+		{
+			resourceID = InvalidResourceID;
+			LogWarning(en::LogChannel::Global, 2, "Can't load resource : %s, %s", identifier.c_str(), resourceFilename.c_str());
+			return false;
+		}
+		else
+		{
+			resourceID = animPtr.GetID();
+		}
+		break;
+	}
+	case 6: // ResourceInfo::Type::Music
 	{
 		MusicID musicID = AudioSystem::GetInstance().PrepareMusic(identifier.c_str(), resourceFilename);
 		if (musicID == InvalidMusicID)
@@ -276,7 +293,7 @@ bool Application::LoadResource(I32 type, const std::string& identifier, const st
 		}
 		break;
 	}
-	case 6: // ResourceInfo::Type::Sound
+	case 7: // ResourceInfo::Type::Sound
 	{
 		SoundID soundID = AudioSystem::GetInstance().PrepareSound(identifier.c_str(), resourceFilename);
 		if (soundID == InvalidSoundID)

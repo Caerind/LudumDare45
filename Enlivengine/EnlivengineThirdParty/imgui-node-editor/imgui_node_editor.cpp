@@ -2014,7 +2014,10 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
 
         // debug
         //if (id < 0) return ImGui::Button(idString, to_imvec(rect.size));
-
+		if (rect.GetSize().x == 0.0f || rect.GetSize().y == 0.0f)
+		{
+			return false;
+		}
         auto result = ImGui::InvisibleButton(idString, rect.GetSize());
 
         // #debug

@@ -55,6 +55,7 @@ class ImGuiTool
 		virtual bool IsImGuiDemoTool() const;
 
 		void AskForResize();
+		void AskForFocus();
 
 	private:
 		bool mRegistered;
@@ -62,11 +63,14 @@ class ImGuiTool
 		friend class ImGuiToolManager;
 		virtual U32 GetHash() const;
 		bool ShouldResize() const;
-		void ResizeIfNeeded();
+		void Resize();
+		bool ShouldFocus() const;
+		void Focus();
 
 	protected:
 		bool mVisible;
 		bool mShouldResize;
+		bool mShouldFocus;
 };
 
 class ImGuiToolManager

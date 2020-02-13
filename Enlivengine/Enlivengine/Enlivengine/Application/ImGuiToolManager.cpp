@@ -57,6 +57,11 @@ void ImGuiTool::AskForResize()
 	mShouldResize = true;
 }
 
+void ImGuiTool::AskForFocus()
+{
+	mShouldFocus = true;
+}
+
 U32 ImGuiTool::GetHash() const
 {
 	return Hash::CRC32(GetName());
@@ -67,13 +72,21 @@ bool ImGuiTool::ShouldResize() const
 	return mShouldResize;
 }
 
-void ImGuiTool::ResizeIfNeeded()
+void ImGuiTool::Resize()
 {
-	if (mShouldResize)
-	{
-		ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
-		mShouldResize = false;
-	}
+	ImGui::SetWindowSize(ImVec2(0.0f, 0.0f));
+	mShouldResize = false;
+}
+
+bool ImGuiTool::ShouldFocus() const
+{
+	return mShouldFocus;
+}
+
+void ImGuiTool::Focus()
+{
+	ImGui::SetWindowFocus();
+	mShouldFocus = false;
 }
 
 ImGuiToolManager::ImGuiToolManager()
@@ -246,7 +259,14 @@ void ImGuiToolManager::ImGuiMain()
 					}
 				}
 				tool->Display();
-				tool->ResizeIfNeeded();
+				if (tool->ShouldFocus())
+				{
+					tool->Focus();
+				}
+				if (tool->ShouldResize())
+				{
+					tool->Resize();
+				}
 				if (!imguiDemoTool)
 				{
 					ImGui::End();
