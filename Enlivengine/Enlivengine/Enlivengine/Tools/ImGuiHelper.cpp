@@ -71,6 +71,12 @@ void PreviewTexture(const en::Texture& texture, const en::Rectu& textureRect, en
 	ImGui::Image(previewSprite);
 }
 
+void PreviewAnimationClip(const en::Animation& animation, en::F32 maxSize, const en::U32& clipIndex, en::U32& clipFrameIndex, en::Time& accumulator, en::F32 speedScale /*= 1.0f*/)
+{
+    en::U32 clipIndexCopy = clipIndex;
+    PreviewAnimation(animation, maxSize, clipIndexCopy, clipFrameIndex, accumulator, speedScale);
+}
+
 void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& clipIndex, en::U32& clipFrameIndex, en::Time& accumulator, en::F32 speedScale /*= 1.0f*/)
 {
 	if (!animation.GetTexture().IsValid())
@@ -115,7 +121,6 @@ void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& 
 			clipFrameIndex++;
 			if (animation.GetClip(clipIndex).GetFrameCount() <= clipFrameIndex)
 			{
-				clipIndex = (clipIndex + 1) % animation.GetClipCount();
 				clipFrameIndex = 0;
 			}
 		}

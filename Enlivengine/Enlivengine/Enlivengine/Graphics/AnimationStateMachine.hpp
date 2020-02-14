@@ -199,7 +199,9 @@ public:
     void RemoveConditionFromTransition(U32 transitionIndex, U32 conditionIndex);
     void ClearConditionsFromTransition(U32 transitionIndex);
 	U32 GetTransitionCount() const;
-	const AnimationStateMachine::Transition& GetTransition(U32 index) const;
+    const AnimationStateMachine::Transition& GetTransition(U32 index) const;
+    U32 GetTransitionFromStateCount(U32 stateIndex) const;
+    U32 GetTransitionToStateCount(U32 stateIndex) const;
 
 private:
 	AnimationPtr mAnimation;

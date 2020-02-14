@@ -133,22 +133,17 @@ bool ImGuiAnimationEditor::IsInitialized() const
 
 void ImGuiAnimationEditor::LeftPanel(AnimationStateMachine& stateMachine)
 {
-	static bool initialLeftColSize = true;
+	static int initialLeftColSize = true;
 	if (initialLeftColSize)
 	{
-		ImGui::PushItemWidth(100.0f);
+		ImGui::SetColumnWidth(0, 240.0f);
+        initialLeftColSize = false;
 	}
 
 	Selection(stateMachine);
 	NewState(stateMachine);
 	NewParameter(stateMachine);
 	ParametersList(stateMachine);
-
-	if (initialLeftColSize)
-	{
-		ImGui::PopItemWidth();
-		initialLeftColSize = false;
-	}
 }
 
 void ImGuiAnimationEditor::Selection(AnimationStateMachine& stateMachine)
@@ -170,21 +165,29 @@ void ImGuiAnimationEditor::Selection(AnimationStateMachine& stateMachine)
 	}
 	else
 	{
-		ImGui::CollapsingHeader("Empty selection");
+		ImGui::CollapsingHeader("Empty selection", ImGuiTreeNodeFlags_Leaf);
 	}
 }
 
 void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax::NodeEditor::NodeId node)
 {
-	ImGui::CollapsingHeader("Selected State");
+	ImGui::CollapsingHeader("Selected State", ImGuiTreeNodeFlags_Leaf);
 	ImGui::Indent();
 
 	const int stateUID = 1;
 	const std::uintptr_t nodeID = reinterpret_cast<std::uintptr_t>(node.AsPointer());
 	const U32 stateIndex = static_cast<U32>(nodeID - stateUID);
 
+    const Animation& animation = stateMachine.GetAnimation().Get();
+
 	ImGui::PushID(stateIndex);
 	const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
+
+    ImGui::Text(state.GetName().c_str());
+
+    static U32 clipFrameIndex = 0;
+    static Time accumulator;
+    ImGui::PreviewAnimationClip(animation, 100.0f, state.GetClipIndex(), clipFrameIndex, accumulator, state.GetSpeedScale());
 
 	float speedScale = static_cast<float>(state.GetSpeedScale());
 	ImGui::PushItemWidth(90.0f);
@@ -206,7 +209,7 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 
 void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax::NodeEditor::LinkId link)
 {
-	ImGui::CollapsingHeader("Selected Transition");
+	ImGui::CollapsingHeader("Selected Transition", ImGuiTreeNodeFlags_Leaf);
 	ImGui::Indent();
 
 	const int transitionUID = 1000 + 1;
@@ -257,30 +260,7 @@ void ImGuiAnimationEditor::NewState(AnimationStateMachine& stateMachine)
 			{
 				static Time accumulator;
 				static U32 clipFrameIndex = 0;
-				if (clipFrameIndex >= clip.GetFrameCount())
-				{
-					clipFrameIndex = 0;
-				}
-				accumulator += seconds(ImGui::GetIO().DeltaTime);
-				const U32 frameIndex = clip.GetFrameIndex(clipFrameIndex);
-				if (frameIndex < animation.GetFrameCount())
-				{
-					const Animation::Frame& frame = animation.GetFrame(frameIndex);
-					assert(animation.GetTexture().IsValid()); // lazy to check
-					const Texture& texture = animation.GetTexture().Get();
-					ImGui::PreviewTexture(texture, frame.GetRect(), 100.0f, true);
-
-					if (accumulator > frame.GetDuration())
-					{
-						accumulator -= frame.GetDuration();
-						clipFrameIndex++;
-					}
-				}
-				else
-				{
-					ImGui::TextColored(Color::Orange.toImGuiColor(), "Invalid clip/frame");
-					validNewState = false;
-				}
+                ImGui::PreviewAnimationClip(animation, 100.0f, static_cast<U32>(stateClipIndex), clipFrameIndex, accumulator, 1.0f);
 			}
 			else
 			{
@@ -498,23 +478,21 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 
 	ax::NodeEditor::Begin(stateMachine.GetIdentifier().c_str(), ImVec2(0.0f, 0.0f));
 
+    ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBg, ImColor(128, 128, 128, 250));
+    ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, ImColor(32, 32, 32, 250));
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodePadding, ImVec4(paddingX, paddingY, paddingX, paddingY));
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, rounding);
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodeBorderWidth, 2.0f);
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_LinkStrength, 0.0f);
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PivotSize, ImVec2(0.0f, 0.0f));
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinCorners, 12);
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinRadius, paddingX * 2.0f);
 	const U32 stateCount = stateMachine.GetStateCount();
 	for (U32 stateIndex = 0; stateIndex < stateCount; ++stateIndex)
 	{
 		int stateID = static_cast<int>(stateIndex);
-		const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
-
-		ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBg, ImColor(128, 128, 128, 250));
-		ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, ImColor(32, 32, 32, 250));
-
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodePadding, ImVec4(paddingX, paddingY, paddingX, paddingY));
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, rounding);
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodeBorderWidth, 2.0f);
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_LinkStrength, 0.0f);
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PivotSize, ImVec2(0.0f, 0.0f));
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinCorners, 12);
-		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinRadius, paddingX * 2.0f);
-		ax::NodeEditor::BeginNode(stateUID + stateID);
+        ax::NodeEditor::BeginNode(stateUID + stateID);
+        const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
 
 		ImGui::Text(state.GetName().c_str());
 		ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
@@ -540,12 +518,11 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 				ax::NodeEditor::PinRect(nodeRect.GetTL(), nodeRect.GetBR());
 				ax::NodeEditor::EndPin();
 			}
-		}
-
+        }
 		ax::NodeEditor::EndNode();
-		ax::NodeEditor::PopStyleVar(7);
-		ax::NodeEditor::PopStyleColor(2);
-	}
+    }
+    ax::NodeEditor::PopStyleVar(7);
+    ax::NodeEditor::PopStyleColor(2);
 
 	const U32 transitionCount = stateMachine.GetTransitionCount();
 	for (U32 i = 0; i < transitionCount; ++i)
@@ -560,6 +537,28 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 			2.0f
 		);
 	}
+
+
+    if (ax::NodeEditor::BeginCreate())
+    {
+        ax::NodeEditor::PinId inputPinId, outputPinId;
+        if (ax::NodeEditor::QueryNewLink(&inputPinId, &outputPinId))
+        {
+            if (inputPinId && outputPinId)
+            {
+                if (ax::NodeEditor::AcceptNewItem())
+                {
+                    // TODO : Get State Indexes
+                    // TODO : Add New Transition
+                    // TODO : Select the created transition
+                }
+            }
+        }
+    }
+    ax::NodeEditor::EndCreate();
+
+
+
 
 	ax::NodeEditor::End();
 }

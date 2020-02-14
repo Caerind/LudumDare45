@@ -18,7 +18,8 @@ void DisabledButton(const char* text);
 
 void PreviewTexture(const en::Texture& texture, en::F32 maxSize, bool canGrow = false);
 void PreviewTexture(const en::Texture& texture, const en::Rectu& textureRect, en::F32 maxSize, bool canGrow = false);
-void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& clipIndex, en::U32& frameIndex, en::Time& accumulator, en::F32 speedScale = 1.0f);
+void PreviewAnimationClip(const en::Animation& animation, en::F32 maxSize, const en::U32& clipIndex, en::U32& clipFrameIndex, en::Time& accumulator, en::F32 speedScale = 1.0f);
+void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& clipIndex, en::U32& clipFrameIndex, en::Time& accumulator, en::F32 speedScale = 1.0f);
 
 } // namespace ImGui
 

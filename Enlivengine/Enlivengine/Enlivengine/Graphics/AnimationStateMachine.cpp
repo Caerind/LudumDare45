@@ -514,4 +514,32 @@ const AnimationStateMachine::Transition& AnimationStateMachine::GetTransition(U3
     return mTransitions[index];
 }
 
+U32 AnimationStateMachine::GetTransitionFromStateCount(U32 stateIndex) const
+{
+    U32 count = 0;
+    const U32 transitionCount = GetTransitionCount();
+    for (U32 i = 0; i < transitionCount; ++i)
+    {
+        if (mTransitions[i].GetFromState() == stateIndex)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
+U32 AnimationStateMachine::GetTransitionToStateCount(U32 stateIndex) const
+{
+    U32 count = 0;
+    const U32 transitionCount = GetTransitionCount();
+    for (U32 i = 0; i < transitionCount; ++i)
+    {
+        if (mTransitions[i].GetToState() == stateIndex)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
 } // namespace en
