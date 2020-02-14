@@ -13,6 +13,7 @@
 #include <Enlivengine/Graphics/LinearColor.hpp>
 #include <Enlivengine/System/ParserXml.hpp>
 
+#include <Enlivengine/Tools/ImGuiHelper.hpp>
 #include <Enlivengine/Tools/ImGuiAnimationEditor.hpp>
 
 #include <Enlivengine/Application/AudioSystem.hpp>
@@ -130,9 +131,7 @@ void ImGuiResourceBrowser::Display()
 	}
 	else
 	{
-		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-		ImGui::Button("Add");
-		ImGui::PopStyleVar();
+		ImGui::DisabledButton("Add");
 	}
 	ImGui::Unindent();
 
@@ -421,20 +420,7 @@ void ImGuiResourceBrowser::TexturePreview(ResourceInfo& resourceInfo)
 		ImGui::BeginTooltip();
 
 		const Texture& texture = ResourceManager::GetInstance().Get<Texture>(resourceInfo.resourceID).Get();
-
-		constexpr F32 maxPreviewSize = 150.0f;
-		sf::Sprite previewSprite;
-		previewSprite.setTexture(texture);
-		Vector2f textureSize;
-		textureSize.x = static_cast<F32>(texture.getSize().x);
-		textureSize.y = static_cast<F32>(texture.getSize().y);
-		if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
-		{
-			const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
-			const F32 scale = maxPreviewSize / larger;
-			previewSprite.setScale(scale, scale);
-		}
-		ImGui::Image(previewSprite);
+		ImGui::PreviewTexture(texture, 150.0f);
 
 		ImGui::EndTooltip();
 	}
@@ -452,20 +438,7 @@ void ImGuiResourceBrowser::TilesetPreview(ResourceInfo& resourceInfo)
 			ImGui::BeginTooltip();
 
 			const Texture& texture = tileset.Get().GetTexture().Get();
-
-			constexpr F32 maxPreviewSize = 150.0f;
-			sf::Sprite previewSprite;
-			previewSprite.setTexture(texture);
-			Vector2f textureSize;
-			textureSize.x = static_cast<F32>(texture.getSize().x);
-			textureSize.y = static_cast<F32>(texture.getSize().y);
-			if (textureSize.x > maxPreviewSize || textureSize.y > maxPreviewSize)
-			{
-				const F32 larger = (textureSize.x > textureSize.y) ? textureSize.x : textureSize.y;
-				const F32 scale = maxPreviewSize / larger;
-				previewSprite.setScale(scale, scale);
-			}
-			ImGui::Image(previewSprite);
+			ImGui::PreviewTexture(texture, 150.0f);
 
 			ImGui::EndTooltip();
 		}
@@ -514,88 +487,35 @@ void ImGuiResourceBrowser::MapPreview(ResourceInfo& resourceInfo)
 	ImGui::SameLine();
 }
 
-void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo, bool onlyAnim)
+void ImGuiResourceBrowser::AnimationPreview(ResourceInfo& resourceInfo)
 {
-	if (!onlyAnim)
+	ImGui::Text(ICON_FA_SEARCH);
+	if (ImGui::IsItemHovered())
 	{
-		ImGui::Text(ICON_FA_SEARCH);
-	}
-	if (onlyAnim || ImGui::IsItemHovered())
-	{
-        static ResourceID lastResourceID = 654321;
-        static U32 animationClipIndex;
-        static U32 animationClipFrameIndex;
-        static Time animationAcc;
-
-        const bool resourceChanged = (lastResourceID != resourceInfo.resourceID);
-        lastResourceID = resourceInfo.resourceID;
-
 		AnimationPtr animation = ResourceManager::GetInstance().Get<Animation>(resourceInfo.resourceID);
 		if (animation.IsValid() && animation.Get().GetTexture().IsValid())
 		{
+			static ResourceID lastResourceID = 654321;
+			static U32 animationClipIndex;
+			static U32 animationClipFrameIndex;
+			static Time animationAcc;
+			if (lastResourceID != resourceInfo.resourceID)
+			{
+				lastResourceID = resourceInfo.resourceID;
+				animationClipIndex = 0;
+				animationClipFrameIndex = 0;
+				animationAcc = Time::Zero;
+			}
+
 			ImGui::BeginTooltip();
 
             const Animation& anim = animation.Get();
-            const Texture& texture = animation.Get().GetTexture().Get();
-
-            sf::Sprite previewSprite;
-            previewSprite.setTexture(texture);
-            Vector2f displaySize;
-
-            bool animationValid = (anim.GetClipCount() > 0 && anim.GetFrameCount() > 0);
-            if (animationValid)
-            {
-                if (resourceChanged)
-                {
-                    animationClipIndex = 0;
-                    assert(anim.GetClip(animationClipIndex).GetFrameCount() > 0);
-                    animationClipFrameIndex = 0;
-                    animationAcc = Time::Zero;
-                }
-
-                U32 frameIndex = anim.GetClip(animationClipIndex).GetFrameIndex(animationClipFrameIndex);
-                assert(frameIndex < anim.GetFrameCount());
-                const Animation::Frame& frame = anim.GetFrame(frameIndex);
-                previewSprite.setTextureRect(toSF(frame.GetRect()));
-
-                displaySize.set(static_cast<Vector2f>(frame.GetRect().getSize()));
-
-                animationAcc += seconds(ImGui::GetIO().DeltaTime);
-                if (animationAcc > frame.GetDuration())
-                {
-                    animationAcc -= frame.GetDuration();
-                    animationClipFrameIndex++;
-                    if (anim.GetClip(animationClipIndex).GetFrameCount() <= animationClipFrameIndex)
-                    {
-                        animationClipIndex = (animationClipIndex + 1) % anim.GetClipCount();
-                        animationClipFrameIndex = 0;
-                    }
-                }
-            }
-
-            if (!animationValid)
-            {
-                displaySize.x = static_cast<F32>(texture.getSize().x);
-                displaySize.y = static_cast<F32>(texture.getSize().y);
-                ImGui::TextColored(Color::Orange.toImGuiColor(), "Invalid animation");
-            }
-
-            F32 maxPreviewSize = 100.0f;
-            if (animationValid || displaySize.x > maxPreviewSize || displaySize.y > maxPreviewSize)
-            {
-                const F32 larger = (displaySize.x > displaySize.y) ? displaySize.x : displaySize.y;
-                const F32 scale = maxPreviewSize / larger;
-                previewSprite.setScale(scale, scale);
-            }
-            ImGui::Image(previewSprite);
+			ImGui::PreviewAnimation(anim, 100.0f, animationClipIndex, animationClipFrameIndex, animationAcc);
 
 			ImGui::EndTooltip();
 		}
 	}
-	if (!onlyAnim)
-	{
-		ImGui::SameLine();
-	}
+	ImGui::SameLine();
 }
 
 void ImGuiResourceBrowser::AnimationStateMachinePreview(ResourceInfo& resourceInfo)
@@ -607,17 +527,26 @@ void ImGuiResourceBrowser::AnimationStateMachinePreview(ResourceInfo& resourceIn
 		if (ImGui::IsItemHovered())
 		{
 			const AnimationPtr& animPtr = ptr.Get().GetAnimation();
-			if (animPtr.IsValid())
+			if (animPtr.IsValid() && animPtr.Get().GetTexture().IsValid())
 			{
-				const Animation& anim = animPtr.Get();
+				static ResourceID lastResourceID = 654321;
+				static U32 animationClipIndex;
+				static U32 animationClipFrameIndex;
+				static Time animationAcc;
+				if (lastResourceID != resourceInfo.resourceID)
+				{
+					lastResourceID = resourceInfo.resourceID;
+					animationClipIndex = 0;
+					animationClipFrameIndex = 0;
+					animationAcc = Time::Zero;
+				}
 
-				// Fake it to display its preview
-				ResourceInfo fakeAnimResourceInfo;
-				fakeAnimResourceInfo.identifier = anim.GetIdentifier();
-				fakeAnimResourceInfo.filename = anim.GetFilename();
-				fakeAnimResourceInfo.type = ResourceInfo::Type::Animation;
-				fakeAnimResourceInfo.resourceID = anim.GetID();
-				AnimationPreview(fakeAnimResourceInfo, /*onlyAnim=*/true);
+				ImGui::BeginTooltip();
+
+				const Animation& anim = animPtr.Get();
+				ImGui::PreviewAnimation(anim, 100.0f, animationClipIndex, animationClipFrameIndex, animationAcc);
+
+				ImGui::EndTooltip();
 			}
 		}
 		if (ImGui::IsItemClicked())

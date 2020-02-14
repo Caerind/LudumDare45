@@ -54,7 +54,7 @@ private:
 	void TexturePreview(ResourceInfo& resourceInfo);
 	void TilesetPreview(ResourceInfo& resourceInfo);
 	void MapPreview(ResourceInfo& resourceInfo);
-	void AnimationPreview(ResourceInfo& resourceInfo, bool onlyAnim = false);
+	void AnimationPreview(ResourceInfo& resourceInfo);
 	void AnimationStateMachinePreview(ResourceInfo& resourceInfo);
 	void MusicPreview(ResourceInfo& resourceInfo);
 	void SoundPreview(ResourceInfo& resourceInfo);

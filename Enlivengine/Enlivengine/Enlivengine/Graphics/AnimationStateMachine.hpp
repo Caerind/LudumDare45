@@ -43,7 +43,8 @@ public:
             Boolean,
             Float,
             Integer,
-            Trigger
+            Trigger,
+			Count
         };
 
 		Parameter(const std::string& name, Type type);

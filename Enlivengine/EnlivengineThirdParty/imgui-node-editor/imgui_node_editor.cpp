@@ -541,14 +541,14 @@ void ed::Pin::Draw(ImDrawList* drawList, DrawFlags flags)
     {
         drawList->ChannelsSetCurrent(m_Node->m_Channel + c_NodePinChannel);
 
-        drawList->AddRectFilled(m_Bounds.Min, m_Bounds.Max,
-            m_Color, m_Rounding, m_Corners);
+		drawList->AddRectFilled(m_Bounds.Min, m_Bounds.Max,
+			m_BorderColor, m_Rounding, m_Corners);
 
         if (m_BorderWidth > 0.0f)
         {
             FringeScaleScope fringe(1.0f);
             drawList->AddRect(m_Bounds.Min, m_Bounds.Max,
-                m_BorderColor, m_Rounding, m_Corners, m_BorderWidth);
+				m_BorderColor, m_Rounding, m_Corners, m_BorderWidth);
         }
 
         if (!Editor->IsSelected(m_Node))
@@ -641,7 +641,7 @@ void ed::Node::Draw(ImDrawList* drawList, DrawFlags flags)
         drawRect(GetRegionBounds(NodeRegion::Header), IM_COL32(0, 255, 255, 64));
 # endif
 
-        DrawBorder(drawList, IM_COL32(255, 0, 0, 255), m_BorderWidth);
+        DrawBorder(drawList, m_BorderColor, m_BorderWidth);
     }
     else if (flags & Selected)
     {
@@ -2012,19 +2012,7 @@ ed::Control ed::EditorContext::BuildControl(bool allowOffscreen)
         snprintf(idString, 32, "%p", id.AsPointer());
         ImGui::SetCursorScreenPos(rect.Min);
 
-        // debug
-        //return ImGui::Button(idString, ImVec2(rect.GetSize().x, rect.GetSize().y));
-
-		/*
-        if (rect.GetSize().x == 0.0f || rect.GetSize().y == 0.0f)
-		{
-			return false;
-		}
-        */
-
-        auto result = ImGui::InvisibleButton(idString, rect.GetSize());
-
-        return result;
+        return ImGui::InvisibleButton(idString, rect.GetSize());
     };
 
     // Check input interactions over area.

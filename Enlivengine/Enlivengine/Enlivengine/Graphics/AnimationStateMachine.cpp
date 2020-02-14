@@ -39,6 +39,7 @@ void AnimationStateMachine::Parameter::SetName(const std::string& name)
 
 void AnimationStateMachine::Parameter::SetType(Parameter::Type type)
 {
+	assert(type < Parameter::Type::Count);
 	if (mType != type)
 	{
 		mType = type;
@@ -266,6 +267,7 @@ U32 AnimationStateMachine::GetStateIndexByName(U32 hashedName) const
 
 U32 AnimationStateMachine::AddParameter(const std::string& name, Parameter::Type type)
 {
+	assert(type < Parameter::Type::Count);
 	mParameters.emplace_back(name, type);
 	return GetParameterCount() - 1;
 }
@@ -290,6 +292,7 @@ void AnimationStateMachine::SetParameterName(U32 index, const std::string& name)
 void AnimationStateMachine::SetParameterType(U32 index, AnimationStateMachine::Parameter::Type type)
 {
 	assert(index < GetParameterCount());
+	assert(type < Parameter::Type::Count);
 	mParameters[index].SetType(type);
 }
 
@@ -364,7 +367,8 @@ void AnimationStateMachine::ClearConditions()
 void AnimationStateMachine::SetConditionParameter(U32 index, U32 parameterIndex)
 {
     assert(index < GetConditionCount());
-    assert(parameterIndex < GetParameterCount());
+	assert(parameterIndex < GetParameterCount());
+	assert(mParameters[parameterIndex].GetType() < Parameter::Type::Count);
 
     mConditions[index].SetParameterIndex(parameterIndex);
 

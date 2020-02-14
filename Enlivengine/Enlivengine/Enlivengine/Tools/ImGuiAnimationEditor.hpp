@@ -31,8 +31,26 @@ public:
 	bool IsInitialized() const;
 
 private:
+	void LeftPanel(AnimationStateMachine& stateMachine);
+	void Selection(AnimationStateMachine& stateMachine);
+	void SelectedNode(AnimationStateMachine& stateMachine, ax::NodeEditor::NodeId node);
+	void SelectedLink(AnimationStateMachine& stateMachine, ax::NodeEditor::LinkId link);
+	void NewState(AnimationStateMachine& stateMachine);
+	void NewParameter(AnimationStateMachine& stateMachine);
+	void ParametersList(AnimationStateMachine& stateMachine);
+
+	void NodeEditor(AnimationStateMachine& stateMachine);
+
+	void AnimationStateMachineList();
+	
+private:
 	AnimationStateMachinePtr mStateMachine;
     ax::NodeEditor::EditorContext* mEditorContext;
+
+	// Left Panel elements
+	static constexpr U32 kBufferSize{ 256 };
+	char mStateInputTextBuffer[kBufferSize];
+	char mParameterInputTextBuffer[kBufferSize];
 };
 
 } // namespace en
