@@ -90,12 +90,17 @@ bool ImGuiAnimationEditor::Initialize(AnimationStateMachinePtr stateMachinePtr)
 
 			stateMachine.AddTransition(0, 1);
 			stateMachine.AddTransition(0, 1); // TODO : See many links
+			stateMachine.AddTransition(0, 1); // TODO : See many links
+			stateMachine.AddTransition(1, 0);
+			stateMachine.AddTransition(1, 0);
 			stateMachine.AddTransition(0, 2);
 			stateMachine.AddTransition(2, 3);
 			stateMachine.AddTransition(3, 0);
 
 			stateMachine.AddParameter("Jumping", AnimationStateMachine::Parameter::Type::Boolean);
 			stateMachine.AddParameter("Speed", AnimationStateMachine::Parameter::Type::Float);
+			stateMachine.AddParameter("Direction", AnimationStateMachine::Parameter::Type::Integer);
+			stateMachine.AddParameter("Action", AnimationStateMachine::Parameter::Type::Trigger);
 		}
 
 		mStateMachine = stateMachinePtr;
@@ -131,6 +136,58 @@ bool ImGuiAnimationEditor::IsInitialized() const
 	return mStateMachine.IsValid() && mEditorContext != nullptr;
 }
 
+int ImGuiAnimationEditor::GetStateID(const AnimationStateMachine::State& state, const AnimationStateMachine& stateMachine)
+{
+	ENLIVE_UNUSED(stateMachine);
+	return static_cast<int>(state.GetHashedName());
+}
+
+int ImGuiAnimationEditor::GetTransitionID(const AnimationStateMachine::Transition& transition, const AnimationStateMachine& stateMachine)
+{
+	const U32 fromStateHash = stateMachine.GetState(transition.GetFromState()).GetHashedName();
+	const U32 toStateHash = stateMachine.GetState(transition.GetToState()).GetHashedName();
+	const U32 transitionCount = stateMachine.GetTransitionCount();
+	U32 transitionIndex = 0;
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		if (&transition == &(stateMachine.GetTransition(i)))
+		{
+			transitionIndex = i;
+		}
+	}
+	return static_cast<int>(fromStateHash + toStateHash + transitionIndex);
+}
+
+int ImGuiAnimationEditor::GetTransitionInputID(const AnimationStateMachine::Transition& transition, const AnimationStateMachine& stateMachine)
+{
+	const U32 toStateHash = stateMachine.GetState(transition.GetToState()).GetHashedName();
+	const U32 transitionCount = stateMachine.GetTransitionCount();
+	U32 transitionIndex = 0;
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		if (&transition == &(stateMachine.GetTransition(i)))
+		{
+			transitionIndex = i;
+		}
+	}
+	return static_cast<int>(toStateHash + transitionIndex);
+}
+
+int ImGuiAnimationEditor::GetTransitionOutputID(const AnimationStateMachine::Transition& transition, const AnimationStateMachine& stateMachine)
+{
+	const U32 fromStateHash = stateMachine.GetState(transition.GetFromState()).GetHashedName();
+	const U32 transitionCount = stateMachine.GetTransitionCount();
+	U32 transitionIndex = 0;
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		if (&transition == &(stateMachine.GetTransition(i)))
+		{
+			transitionIndex = i;
+		}
+	}
+	return static_cast<int>(fromStateHash + transitionIndex);
+}
+
 void ImGuiAnimationEditor::LeftPanel(AnimationStateMachine& stateMachine)
 {
 	static int initialLeftColSize = true;
@@ -142,8 +199,10 @@ void ImGuiAnimationEditor::LeftPanel(AnimationStateMachine& stateMachine)
 
 	Selection(stateMachine);
 	NewState(stateMachine);
+	NewTransition(stateMachine);
 	NewParameter(stateMachine);
-	ParametersList(stateMachine);
+	ParametersList(stateMachine); 
+	Debug(stateMachine);
 }
 
 void ImGuiAnimationEditor::Selection(AnimationStateMachine& stateMachine)
@@ -174,19 +233,40 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 	ImGui::CollapsingHeader("Selected State", ImGuiTreeNodeFlags_Leaf);
 	ImGui::Indent();
 
-	const int stateUID = 1;
-	const std::uintptr_t nodeID = reinterpret_cast<std::uintptr_t>(node.AsPointer());
-	const U32 stateIndex = static_cast<U32>(nodeID - stateUID);
+	const int nodeID = static_cast<int>(reinterpret_cast<std::uintptr_t>(node.AsPointer()));
 
-    const Animation& animation = stateMachine.GetAnimation().Get();
+	U32 stateIndex = stateMachine.GetStateCount();
+	for (U32 i = 0; i < stateIndex; ++i)
+	{
+		if (GetStateID(stateMachine.GetState(i), stateMachine) == nodeID)
+		{
+			stateIndex = i;
+		}
+	}
+	if (stateIndex >= stateMachine.GetStateCount())
+	{
+		ImGui::Unindent();
+		ax::NodeEditor::ClearSelection();
+		return;
+	}
+
+	if (ImGui::Button(ICON_FA_BAN " Remove state"))
+	{
+		stateMachine.RemoveState(stateIndex);
+		ax::NodeEditor::ClearSelection();
+		ImGui::Unindent();
+		return;
+	}
+
+	const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
 
 	ImGui::PushID(stateIndex);
-	const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
 
     ImGui::Text(state.GetName().c_str());
 
     static U32 clipFrameIndex = 0;
-    static Time accumulator;
+	static Time accumulator;
+	const Animation& animation = stateMachine.GetAnimation().Get();
     ImGui::PreviewAnimationClip(animation, 100.0f, state.GetClipIndex(), clipFrameIndex, accumulator, state.GetSpeedScale());
 
 	float speedScale = static_cast<float>(state.GetSpeedScale());
@@ -212,17 +292,174 @@ void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax:
 	ImGui::CollapsingHeader("Selected Transition", ImGuiTreeNodeFlags_Leaf);
 	ImGui::Indent();
 
-	const int transitionUID = 1000 + 1;
-	const std::uintptr_t linkID = reinterpret_cast<std::uintptr_t>(link.AsPointer());
-	const U32 transitionIndex = static_cast<U32>(linkID - transitionUID);
+	const int linkID = static_cast<int>(reinterpret_cast<std::uintptr_t>(link.AsPointer()));
+
+	U32 transitionIndex = stateMachine.GetTransitionCount();
+	for (U32 i = 0; i < transitionIndex; ++i)
+	{
+		if (GetTransitionID(stateMachine.GetTransition(i), stateMachine) == linkID)
+		{
+			transitionIndex = i;
+		}
+	}
+	if (transitionIndex >= stateMachine.GetTransitionCount())
+	{
+		ImGui::Unindent();
+		ax::NodeEditor::ClearSelection();
+		return;
+	}
+
+	if (ImGui::Button(ICON_FA_BAN " Remove transition"))
+	{
+		stateMachine.RemoveTransition(transitionIndex);
+		ax::NodeEditor::ClearSelection();
+		ImGui::Unindent();
+		return;
+	}
 
 	const AnimationStateMachine::Transition& transition = stateMachine.GetTransition(transitionIndex);
 
-	const AnimationStateMachine::State& fromState = stateMachine.GetState(transition.GetFromState());
-	const AnimationStateMachine::State& toState = stateMachine.GetState(transition.GetToState());
+	ImGui::Text("From: %s", stateMachine.GetState(transition.GetFromState()).GetName().c_str());
+	ImGui::Text("To: %s", stateMachine.GetState(transition.GetToState()).GetName().c_str());
 
-	ImGui::Text("From: %s", fromState.GetName().c_str());
-	ImGui::Text("To: %s", toState.GetName().c_str());
+	if (stateMachine.GetParameterCount() > 0)
+	{
+		ImGui::Text("Conditions:");
+		ImGui::SameLine();
+		if (ImGui::Button("New condition"))
+		{
+			U32 conditionIndex = stateMachine.AddCondition(0);
+			stateMachine.AddConditionToTransition(transitionIndex, conditionIndex);
+		}
+
+		std::vector<const char*> paramNames;
+		paramNames.reserve(stateMachine.GetParameterCount());
+		for (U32 parameterIndex = 0; parameterIndex < stateMachine.GetParameterCount(); ++parameterIndex)
+		{
+			paramNames.push_back(stateMachine.GetParameter(parameterIndex).GetName().c_str());
+		}
+
+		static const char* boolOperators[] = { "=", "!=" };
+		static const char* boolValues[] = { "False", "True" };
+		static const char* operators[] = { "=", "!=", "<", "<=", ">", ">=" };
+
+		ImGui::Indent();
+		for (U32 conditionIndexInTransition = 0; conditionIndexInTransition < transition.GetConditionCount(); ++conditionIndexInTransition)
+		{
+			ImGui::PushID(conditionIndexInTransition);
+
+			U32 conditionIndex = transition.GetCondition(conditionIndexInTransition);
+			const AnimationStateMachine::Condition& condition = stateMachine.GetCondition(conditionIndex);
+
+			ImGui::Text("-");
+			ImGui::SameLine();
+
+			ImGui::PushItemWidth(120.0f);
+			int parameterIndex = static_cast<int>(condition.GetParameterIndex());
+			if (ImGui::Combo("##CondEditParam", &parameterIndex, paramNames.data(), static_cast<int>(paramNames.size())))
+			{
+				stateMachine.SetConditionParameter(conditionIndex, static_cast<U32>(parameterIndex));
+			}
+			ImGui::PopItemWidth();
+
+			bool valid = true;
+			ImGui::SameLine();
+			ImGui::Text(ICON_FA_BAN);
+			if (ImGui::IsItemClicked())
+			{
+				stateMachine.RemoveConditionFromTransition(transitionIndex, conditionIndex);
+				valid = false;
+			}
+
+			if (valid)
+			{
+				ImGui::Indent();
+				AnimationStateMachine::Parameter::Type type = stateMachine.GetParameter(condition.GetParameterIndex()).GetType();
+				switch (type)
+				{
+				case AnimationStateMachine::Parameter::Type::Boolean:
+				{
+					ImGui::PushItemWidth(40.0f);
+					int operatorIndex;
+					AnimationStateMachine::Condition::Operator operatorValue = condition.GetOperator();
+					if (operatorValue == AnimationStateMachine::Condition::Operator::NotEqual
+						|| operatorValue == AnimationStateMachine::Condition::Operator::Greater
+						|| operatorValue == AnimationStateMachine::Condition::Operator::Less)
+					{
+						operatorIndex = 1;
+					}
+					else
+					{
+						operatorIndex = 0;
+					}
+					if (ImGui::Combo("##ConditionBoolOperatorInput", &operatorIndex, boolOperators, IM_ARRAYSIZE(boolOperators)))
+					{
+						stateMachine.SetConditionOperator(conditionIndex, (operatorIndex == 0)
+							? AnimationStateMachine::Condition::Operator::Equal
+							: AnimationStateMachine::Condition::Operator::NotEqual);
+					}
+					ImGui::PopItemWidth();
+
+					ImGui::SameLine();
+
+					ImGui::PushItemWidth(80.0f);
+					int boolValueIndex = (int)condition.GetOperandBoolean();
+					if (ImGui::Combo("##ConditionBoolValueInput", &boolValueIndex, boolValues, IM_ARRAYSIZE(boolValues)))
+					{
+						stateMachine.SetConditionOperandBoolean(conditionIndex, (bool)boolValueIndex);
+					}
+					ImGui::PopItemWidth();
+				} break;
+				case AnimationStateMachine::Parameter::Type::Float:
+				{
+					ImGui::PushItemWidth(40.0f);
+					int operatorIndex = static_cast<int>(condition.GetOperator());
+					if (ImGui::Combo("##ConditionFloatOperatorInput", &operatorIndex, operators, IM_ARRAYSIZE(operators)))
+					{
+						stateMachine.SetConditionOperator(conditionIndex, static_cast<AnimationStateMachine::Condition::Operator>(operatorIndex));
+					}
+					ImGui::PopItemWidth();
+
+					ImGui::SameLine();
+
+					ImGui::PushItemWidth(80.0f);
+					float floatValue = (float)condition.GetOperandFloat();
+					if (ImGui::InputFloat("##ConditionFloatValueInput", &floatValue))
+					{
+						stateMachine.SetConditionOperandFloat(conditionIndex, (F32)floatValue);
+					}
+					ImGui::PopItemWidth();
+				} break;
+				case AnimationStateMachine::Parameter::Type::Integer:
+				{
+					ImGui::PushItemWidth(40.0f);
+					int operatorIndex = static_cast<int>(condition.GetOperator());
+					if (ImGui::Combo("##ConditionIntegerOperatorInput", &operatorIndex, operators, IM_ARRAYSIZE(operators)))
+					{
+						stateMachine.SetConditionOperator(conditionIndex, static_cast<AnimationStateMachine::Condition::Operator>(operatorIndex));
+					}
+					ImGui::PopItemWidth();
+
+					ImGui::SameLine();
+
+					ImGui::PushItemWidth(80.0f);
+					int intValue = (int)condition.GetOperandInteger();
+					if (ImGui::InputInt("##ConditionIntegerValueInput", &intValue))
+					{
+						stateMachine.SetConditionOperandInteger(conditionIndex, (I32)intValue);
+					}
+					ImGui::PopItemWidth();
+				} break;
+				case AnimationStateMachine::Parameter::Type::Trigger: break;
+				default: assert(false); break;
+				}
+				ImGui::Unindent();
+			}
+
+			ImGui::PopID();
+		}
+		ImGui::Unindent();
+	}
 
 	ImGui::Unindent();
 }
@@ -295,6 +532,64 @@ void ImGuiAnimationEditor::NewState(AnimationStateMachine& stateMachine)
 		}
 
 		ImGui::Unindent();
+	}
+}
+
+void ImGuiAnimationEditor::NewTransition(AnimationStateMachine& stateMachine)
+{
+	if (ImGui::CollapsingHeader("New transition") && stateMachine.GetStateCount() > 0)
+	{
+		std::vector<const char*> stateNames;
+		stateNames.reserve(stateMachine.GetStateCount());
+		for (U32 stateIndex = 0; stateIndex < stateMachine.GetStateCount(); ++stateIndex)
+		{
+			stateNames.push_back(stateMachine.GetState(stateIndex).GetName().c_str());
+		}
+
+		const int stateCount = static_cast<int>(stateMachine.GetStateCount());
+
+		static int fromStateIndex = 0;
+		if (fromStateIndex >= stateCount)
+		{
+			fromStateIndex = 0;
+		}
+
+		static int toStateIndex = 0;
+		if (toStateIndex >= stateCount)
+		{
+			toStateIndex = 0;
+		}
+
+		ImGui::Combo("FromState##NewTransition", &fromStateIndex, stateNames.data(), stateCount);
+		ImGui::Combo("ToState##NewTransition", &toStateIndex, stateNames.data(), stateCount);
+
+		bool transitionValid = true;
+		if (fromStateIndex < 0 || fromStateIndex >= stateCount)
+		{
+			transitionValid = false;
+		}
+		if (toStateIndex < 0 || toStateIndex >= stateCount)
+		{
+			transitionValid = false;
+		}
+		if (fromStateIndex == toStateIndex)
+		{
+			transitionValid = false;
+		}
+
+		if (transitionValid)
+		{
+			if (ImGui::Button("Add##NewTransition"))
+			{
+				stateMachine.AddTransition(static_cast<U32>(fromStateIndex), static_cast<U32>(toStateIndex));
+				fromStateIndex = 0;
+				toStateIndex = 0;
+			}
+		}
+		else
+		{
+			ImGui::DisabledButton("Add##NewTransitionDisabled");
+		}
 	}
 }
 
@@ -393,88 +688,163 @@ void ImGuiAnimationEditor::NewParameter(AnimationStateMachine& stateMachine)
 
 void ImGuiAnimationEditor::ParametersList(AnimationStateMachine& stateMachine)
 {
-	if (ImGui::CollapsingHeader("Parameters list"))
+	ImGui::CollapsingHeader("Parameters list", ImGuiTreeNodeFlags_Leaf);
+	ImGui::Indent();
+
+	U32 parameterCount = stateMachine.GetParameterCount();
+	for (U32 parameterIndex = 0; parameterIndex < parameterCount; ++parameterIndex)
 	{
-		ImGui::Indent();
+		const AnimationStateMachine::Parameter& parameter = stateMachine.GetParameter(parameterIndex);
+		ImGui::PushID(parameterIndex);
 
-		const U32 parameterCount = stateMachine.GetParameterCount();
-		for (U32 parameterIndex = 0; parameterIndex < parameterCount; ++parameterIndex)
-		{
-			const AnimationStateMachine::Parameter& parameter = stateMachine.GetParameter(parameterIndex);
-
-			ImGui::Text("-");
-			ImGui::SameLine();
+		ImGui::Text("-");
+		ImGui::SameLine();
 			
-			ImVec4 color;
+		ImVec4 color;
+		switch (parameter.GetType())
+		{
+		case AnimationStateMachine::Parameter::Type::Boolean: color = Color::Lime.toImGuiColor(); break;
+		case AnimationStateMachine::Parameter::Type::Float: color = Color::Salmon.toImGuiColor(); break;
+		case AnimationStateMachine::Parameter::Type::Integer: color = Color::Cyan.toImGuiColor(); break;
+		case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
+		default: break;
+		}
+		ImGui::TextColored(color, parameter.GetName().c_str());
+
+		if (parameter.GetType() < AnimationStateMachine::Parameter::Type::Trigger)
+		{
+			ImGui::SameLine();
+
+			ImGui::PushItemWidth(80.0f);
 			switch (parameter.GetType())
 			{
-			case AnimationStateMachine::Parameter::Type::Boolean: color = Color::Lime.toImGuiColor(); break;
-			case AnimationStateMachine::Parameter::Type::Float: color = Color::Salmon.toImGuiColor(); break;
-			case AnimationStateMachine::Parameter::Type::Integer: color = Color::Cyan.toImGuiColor(); break;
-			case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
-			default: break;
-			}
-			ImGui::TextColored(color, parameter.GetName().c_str());
-			ImGui::SameLine();
-
-			if (parameter.GetType() < AnimationStateMachine::Parameter::Type::Trigger)
+			case AnimationStateMachine::Parameter::Type::Boolean: // Boolean
 			{
-				ImGui::Text(" : ");
-				ImGui::SameLine();
-
-				ImGui::PushID(parameterIndex);
-				ImGui::PushItemWidth(80.0f);
-				switch (parameter.GetType())
+				static const char* boolValues[] = { "False", "True" };
+				int boolValueIndex = (int)parameter.GetBooleanValue();
+				if (ImGui::Combo("##ParametersListBoolParametersListInput", &boolValueIndex, boolValues, IM_ARRAYSIZE(boolValues)))
 				{
-				case AnimationStateMachine::Parameter::Type::Boolean: // Boolean
-				{
-					static const char* boolValues[] = { "False", "True" };
-					int boolValueIndex = (int)parameter.GetBooleanValue();
-					if (ImGui::Combo("##ParametersListBoolParametersListInput", &boolValueIndex, boolValues, IM_ARRAYSIZE(boolValues)))
-					{
-						stateMachine.SetParameterBoolean(parameterIndex, (bool)boolValueIndex);
-					}
-				} break;
-				case AnimationStateMachine::Parameter::Type::Float: // Float
-				{
-					float floatValue = parameter.GetFloatValue();
-					if (ImGui::InputFloat("##ParametersListFloatParametersListInput", &floatValue))
-					{
-						stateMachine.SetParameterFloat(parameterIndex, (F32)floatValue);
-					}
-				} break;
-				case AnimationStateMachine::Parameter::Type::Integer: // Integer
-				{
-					int intValue = parameter.GetIntegerValue();
-					if (ImGui::InputInt("##ParametersListIntParametersListInput", &intValue))
-					{
-						stateMachine.SetParameterInteger(parameterIndex, (I32)intValue);
-					}
-				} break;
-				default:
-					break;
+					stateMachine.SetParameterBoolean(parameterIndex, (bool)boolValueIndex);
 				}
-				ImGui::PopItemWidth();
-				ImGui::PopID();
+			} break;
+			case AnimationStateMachine::Parameter::Type::Float: // Float
+			{
+				float floatValue = parameter.GetFloatValue();
+				if (ImGui::InputFloat("##ParametersListFloatParametersListInput", &floatValue))
+				{
+					stateMachine.SetParameterFloat(parameterIndex, (F32)floatValue);
+				}
+			} break;
+			case AnimationStateMachine::Parameter::Type::Integer: // Integer
+			{
+				int intValue = parameter.GetIntegerValue();
+				if (ImGui::InputInt("##ParametersListIntParametersListInput", &intValue))
+				{
+					stateMachine.SetParameterInteger(parameterIndex, (I32)intValue);
+				}
+			} break;
+			default:
+				break;
 			}
-
+			ImGui::PopItemWidth();
 		}
 
-		ImGui::Unindent();
+		ImGui::SameLine();
+		ImGui::Text(ICON_FA_BAN);
+		if (ImGui::IsItemClicked())
+		{
+			stateMachine.RemoveParameter(parameterIndex);
+			parameterCount--;
+			parameterIndex--;
+		}
+		ImGui::PopID();
+	}
+
+	ImGui::Unindent();
+}
+
+void ImGuiAnimationEditor::Debug(AnimationStateMachine& stateMachine)
+{
+	if (ImGui::CollapsingHeader("Debug"))
+	{
+		ImGui::Text("%d states", stateMachine.GetStateCount());
+		if (ImGui::IsItemHovered() && stateMachine.GetStateCount() > 0)
+		{
+			ImGui::BeginTooltip();
+			const U32 stateCount = stateMachine.GetStateCount();
+			for (U32 i = 0; i < stateCount; ++i)
+			{
+				const AnimationStateMachine::State& state = stateMachine.GetState(i);
+				ImGui::Text("%s", state.GetName().c_str());
+			}
+			ImGui::EndTooltip();
+		}
+
+		ImGui::Text("%d parameters", stateMachine.GetParameterCount());
+		if (ImGui::IsItemHovered() && stateMachine.GetParameterCount() > 0)
+		{
+			ImGui::BeginTooltip();
+			const U32 parameterCount = stateMachine.GetParameterCount();
+			for (U32 i = 0; i < parameterCount; ++i)
+			{
+				const AnimationStateMachine::Parameter& parameter = stateMachine.GetParameter(i);
+				ImGui::Text("%s", parameter.GetName().c_str());
+			}
+			ImGui::EndTooltip();
+		}
+
+		ImGui::Text("%d transitions", stateMachine.GetTransitionCount());
+		if (ImGui::IsItemHovered() && stateMachine.GetTransitionCount() > 0)
+		{
+			ImGui::BeginTooltip();
+			const U32 transitionCount = stateMachine.GetTransitionCount();
+			for (U32 i = 0; i < transitionCount; ++i)
+			{
+				const AnimationStateMachine::Transition& transition = stateMachine.GetTransition(i);
+				ImGui::Text("From: %s", stateMachine.GetState(transition.GetFromState()).GetName().c_str());
+				ImGui::Text("To: %s", stateMachine.GetState(transition.GetToState()).GetName().c_str());
+
+				const U32 conditionCount = transition.GetConditionCount();
+				for (U32 j = 0; j < conditionCount; ++j)
+				{
+					ImGui::Text("%d ", transition.GetCondition(j));
+					if (j < conditionCount - 1)
+					{
+						ImGui::SameLine();
+					}
+				}
+
+				if (i < transitionCount - 1)
+				{
+					ImGui::Separator();
+				}
+			}
+			ImGui::EndTooltip();
+		}
+
+		ImGui::Text("%d conditions", stateMachine.GetConditionCount());
+		if (ImGui::IsItemHovered() && stateMachine.GetConditionCount() > 0)
+		{
+			ImGui::BeginTooltip();
+			const U32 conditionCount = stateMachine.GetConditionCount();
+			for (U32 i = 0; i < conditionCount; ++i)
+			{
+				const AnimationStateMachine::Condition& condition = stateMachine.GetCondition(i);
+				ImGui::Text("On: %s", stateMachine.GetParameter(condition.GetParameterIndex()).GetName().c_str());
+			}
+			ImGui::EndTooltip();
+		}
 	}
 }
 
 void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 {
-	// TODO : Make those private constexpr static
-	const int stateUID = 1;
-	const int transitionUID = 1000 + 1;
-	const int transitionInputUID = 2000 + 1;
-	const int transitionOutputUID = 3000 + 1;
-
-	const float paddingX = 12.0f;
-	const float paddingY = 6.0f;
-	const float rounding = 4.0f;
+	static constexpr float paddingX = 12.0f;
+	static constexpr float paddingY = 6.0f;
+	static constexpr float rounding = 4.0f;
+	static constexpr float pinHalfSize = 0.1f;
+	static constexpr float pinPaddingY = 6.0f;
+	static constexpr float pinSpacing = 2.0f;
 
 	ax::NodeEditor::Begin(stateMachine.GetIdentifier().c_str(), ImVec2(0.0f, 0.0f));
 
@@ -485,60 +855,99 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
     ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_NodeBorderWidth, 2.0f);
     ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_LinkStrength, 0.0f);
     ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PivotSize, ImVec2(0.0f, 0.0f));
-    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinCorners, 12);
-    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinRadius, paddingX * 2.0f);
+    ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinCorners, 4);
+	ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinRadius, 0.0f);
+
+	bool rectsDirty = false;
+	static std::vector<ImRect> lastFrameRects;
+	if (static_cast<U32>(lastFrameRects.size()) != stateMachine.GetStateCount())
+	{
+		lastFrameRects.resize(stateMachine.GetStateCount());
+		rectsDirty = true;
+	}
+
 	const U32 stateCount = stateMachine.GetStateCount();
 	for (U32 stateIndex = 0; stateIndex < stateCount; ++stateIndex)
 	{
-		int stateID = static_cast<int>(stateIndex);
-        ax::NodeEditor::BeginNode(stateUID + stateID);
-        const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
+		const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
+        ax::NodeEditor::BeginNode(GetStateID(state, stateMachine));
 
 		ImGui::Text(state.GetName().c_str());
 		ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-
-		const U32 transitionCount = stateMachine.GetTransitionCount();
-		for (U32 j = 0; j < transitionCount; ++j)
+		nodeRect.Min.x -= paddingX;
+		nodeRect.Min.y -= paddingY;
+		nodeRect.Max.x += paddingX;
+		nodeRect.Max.y += paddingY;
+		const U32 pinCount = stateMachine.GetTransitionFromStateCount(stateIndex) + stateMachine.GetTransitionToStateCount(stateIndex);
+		nodeRect.Max.y += pinPaddingY * pinCount;
+		if (pinCount > 0)
 		{
-			int transitionID = static_cast<int>(j);
-			const AnimationStateMachine::Transition& transition = stateMachine.GetTransition(j);
-			if (transition.GetToState() == stateIndex) // Input
-			{
-				ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinArrowSize, 10.0f);
-				ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinArrowWidth, 10.0f);
-				ax::NodeEditor::BeginPin(transitionInputUID + transitionID, ax::NodeEditor::PinKind::Input);
-				ax::NodeEditor::PinRect(nodeRect.GetTL(), nodeRect.GetBR());
-				ax::NodeEditor::EndPin();
-				ax::NodeEditor::PopStyleVar(2);
-			}
-			if (transition.GetFromState() == stateIndex) // Output
-			{
-				ImRect outputsRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-				ax::NodeEditor::BeginPin(transitionOutputUID + transitionID, ax::NodeEditor::PinKind::Output);
-				ax::NodeEditor::PinRect(nodeRect.GetTL(), nodeRect.GetBR());
-				ax::NodeEditor::EndPin();
-			}
-        }
+			nodeRect.Max.y -= pinSpacing * (pinCount - 1);
+		}
+		lastFrameRects[stateIndex] = nodeRect;
+		//ImGui::GetWindowDrawList()->AddRect(nodeRect.Min, nodeRect.Max, IM_COL32(0, 255, 0, 255));
+
+		std::vector<PinInfo> inputPositions;
+		std::vector<PinInfo> outputPositions;
+		if (!rectsDirty)
+		{
+			GetStatePinPositions(stateMachine, stateIndex, lastFrameRects, inputPositions, outputPositions);
+		}
+
+		const U32 inputCount = static_cast<U32>(inputPositions.size());
+		for (U32 input = 0; input < inputCount; ++input)
+		{
+			const ImVec2& pos = inputPositions[input].pos;
+			const ImVec2 posMin = ImVec2(pos.x - pinHalfSize, pos.y - pinHalfSize);
+			const ImVec2 posMax = ImVec2(pos.x + pinHalfSize, pos.y + pinHalfSize);
+
+			ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinArrowSize, 10.0f);
+			ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_PinArrowWidth, 10.0f);
+			ax::NodeEditor::BeginPin(inputPositions[input].id, ax::NodeEditor::PinKind::Input);
+			ax::NodeEditor::PinRect(posMin, posMax);
+			ax::NodeEditor::PinPivotRect(posMin, posMax);
+			ax::NodeEditor::EndPin();
+			ax::NodeEditor::PopStyleVar(2);
+
+			ImGui::GetWindowDrawList()->AddRect(posMin, posMax, IM_COL32(0, 0, 255, 255));
+		}
+		const U32 outputCount = static_cast<U32>(outputPositions.size());
+		for (U32 output = 0; output < outputCount; ++output)
+		{
+			const ImVec2& pos = outputPositions[output].pos;
+			const ImVec2 posMin = ImVec2(pos.x - pinHalfSize, pos.y - pinHalfSize);
+			const ImVec2 posMax = ImVec2(pos.x + pinHalfSize, pos.y + pinHalfSize);
+
+			ax::NodeEditor::BeginPin(outputPositions[output].id, ax::NodeEditor::PinKind::Output);
+			ax::NodeEditor::PinRect(posMin, posMax);
+			ax::NodeEditor::PinPivotRect(posMin, posMax);
+			ax::NodeEditor::EndPin();
+
+			ImGui::GetWindowDrawList()->AddRect(posMin, posMax, IM_COL32(0, 0, 255, 255));
+		}
+
 		ax::NodeEditor::EndNode();
     }
+
     ax::NodeEditor::PopStyleVar(7);
     ax::NodeEditor::PopStyleColor(2);
-
-	const U32 transitionCount = stateMachine.GetTransitionCount();
-	for (U32 i = 0; i < transitionCount; ++i)
+	
+	if (!rectsDirty)
 	{
-		int transitionID = static_cast<int>(i);
-
-		ax::NodeEditor::Link(
-			transitionUID + transitionID,
-			transitionInputUID + transitionID,
-			transitionOutputUID + transitionID,
-			Color::Lime.toImGuiColor(),
-			2.0f
-		);
+		const U32 transitionCount = stateMachine.GetTransitionCount();
+		for (U32 i = 0; i < transitionCount; ++i)
+		{
+			const AnimationStateMachine::Transition& transition = stateMachine.GetTransition(i);
+			ax::NodeEditor::Link(GetTransitionID(transition, stateMachine),
+				GetTransitionInputID(transition, stateMachine),
+				GetTransitionOutputID(transition, stateMachine),
+				Color::Lime.toImGuiColor(),
+				2.0f
+			);
+		}
 	}
 
-
+	/*
     if (ax::NodeEditor::BeginCreate())
     {
         ax::NodeEditor::PinId inputPinId, outputPinId;
@@ -556,11 +965,151 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
         }
     }
     ax::NodeEditor::EndCreate();
-
-
-
+	*/
 
 	ax::NodeEditor::End();
+}
+
+void ImGuiAnimationEditor::GetStatePinPositions(const AnimationStateMachine& stateMachine, const U32 stateIndex, const std::vector<ImRect>& stateRects, std::vector<PinInfo>& inputPins, std::vector<PinInfo>& outputPins)
+{
+	struct StateTransitionInfo
+	{
+		std::vector<U32> inputs;
+		std::vector<U32> outputs;
+	};
+	std::vector<StateTransitionInfo> withState;
+	withState.resize(stateMachine.GetStateCount());
+	const U32 transitionCount = stateMachine.GetTransitionCount();
+	for (U32 transitionIndex = 0; transitionIndex < transitionCount; ++transitionIndex)
+	{
+		const AnimationStateMachine::Transition& transition = stateMachine.GetTransition(transitionIndex);
+		if (transition.GetToState() == stateIndex) // Input
+		{
+			withState[transition.GetFromState()].inputs.push_back(transitionIndex);
+		}
+		if (transition.GetFromState() == stateIndex) // Output
+		{
+			withState[transition.GetToState()].outputs.push_back(transitionIndex);
+		}
+	}
+	assert(withState[stateIndex].inputs.size() + withState[stateIndex].outputs.size() == 0);
+
+	const U32 stateCount = stateMachine.GetStateCount();
+	for (U32 otherStateIndex = 0; otherStateIndex < stateCount; ++otherStateIndex)
+	{
+		StateTransitionInfo& sti = withState[otherStateIndex];
+		const U32 transitions = static_cast<U32>(sti.inputs.size() + sti.outputs.size());
+		if (transitions > 0 && otherStateIndex != stateIndex)
+		{
+			const ImVec2 centerThis = stateRects[stateIndex].GetCenter();
+			const ImVec2 centerOther = stateRects[otherStateIndex].GetCenter();
+			const ImVec2 delta = ImVec2(centerOther.x - centerThis.x, centerOther.y - centerThis.y);
+			const F32 deltaLength = Math::Sqrt(delta.x * delta.x + delta.y * delta.y);
+			if (deltaLength)
+			{
+				const ImVec2 deltaNormalized = ImVec2(delta.x / deltaLength, delta.y / deltaLength);
+				const ImVec2 cross = ImVec2(deltaNormalized.y, -deltaNormalized.x);
+				static constexpr F32 diff = 10.0f;
+				const F32 factor = ((transitions % 2) == 0) ? diff * ((transitions * 0.5f) - 0.5f) : diff * (transitions - 1) * 0.5f;
+				const ImVec2 startPos = ImVec2(centerThis.x - cross.x * factor, centerThis.y - cross.y * factor);
+				const ImVec2 startPosOther = ImVec2(centerOther.x - cross.x * factor, centerOther.y - cross.y * factor);
+
+				const bool useCorrectedPosition = !stateRects[stateIndex].Overlaps(stateRects[otherStateIndex]);
+
+				std::sort(sti.inputs.begin(), sti.inputs.end());
+				inputPins.reserve(sti.inputs.size());
+				const U32 stiInputCount = static_cast<U32>(sti.inputs.size());
+				for (U32 stindex = 0; stindex < stiInputCount; ++stindex)
+				{
+					PinInfo pinInfo;
+					pinInfo.id = GetTransitionInputID(stateMachine.GetTransition(sti.inputs[stindex]), stateMachine);
+					const ImVec2 pinPos = ImVec2(stindex * diff * cross.x + startPos.x, stindex * diff * cross.y + startPos.y);
+					if (useCorrectedPosition)
+					{
+						const ImVec2 otherPinPos = ImVec2(stindex * diff * cross.x + startPosOther.x, stindex * diff * cross.y + startPosOther.y);
+						pinInfo.pos = GetCorrectedPinPosition(pinPos, otherPinPos, stateRects[stateIndex]);
+					}
+					else
+					{
+						pinInfo.pos = pinPos;
+					}
+					inputPins.emplace_back(pinInfo);
+				}
+
+				std::sort(sti.outputs.begin(), sti.outputs.end(), [](U32 a, U32 b) { return a > b; }); // Reverse to match the inputs on other side
+				outputPins.reserve(sti.outputs.size());
+				const U32 stiOutputCount = static_cast<U32>(sti.outputs.size());
+				for (U32 stindex = 0; stindex < stiOutputCount; ++stindex)
+				{
+					PinInfo pinInfo;
+					pinInfo.id = GetTransitionOutputID(stateMachine.GetTransition(sti.outputs[stindex]), stateMachine);
+					const ImVec2 pinPos = ImVec2((stiInputCount + stindex) * diff * cross.x + startPos.x, (stiInputCount + stindex) * diff * cross.y + startPos.y);
+					if (useCorrectedPosition)
+					{
+						const ImVec2 otherPinPos = ImVec2((stiInputCount + stindex) * diff * cross.x + startPosOther.x, (stiInputCount + stindex) * diff * cross.y + startPosOther.y);
+						pinInfo.pos = GetCorrectedPinPosition(pinPos, otherPinPos, stateRects[stateIndex]);
+					}
+					else
+					{
+						pinInfo.pos = pinPos;
+					}
+					outputPins.emplace_back(pinInfo);
+				}
+			}
+		}
+	}
+}
+
+ImVec2 ImGuiAnimationEditor::GetCorrectedPinPosition(const ImVec2& pinPos, const ImVec2& otherPinPos, const ImRect& pinRect)
+{
+	const F32 deltaExpand = 2.0f;
+	ImRect largerRect = pinRect;
+	largerRect.Expand(deltaExpand);
+
+	bool validIntersections[4];
+	ImVec2 intersections[4];
+	validIntersections[0] = GetLineIntersection(pinPos, otherPinPos, pinRect.GetTL(), pinRect.GetTR(), intersections[0]);
+	validIntersections[1] = GetLineIntersection(pinPos, otherPinPos, pinRect.GetTR(), pinRect.GetBR(), intersections[1]);
+	validIntersections[2] = GetLineIntersection(pinPos, otherPinPos, pinRect.GetBR(), pinRect.GetBL(), intersections[2]);
+	validIntersections[3] = GetLineIntersection(pinPos, otherPinPos, pinRect.GetBL(), pinRect.GetTL(), intersections[3]);
+	U32 bestIndex = 4;
+	F32 bestDistanceSqr = 9999999999999.9f;
+	for (U32 i = 0; i < 4; ++i)
+	{
+		if (validIntersections[i] && largerRect.Contains(intersections[i]))
+		{
+			const ImVec2 delta = ImVec2(otherPinPos.x - intersections[i].x, otherPinPos.y - intersections[i].y);
+			const F32 distanceSqr = (delta.x * delta.x + delta.y * delta.y);
+			if (distanceSqr < bestDistanceSqr)
+			{
+				bestDistanceSqr = distanceSqr;
+				bestIndex = i;
+			}
+		}
+	}
+	if (bestIndex < 4)
+	{
+		return intersections[bestIndex];
+	}
+	return pinPos;
+}
+
+bool ImGuiAnimationEditor::GetLineIntersection(const ImVec2& lineA1, const ImVec2& lineA2, const ImVec2& lineB1, const ImVec2& lineB2, ImVec2& intersection)
+{
+	const float A1 = lineA2.y - lineA1.y;
+	const float B1 = lineA1.x - lineA2.x;
+	const float A2 = lineB2.y - lineB1.y;
+	const float B2 = lineB1.x - lineB2.x;
+	const float delta = A1 * B2 - A2 * B1;
+	if (delta == 0.0f)
+	{
+		return false;
+	}
+	const float invdelta = 1.0f / delta;
+	const float C2 = A2 * lineB1.x + B2 * lineB1.y;
+	const float C1 = A1 * lineA1.x + B1 * lineA1.y;
+	intersection = ImVec2((B2 * C1 - B1 * C2) * invdelta, (A1 * C2 - A2 * C1) * invdelta);
+	return true;
 }
 
 void ImGuiAnimationEditor::AnimationStateMachineList()

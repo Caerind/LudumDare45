@@ -86,6 +86,23 @@ bool Animation::LoadFromFile(const std::string& filename)
 					const Time duration{ milliseconds(frame["duration"].get<I32>()) };
 					AddFrame(rect, duration);
 				}
+
+				// NlohmannJson sort node at the same level alphabetically... And we don't want that here.
+				// We want to keep the same order like in Aseprite to be used for the clips
+				if (GetFrameCount() > 0)
+				{
+					sort(mFrames.begin(), mFrames.end(), [](const Frame& a, const Frame& b)
+					{
+						if (a.GetRect().top() != b.GetRect().top())
+						{
+							return a.GetRect().top() < b.GetRect().top();
+						}
+						else
+						{
+							return a.GetRect().left() < b.GetRect().left();
+						}
+					});
+				}
 			}
 
 			itr = document.find("meta");

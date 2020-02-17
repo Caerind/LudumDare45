@@ -75,6 +75,22 @@ void PreviewAnimationClip(const en::Animation& animation, en::F32 maxSize, const
 {
     en::U32 clipIndexCopy = clipIndex;
     PreviewAnimation(animation, maxSize, clipIndexCopy, clipFrameIndex, accumulator, speedScale);
+
+	/*
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::BeginTooltip();
+
+		const en::Animation::Clip& clip = animation.GetClip(clipIndex);
+		ImGui::Text("%s\nFrom: %d\nTo: %d", clip.GetName().c_str(), clip.GetFrom(), clip.GetTo());
+		for (en::U32 i = 0; i < clip.GetFrameCount(); i++)
+		{
+			ImGui::Text("%d", clip.GetFrameIndex(i));
+		}
+
+		ImGui::EndTooltip();
+	}
+	*/
 }
 
 void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& clipIndex, en::U32& clipFrameIndex, en::Time& accumulator, en::F32 speedScale /*= 1.0f*/)
@@ -121,6 +137,7 @@ void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& 
 			clipFrameIndex++;
 			if (animation.GetClip(clipIndex).GetFrameCount() <= clipFrameIndex)
 			{
+				clipIndex = (clipIndex + 1) % animation.GetClipCount();
 				clipFrameIndex = 0;
 			}
 		}

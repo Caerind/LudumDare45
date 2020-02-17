@@ -122,16 +122,42 @@ U32 AnimationStateMachine::Transition::GetConditionCount() const
 	return static_cast<U32>(mConditions.size());
 }
 
-void AnimationStateMachine::Transition::AddCondition(U32 conditionIndex)
+U32 AnimationStateMachine::Transition::GetCondition(U32 conditionIndexInTransition) const
 {
-	for (U32 condition : mConditions)
+	assert(conditionIndexInTransition < GetConditionCount());
+	return mConditions[conditionIndexInTransition];
+}
+
+void AnimationStateMachine::Transition::SetCondition(U32 conditionIndexInTransition, U32 conditionIndex)
+{
+	assert(conditionIndexInTransition < GetConditionCount());
+	mConditions[conditionIndexInTransition] = conditionIndex;
+}
+
+bool AnimationStateMachine::Transition::HasCondition(U32 conditionIndex) const
+{
+	const U32 conditionCount = GetConditionCount();
+	for (U32 i = 0; i < conditionCount; ++i)
 	{
-		if (condition == conditionIndex)
+		if (mConditions[i] == conditionIndex)
 		{
-			return;
+			return true;
+		}
+	}
+	return false;
+}
+
+U32 AnimationStateMachine::Transition::AddCondition(U32 conditionIndex)
+{
+	for (U32 conditionI : mConditions)
+	{
+		if (conditionI == conditionIndex)
+		{
+			return conditionI;
 		}
 	}
 	mConditions.push_back(conditionIndex);
+	return GetConditionCount() - 1;
 }
 
 void AnimationStateMachine::Transition::RemoveCondition(U32 conditionIndex)
@@ -202,12 +228,26 @@ U32 AnimationStateMachine::AddState(const std::string& name, U32 clipIndex)
 void AnimationStateMachine::RemoveState(U32 index)
 {
 	assert(index < GetStateCount());
+
+	// Remove all transitions from/to this state
+	U32 transitionCount = GetTransitionCount();
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		if (mTransitions[i].GetFromState() == index || mTransitions[i].GetToState() == index)
+		{
+			RemoveTransition(i);
+			transitionCount--;
+			i--;
+		}
+	}
+
 	mStates.erase(mStates.begin() + index);
 }
 
 void AnimationStateMachine::ClearStates()
 {
 	mStates.clear();
+	ClearTransitions();
 }
 
 void AnimationStateMachine::SetStateName(U32 index, const std::string& name)
@@ -275,12 +315,24 @@ U32 AnimationStateMachine::AddParameter(const std::string& name, Parameter::Type
 void AnimationStateMachine::RemoveParameter(U32 index)
 {
 	assert(index < GetParameterCount());
-	// TODO : TODO
+	mParameters.erase(mParameters.begin() + index);
+	
+	U32 conditionCount = GetConditionCount();
+	for (U32 i = 0; i < conditionCount; ++i)
+	{
+		if (mConditions[i].GetParameterIndex() == index)
+		{
+			RemoveCondition(i);
+			conditionCount--;
+			i--;
+		}
+	}
 }
 
 void AnimationStateMachine::ClearParameters()
 {
-	// TODO : TODO
+	mParameters.clear();
+	ClearConditions();
 }
 
 void AnimationStateMachine::SetParameterName(U32 index, const std::string& name)
@@ -355,13 +407,39 @@ U32 AnimationStateMachine::AddCondition(U32 parameterIndex)
 
 void AnimationStateMachine::RemoveCondition(U32 index)
 {
-    assert(index < GetConditionCount());
-    // TODO : TODO
+	assert(index < GetConditionCount());
+	mConditions.erase(mConditions.begin() + index);
+
+	// We should go through every transition to 
+	//  - Remove the condition
+	//  - Reduce superior indexes by one
+	const U32 transitionCount = GetTransitionCount();
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		if (mTransitions[i].HasCondition(index))
+		{
+			mTransitions[i].RemoveCondition(index);
+		}
+		const U32 conditionCountInTransition = mTransitions[i].GetConditionCount();
+		for (U32 j = 0; j < conditionCountInTransition; ++j)
+		{
+			U32 conditionIndex = mTransitions[i].GetCondition(j);
+			if (conditionIndex > index)
+			{
+				mTransitions[i].SetCondition(j, conditionIndex - 1);
+			}
+		}
+	}
 }
 
 void AnimationStateMachine::ClearConditions()
 {
-    // TODO : TODO
+	mConditions.clear();
+	const U32 transitionCount = GetTransitionCount();
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		mTransitions[i].ClearConditions();
+	}
 }
 
 void AnimationStateMachine::SetConditionParameter(U32 index, U32 parameterIndex)
@@ -460,13 +538,41 @@ U32 AnimationStateMachine::AddTransition(U32 fromState, U32 toState)
 
 void AnimationStateMachine::RemoveTransition(U32 index)
 {
-    assert(index < GetTransitionCount());
-    // TODO : TODO
+	assert(index < GetTransitionCount());
+
+	const U32 transitionCount = GetTransitionCount();
+
+	// If a condition is only in this transition, remove it
+	U32 conditionCountInTransition = mTransitions[index].GetConditionCount();
+	for (U32 i = 0; i < conditionCountInTransition; ++i)
+	{
+		U32 conditionIndex = mTransitions[index].GetCondition(i);
+		bool conditionFound = false;
+		for (U32 j = 0; j < transitionCount; ++j)
+		{
+			if (j != index)
+			{
+				if (mTransitions[j].HasCondition(conditionIndex))
+				{
+					conditionFound = true;
+				}
+			}
+		}
+		if (!conditionFound)
+		{
+			RemoveCondition(conditionIndex);
+			conditionCountInTransition--;
+			i--;
+		}
+	}
+
+	mTransitions.erase(mTransitions.begin() + index);
 }
 
 void AnimationStateMachine::ClearTransitions()
 {
-    // TODO : TODO
+	mTransitions.clear();
+	ClearConditions();
 }
 
 void AnimationStateMachine::SetTransitionFromState(U32 index, U32 fromState)
@@ -495,6 +601,17 @@ void AnimationStateMachine::RemoveConditionFromTransition(U32 transitionIndex, U
     assert(transitionIndex < GetTransitionCount());
     assert(conditionIndex < GetConditionCount());
 	mTransitions[transitionIndex].RemoveCondition(conditionIndex);
+
+	// Remove condition if not used elsewhere anymore
+	const U32 transitionCount = GetTransitionCount();
+	for (U32 i = 0; i < transitionCount; ++i)
+	{
+		if (mTransitions[i].HasCondition(conditionIndex))
+		{
+			return;
+		}
+	}
+	RemoveCondition(conditionIndex);
 }
 
 void AnimationStateMachine::ClearConditionsFromTransition(U32 transitionIndex)

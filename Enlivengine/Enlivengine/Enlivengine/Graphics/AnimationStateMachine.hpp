@@ -128,7 +128,10 @@ public:
         U32 GetToState() const { return mToState; }
 
 		U32 GetConditionCount() const;
-        void AddCondition(U32 conditionIndex);
+		U32 GetCondition(U32 conditionIndexInTransition) const;
+		void SetCondition(U32 conditionIndexInTransition, U32 conditionIndex);
+		bool HasCondition(U32 conditionIndex) const;
+        U32 AddCondition(U32 conditionIndex);
         void RemoveCondition(U32 conditionIndex);
         void ClearConditions();
 
