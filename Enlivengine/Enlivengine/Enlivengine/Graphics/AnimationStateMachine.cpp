@@ -1,5 +1,7 @@
 #include <Enlivengine/Graphics/AnimationStateMachine.hpp>
 
+#include <Enlivengine/System/ParserXml.hpp>
+
 namespace en
 {
 
@@ -179,6 +181,7 @@ void AnimationStateMachine::Transition::ClearConditions()
 }
 
 AnimationStateMachine::AnimationStateMachine()
+    : mDefaultStateIndex(0)
 {
 }
 
@@ -197,8 +200,124 @@ bool AnimationStateMachine::LoadFromFile(const std::string& filename)
 
 bool AnimationStateMachine::SaveToFile(const std::string& filename)
 {
-	// TODO : TODO
-	ENLIVE_UNUSED(filename);
+    ParserXml xml;
+    xml.newFile();
+
+    if (!xml.createChild("AnimationStateMachine"))
+    {
+        return false;
+    }
+
+    if (mAnimation.IsValid())
+    {
+        xml.setAttribute("animation", mAnimation.Get().GetIdentifier());
+    }
+    else
+    {
+        xml.setAttribute("animation", "");
+    }
+
+    const U32 stateCount = GetStateCount();
+    const U32 parameterCount = GetParameterCount();
+    const U32 conditionCount = GetConditionCount();
+    const U32 transitionCount = GetTransitionCount();
+
+    xml.setAttribute("states", stateCount);
+    xml.setAttribute("parameters", parameterCount);
+    xml.setAttribute("conditions", conditionCount);
+    xml.setAttribute("transitions", transitionCount);
+    xml.setAttribute("defaultStateIndex", mDefaultStateIndex);
+
+    // States
+    for (U32 i = 0; i < stateCount; ++i)
+    {
+        if (!xml.createChild("State"))
+        {
+            continue;
+        }
+        const State& state = GetState(i);
+        xml.setAttribute("name", state.GetName());
+        xml.setAttribute("clipIndex", state.GetClipIndex());
+        xml.setAttribute("speedScale", state.GetSpeedScale());
+        xml.setAttribute("exitOnlyAtEnd", state.GetExitOnlyAtEnd());
+        xml.closeNode();
+    }
+
+    // Parameters
+    for (U32 i = 0; i < parameterCount; ++i)
+    {
+        if (!xml.createChild("Parameter"))
+        {
+            continue;
+        }
+        const Parameter& parameter = GetParameter(i);
+        xml.setAttribute("name", parameter.GetName());
+        xml.setAttribute("type", static_cast<I32>(parameter.GetType()));
+        switch (parameter.GetType())
+        {
+        case Parameter::Type::Boolean: xml.setAttribute("defaultValue", parameter.GetBooleanValue()); break;
+        case Parameter::Type::Float: xml.setAttribute("defaultValue", parameter.GetFloatValue()); break;
+        case Parameter::Type::Integer: xml.setAttribute("defaultValue", parameter.GetIntegerValue()); break;
+        case Parameter::Type::Trigger: xml.setAttribute("defaultValue", parameter.GetTriggerValue()); break;
+        default: break;
+        }
+
+        xml.closeNode();
+    }
+
+    // Conditions
+    for (U32 i = 0; i < conditionCount; ++i)
+    {
+        if (!xml.createChild("Condition"))
+        {
+            continue;
+        }
+        const Condition& condition = GetCondition(i);
+        xml.setAttribute("parameterIndex", condition.GetParameterIndex());
+        xml.setAttribute("operator", static_cast<I32>(condition.GetOperator()));
+        switch (GetParameter(condition.GetParameterIndex()).GetType())
+        {
+        case Parameter::Type::Boolean: xml.setAttribute("operandValue", condition.GetOperandBoolean()); break;
+        case Parameter::Type::Float: xml.setAttribute("operandValue", condition.GetOperandFloat()); break;
+        case Parameter::Type::Integer: xml.setAttribute("operandValue", condition.GetOperandInteger()); break;
+        default: break;
+        }
+
+        xml.closeNode();
+    }
+
+    // Transitions
+    for (U32 i = 0; i < transitionCount; ++i)
+    {
+        if (!xml.createChild("Transition"))
+        {
+            continue;
+        }
+        const Transition& transition = GetTransition(i);
+        xml.setAttribute("fromState", transition.GetFromState());
+        xml.setAttribute("toState", transition.GetToState());
+        const U32 conditionCountInTransition = transition.GetConditionCount();
+        xml.setAttribute("conditionCount", conditionCountInTransition);
+        if (transition.GetConditionCount() > 0)
+        {
+            for (U32 j = 0; j < conditionCountInTransition; ++j)
+            {
+                if (!xml.createChild("Condition"))
+                {
+                    continue;
+                }
+                xml.setAttribute("conditionIndex", transition.GetCondition(j));
+                xml.closeNode();
+            }
+        }
+        xml.closeNode();
+    }
+
+    if (!xml.saveToFile(filename))
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -657,6 +776,16 @@ U32 AnimationStateMachine::GetTransitionToStateCount(U32 stateIndex) const
         }
     }
     return count;
+}
+
+void AnimationStateMachine::SetDefaultStateIndex(U32 stateIndex)
+{
+    mDefaultStateIndex = stateIndex;
+}
+
+U32 AnimationStateMachine::GetDefaultStateIndex() const
+{
+    return mDefaultStateIndex;
 }
 
 } // namespace en

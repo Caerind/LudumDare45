@@ -58,8 +58,8 @@ public:
 
 		void SetBooleanValue(bool value);
 		void SetFloatValue(F32 value);
-		void SetIntegerValue(I32 value);
-		void SetTriggerValue(bool value);
+        void SetIntegerValue(I32 value);
+        void SetTriggerValue(bool value);
 		bool GetBooleanValue() const;
 		F32 GetFloatValue() const;
 		I32 GetIntegerValue() const;
@@ -206,12 +206,16 @@ public:
     U32 GetTransitionFromStateCount(U32 stateIndex) const;
     U32 GetTransitionToStateCount(U32 stateIndex) const;
 
+    void SetDefaultStateIndex(U32 stateIndex);
+    U32 GetDefaultStateIndex() const;
+
 private:
 	AnimationPtr mAnimation;
 	std::vector<State> mStates;
 	std::vector<Parameter> mParameters;
 	std::vector<Condition> mConditions;
 	std::vector<Transition> mTransitions;
+    U32 mDefaultStateIndex;
 };
 
 using AnimationStateMachinePtr = ResourcePtr<AnimationStateMachine>;

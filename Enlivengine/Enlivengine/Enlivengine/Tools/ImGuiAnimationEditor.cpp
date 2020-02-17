@@ -14,6 +14,7 @@ ImGuiAnimationEditor::ImGuiAnimationEditor()
 	: ImGuiTool()
 	, mStateMachine()
 	, mEditorContext(nullptr)
+    , mDisplayPreviews(true)
 {
 }
 
@@ -197,12 +198,26 @@ void ImGuiAnimationEditor::LeftPanel(AnimationStateMachine& stateMachine)
         initialLeftColSize = false;
 	}
 
+    StateMachine(stateMachine);
 	Selection(stateMachine);
 	NewState(stateMachine);
 	NewTransition(stateMachine);
 	NewParameter(stateMachine);
 	ParametersList(stateMachine); 
-	Debug(stateMachine);
+	//Debug(stateMachine);
+}
+
+void ImGuiAnimationEditor::StateMachine(AnimationStateMachine& stateMachine)
+{
+    if (ImGui::Button("Save"))
+    {
+        if (!stateMachine.SaveToFile(stateMachine.GetFilename()))
+        {
+            LogError(en::LogChannel::Animation, 7, "Can't save file %s", stateMachine.GetFilename().c_str());
+        }
+    }
+
+    ImGui::Checkbox("Show clips", &mDisplayPreviews);
 }
 
 void ImGuiAnimationEditor::Selection(AnimationStateMachine& stateMachine)
@@ -282,6 +297,20 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 	{
 		stateMachine.SetStateExitOnlyAtEnd(stateIndex, exitOnlyAtEnd);
 	}
+
+    bool isDefaultState = (stateIndex == stateMachine.GetDefaultStateIndex());
+    if (ImGui::Checkbox("DefaultState##SelectedNode", &isDefaultState))
+    {
+        if (isDefaultState)
+        {
+            stateMachine.SetDefaultStateIndex(stateIndex);
+        }
+        else
+        {
+            stateMachine.SetDefaultStateIndex(stateMachine.GetStateCount());
+        }
+    }
+
 	ImGui::PopID();
 
 	ImGui::Unindent();
@@ -688,79 +717,81 @@ void ImGuiAnimationEditor::NewParameter(AnimationStateMachine& stateMachine)
 
 void ImGuiAnimationEditor::ParametersList(AnimationStateMachine& stateMachine)
 {
-	ImGui::CollapsingHeader("Parameters list", ImGuiTreeNodeFlags_Leaf);
-	ImGui::Indent();
+    if (ImGui::CollapsingHeader("Parameters list"))
+    {
+        ImGui::Indent();
 
-	U32 parameterCount = stateMachine.GetParameterCount();
-	for (U32 parameterIndex = 0; parameterIndex < parameterCount; ++parameterIndex)
-	{
-		const AnimationStateMachine::Parameter& parameter = stateMachine.GetParameter(parameterIndex);
-		ImGui::PushID(parameterIndex);
+        U32 parameterCount = stateMachine.GetParameterCount();
+        for (U32 parameterIndex = 0; parameterIndex < parameterCount; ++parameterIndex)
+        {
+            const AnimationStateMachine::Parameter& parameter = stateMachine.GetParameter(parameterIndex);
+            ImGui::PushID(parameterIndex);
 
-		ImGui::Text("-");
-		ImGui::SameLine();
-			
-		ImVec4 color;
-		switch (parameter.GetType())
-		{
-		case AnimationStateMachine::Parameter::Type::Boolean: color = Color::Lime.toImGuiColor(); break;
-		case AnimationStateMachine::Parameter::Type::Float: color = Color::Salmon.toImGuiColor(); break;
-		case AnimationStateMachine::Parameter::Type::Integer: color = Color::Cyan.toImGuiColor(); break;
-		case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
-		default: break;
-		}
-		ImGui::TextColored(color, parameter.GetName().c_str());
+            ImGui::Text("-");
+            ImGui::SameLine();
 
-		if (parameter.GetType() < AnimationStateMachine::Parameter::Type::Trigger)
-		{
-			ImGui::SameLine();
+            ImVec4 color;
+            switch (parameter.GetType())
+            {
+            case AnimationStateMachine::Parameter::Type::Boolean: color = Color::Lime.toImGuiColor(); break;
+            case AnimationStateMachine::Parameter::Type::Float: color = Color::Salmon.toImGuiColor(); break;
+            case AnimationStateMachine::Parameter::Type::Integer: color = Color::Cyan.toImGuiColor(); break;
+            case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
+            default: break;
+            }
+            ImGui::TextColored(color, parameter.GetName().c_str());
 
-			ImGui::PushItemWidth(80.0f);
-			switch (parameter.GetType())
-			{
-			case AnimationStateMachine::Parameter::Type::Boolean: // Boolean
-			{
-				static const char* boolValues[] = { "False", "True" };
-				int boolValueIndex = (int)parameter.GetBooleanValue();
-				if (ImGui::Combo("##ParametersListBoolParametersListInput", &boolValueIndex, boolValues, IM_ARRAYSIZE(boolValues)))
-				{
-					stateMachine.SetParameterBoolean(parameterIndex, (bool)boolValueIndex);
-				}
-			} break;
-			case AnimationStateMachine::Parameter::Type::Float: // Float
-			{
-				float floatValue = parameter.GetFloatValue();
-				if (ImGui::InputFloat("##ParametersListFloatParametersListInput", &floatValue))
-				{
-					stateMachine.SetParameterFloat(parameterIndex, (F32)floatValue);
-				}
-			} break;
-			case AnimationStateMachine::Parameter::Type::Integer: // Integer
-			{
-				int intValue = parameter.GetIntegerValue();
-				if (ImGui::InputInt("##ParametersListIntParametersListInput", &intValue))
-				{
-					stateMachine.SetParameterInteger(parameterIndex, (I32)intValue);
-				}
-			} break;
-			default:
-				break;
-			}
-			ImGui::PopItemWidth();
-		}
+            if (parameter.GetType() < AnimationStateMachine::Parameter::Type::Trigger)
+            {
+                ImGui::SameLine();
 
-		ImGui::SameLine();
-		ImGui::Text(ICON_FA_BAN);
-		if (ImGui::IsItemClicked())
-		{
-			stateMachine.RemoveParameter(parameterIndex);
-			parameterCount--;
-			parameterIndex--;
-		}
-		ImGui::PopID();
-	}
+                ImGui::PushItemWidth(80.0f);
+                switch (parameter.GetType())
+                {
+                case AnimationStateMachine::Parameter::Type::Boolean: // Boolean
+                {
+                    static const char* boolValues[] = { "False", "True" };
+                    int boolValueIndex = (int)parameter.GetBooleanValue();
+                    if (ImGui::Combo("##ParametersListBoolParametersListInput", &boolValueIndex, boolValues, IM_ARRAYSIZE(boolValues)))
+                    {
+                        stateMachine.SetParameterBoolean(parameterIndex, (bool)boolValueIndex);
+                    }
+                } break;
+                case AnimationStateMachine::Parameter::Type::Float: // Float
+                {
+                    float floatValue = parameter.GetFloatValue();
+                    if (ImGui::InputFloat("##ParametersListFloatParametersListInput", &floatValue))
+                    {
+                        stateMachine.SetParameterFloat(parameterIndex, (F32)floatValue);
+                    }
+                } break;
+                case AnimationStateMachine::Parameter::Type::Integer: // Integer
+                {
+                    int intValue = parameter.GetIntegerValue();
+                    if (ImGui::InputInt("##ParametersListIntParametersListInput", &intValue))
+                    {
+                        stateMachine.SetParameterInteger(parameterIndex, (I32)intValue);
+                    }
+                } break;
+                default:
+                    break;
+                }
+                ImGui::PopItemWidth();
+            }
 
-	ImGui::Unindent();
+            ImGui::SameLine();
+            ImGui::Text(ICON_FA_BAN);
+            if (ImGui::IsItemClicked())
+            {
+                stateMachine.RemoveParameter(parameterIndex);
+                parameterCount--;
+                parameterIndex--;
+            }
+            ImGui::PopID();
+        }
+
+        ImGui::Unindent();
+    }
 }
 
 void ImGuiAnimationEditor::Debug(AnimationStateMachine& stateMachine)
@@ -870,10 +901,54 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 	for (U32 stateIndex = 0; stateIndex < stateCount; ++stateIndex)
 	{
 		const AnimationStateMachine::State& state = stateMachine.GetState(stateIndex);
+
         ax::NodeEditor::BeginNode(GetStateID(state, stateMachine));
 
-		ImGui::Text(state.GetName().c_str());
-		ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+        ImRect defaultIconRect;
+        const bool isDefaultState = (stateMachine.GetDefaultStateIndex() == stateIndex);
+        if (isDefaultState)
+        {
+            ImGui::Text(ICON_FA_SIGN_IN_ALT);
+            defaultIconRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+            ImGui::SameLine();
+        }
+
+        ImGui::Text(state.GetName().c_str());
+        ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+        if (isDefaultState)
+        {
+            nodeRect.Add(defaultIconRect.GetTL());
+            nodeRect.Add(defaultIconRect.GetBR());
+        }
+
+        if (stateMachine.GetAnimation().IsValid() && mDisplayPreviews)
+        {
+            struct AnimInfo
+            {
+                U32 clipFrameIndex = 0;
+                Time accumulator;
+            };
+            static std::vector<AnimInfo> animInfos;
+            if (stateCount != static_cast<U32>(animInfos.size()))
+            {
+                animInfos.resize(stateCount);
+            }
+            
+            static constexpr F32 previewSize = 30.0f;
+            if (nodeRect.GetSize().x > previewSize)
+            {
+                const F32 size = nodeRect.GetSize().x - previewSize;
+                ImGui::InvisibleButton("", ImVec2(size * 0.5f, previewSize * 0.5f));
+                nodeRect.Add(ImGui::GetItemRectMin());
+                nodeRect.Add(ImGui::GetItemRectMax());
+                ImGui::SameLine();
+            }
+
+            ImGui::PreviewAnimationClip(stateMachine.GetAnimation().Get(), previewSize, state.GetClipIndex(), animInfos[stateIndex].clipFrameIndex, animInfos[stateIndex].accumulator, state.GetSpeedScale());
+            nodeRect.Add(ImGui::GetItemRectMin());
+            nodeRect.Add(ImGui::GetItemRectMax());
+        }
+
 		nodeRect.Min.x -= paddingX;
 		nodeRect.Min.y -= paddingY;
 		nodeRect.Max.x += paddingX;
@@ -909,7 +984,7 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 			ax::NodeEditor::EndPin();
 			ax::NodeEditor::PopStyleVar(2);
 
-			ImGui::GetWindowDrawList()->AddRect(posMin, posMax, IM_COL32(0, 0, 255, 255));
+			//ImGui::GetWindowDrawList()->AddRect(posMin, posMax, IM_COL32(0, 0, 255, 255));
 		}
 		const U32 outputCount = static_cast<U32>(outputPositions.size());
 		for (U32 output = 0; output < outputCount; ++output)
@@ -923,10 +998,10 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
 			ax::NodeEditor::PinPivotRect(posMin, posMax);
 			ax::NodeEditor::EndPin();
 
-			ImGui::GetWindowDrawList()->AddRect(posMin, posMax, IM_COL32(0, 0, 255, 255));
+			//ImGui::GetWindowDrawList()->AddRect(posMin, posMax, IM_COL32(0, 0, 255, 255));
 		}
 
-		ax::NodeEditor::EndNode();
+        ax::NodeEditor::EndNode();
     }
 
     ax::NodeEditor::PopStyleVar(7);

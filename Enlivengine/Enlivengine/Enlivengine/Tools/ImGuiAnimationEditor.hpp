@@ -38,6 +38,7 @@ public:
 
 private:
 	void LeftPanel(AnimationStateMachine& stateMachine);
+    void StateMachine(AnimationStateMachine& stateMachine);
 	void Selection(AnimationStateMachine& stateMachine);
 	void SelectedNode(AnimationStateMachine& stateMachine, ax::NodeEditor::NodeId node);
 	void SelectedLink(AnimationStateMachine& stateMachine, ax::NodeEditor::LinkId link);
@@ -67,6 +68,8 @@ private:
 	static constexpr U32 kBufferSize{ 256 };
 	char mStateInputTextBuffer[kBufferSize];
 	char mParameterInputTextBuffer[kBufferSize];
+
+    bool mDisplayPreviews; 
 };
 
 } // namespace en

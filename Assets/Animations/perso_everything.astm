@@ -1,1 +1,19 @@
-// Nothing yet
+<?xml version="1.0"?>
+<AnimationStateMachine animation="anim_perso_everything" states="4" parameters="4" conditions="0" transitions="8" defaultStateIndex="0">
+	<State name="TestA" clipIndex="0" speedScale="1" exitOnlyAtEnd="0" />
+	<State name="TestB" clipIndex="1" speedScale="1" exitOnlyAtEnd="0" />
+	<State name="TestC" clipIndex="2" speedScale="1" exitOnlyAtEnd="0" />
+	<State name="TestD" clipIndex="3" speedScale="1" exitOnlyAtEnd="0" />
+	<Parameter name="Jumping" type="0" defaultValue="0" />
+	<Parameter name="Speed" type="1" defaultValue="0" />
+	<Parameter name="Direction" type="2" defaultValue="0" />
+	<Parameter name="Action" type="3" defaultValue="0" />
+	<Transition fromState="0" toState="1" conditionCount="0" />
+	<Transition fromState="0" toState="1" conditionCount="0" />
+	<Transition fromState="0" toState="1" conditionCount="0" />
+	<Transition fromState="1" toState="0" conditionCount="0" />
+	<Transition fromState="1" toState="0" conditionCount="0" />
+	<Transition fromState="0" toState="2" conditionCount="0" />
+	<Transition fromState="2" toState="3" conditionCount="0" />
+	<Transition fromState="3" toState="0" conditionCount="0" />
+</AnimationStateMachine>
