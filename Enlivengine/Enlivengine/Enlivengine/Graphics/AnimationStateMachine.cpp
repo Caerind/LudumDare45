@@ -11,6 +11,7 @@ AnimationStateMachine::State::State(const std::string& name, U32 clipIndex)
     SetClipIndex(clipIndex);
     mSpeedScale = 1.0f;
     mExitOnlyAtEnd = false;
+	mBlendStateInfo = nullptr;
 }
 
 void AnimationStateMachine::State::SetName(const std::string& name)
@@ -21,6 +22,88 @@ void AnimationStateMachine::State::SetName(const std::string& name)
         mName = name;
         mHashedName = hashedName;
     }
+}
+
+void AnimationStateMachine::State::CreateBlendStateInfo(U32 dimension)
+{
+	if (HasBlendStateInfo())
+	{
+		RemoveBlendStateInfo();
+	}
+	mBlendStateInfo = new BlendStateInfo(dimension);
+}
+
+void AnimationStateMachine::State::RemoveBlendStateInfo()
+{
+	if (HasBlendStateInfo())
+	{
+		delete mBlendStateInfo;
+		mBlendStateInfo = nullptr;
+	}
+}
+
+AnimationStateMachine::State::BlendStateInfo::Motion::Motion(U32 clipIndex, U32 dimensions)
+{
+	mClipIndex = clipIndex;
+	mValues.resize(dimensions);
+}
+
+void AnimationStateMachine::State::BlendStateInfo::Motion::SetValue(U32 dimensionIndex, F32 value)
+{
+	assert(dimensionIndex < GetValueCount());
+	mValues[dimensionIndex] = value;
+}
+
+F32 AnimationStateMachine::State::BlendStateInfo::Motion::GetValue(U32 dimensionIndex) const
+{
+	assert(dimensionIndex < GetValueCount());
+	return mValues[dimensionIndex];
+}
+
+AnimationStateMachine::State::BlendStateInfo::BlendStateInfo(U32 dimension)
+{
+	mParameters.resize(dimension);
+}
+
+void AnimationStateMachine::State::BlendStateInfo::SetParameter(U32 dimensionIndex, U32 parameterIndex)
+{
+	assert(dimensionIndex < GetDimension());
+	mParameters[dimensionIndex] = parameterIndex;
+}
+
+U32 AnimationStateMachine::State::BlendStateInfo::GetParameter(U32 dimensionIndex) const
+{
+	assert(dimensionIndex < GetDimension());
+	return mParameters[dimensionIndex];
+}
+
+U32 AnimationStateMachine::State::BlendStateInfo::AddMotion(U32 clipIndex)
+{
+	mMotions.emplace_back(clipIndex, GetDimension());
+	return static_cast<U32>(GetMotionCount() - 1);
+}
+
+const AnimationStateMachine::State::BlendStateInfo::Motion& AnimationStateMachine::State::BlendStateInfo::GetMotion(U32 motionIndex) const
+{
+	assert(motionIndex < GetMotionCount());
+	return mMotions[motionIndex];
+}
+
+void AnimationStateMachine::State::BlendStateInfo::SetMotionValue(U32 motionIndex, U32 dimensionIndex, F32 value)
+{
+	assert(motionIndex < GetMotionCount());
+	mMotions[motionIndex].SetValue(dimensionIndex, value);
+}
+
+void AnimationStateMachine::State::BlendStateInfo::RemoveMotion(U32 motionIndex)
+{
+	assert(motionIndex < GetMotionCount());
+	mMotions.erase(mMotions.begin() + motionIndex);
+}
+
+void AnimationStateMachine::State::BlendStateInfo::ClearMotions()
+{
+	mMotions.clear();
 }
 
 AnimationStateMachine::Parameter::Parameter(const std::string& name, Parameter::Type type)
@@ -107,7 +190,6 @@ bool AnimationStateMachine::Parameter::GetTriggerValue() const
 
 AnimationStateMachine::Condition::Condition(U32 parameterIndex)
 {
-    // TODO : No idea what to put here...
 	mParameterIndex = parameterIndex;
     mOperator = Operator::Equal;
     mOperand.bValue = false;
@@ -116,6 +198,7 @@ AnimationStateMachine::Condition::Condition(U32 parameterIndex)
 AnimationStateMachine::Transition::Transition(U32 fromState, U32 toState)
 	: mFromState(fromState)
 	, mToState(toState)
+	, mExitOnlyAtEnd(true)
 {
 }
 
@@ -200,6 +283,8 @@ bool AnimationStateMachine::LoadFromFile(const std::string& filename)
 
 bool AnimationStateMachine::SaveToFile(const std::string& filename)
 {
+	Precompute();
+
     ParserXml xml;
     xml.newFile();
 
@@ -240,6 +325,18 @@ bool AnimationStateMachine::SaveToFile(const std::string& filename)
         xml.setAttribute("clipIndex", state.GetClipIndex());
         xml.setAttribute("speedScale", state.GetSpeedScale());
         xml.setAttribute("exitOnlyAtEnd", state.GetExitOnlyAtEnd());
+
+		if (state.HasBlendStateInfo())
+		{
+			if (!xml.createChild("BlendState"))
+			{
+				continue;
+			}
+			const State::BlendStateInfo* blendState = state.GetBlendStateInfo();
+			xml.setAttribute("dimension", blendState->GetDimension());
+			xml.closeNode();
+		}
+
         xml.closeNode();
     }
 
@@ -296,6 +393,7 @@ bool AnimationStateMachine::SaveToFile(const std::string& filename)
         const Transition& transition = GetTransition(i);
         xml.setAttribute("fromState", transition.GetFromState());
         xml.setAttribute("toState", transition.GetToState());
+		xml.setAttribute("exitOnlyAtEnd", transition.GetExitOnlyAtEnd());
         const U32 conditionCountInTransition = transition.GetConditionCount();
         xml.setAttribute("conditionCount", conditionCountInTransition);
         if (transition.GetConditionCount() > 0)
@@ -321,9 +419,43 @@ bool AnimationStateMachine::SaveToFile(const std::string& filename)
     return true;
 }
 
-void AnimationStateMachine::Clean()
+void AnimationStateMachine::Precompute()
 {
-    // TODO : TODO
+	// Fallback default state
+	if (mDefaultStateIndex >= GetStateCount())
+	{
+		mDefaultStateIndex = 0;
+	}
+
+	// Sort transitions by FromState for faster iterations in Controller
+	std::sort(mTransitions.begin(), mTransitions.end(), [](const Transition& a, const Transition& b)
+	{
+		if (a.GetFromState() != b.GetFromState())
+		{
+			return a.GetFromState() < b.GetFromState();
+		}
+		return a.GetToState() < b.GetToState();
+	});
+
+	// Save if state can only exit at end or not depending on its transitions
+	const U32 stateCount = GetStateCount();
+	const U32 transitionCount = GetTransitionCount();
+	for (U32 stateIndex = 0; stateIndex < stateCount; ++stateIndex)
+	{
+		mStates[stateIndex].SetExitOnlyAtEnd(true);
+		for (U32 transitionIndex = 0; transitionIndex < transitionCount && mStates[stateIndex].GetExitOnlyAtEnd() && mTransitions[transitionIndex].GetFromState() <= stateIndex; ++transitionIndex)
+		{
+			if (mTransitions[transitionIndex].GetFromState() == stateIndex)
+			{
+				if (!mTransitions[transitionIndex].GetExitOnlyAtEnd())
+				{
+					mStates[stateIndex].SetExitOnlyAtEnd(false);
+				}
+			}
+		}
+	}
+
+	// TODO : Remove conditions duplicates
 }
 
 void AnimationStateMachine::SetAnimation(AnimationPtr animation)
@@ -379,7 +511,7 @@ void AnimationStateMachine::SetStateClipIndex(U32 index, U32 clipIndex)
 {
 	assert(index < GetStateCount());
 	assert(mAnimation.IsValid());
-	assert(clipIndex < mAnimation.Get().GetClipCount());
+	assert(clipIndex < mAnimation.Get().GetClipCount()); // TODO : Check anim is valid
 	mStates[index].SetClipIndex(clipIndex);
 }
 
@@ -387,12 +519,6 @@ void AnimationStateMachine::SetStateSpeedScale(U32 index, F32 speedScale)
 {
 	assert(index < GetStateCount());
 	mStates[index].SetSpeedScale(speedScale);
-}
-
-void AnimationStateMachine::SetStateExitOnlyAtEnd(U32 index, bool exitOnlyAtEnd)
-{
-	assert(index < GetStateCount());
-	mStates[index].SetExitOnlyAtEnd(exitOnlyAtEnd);
 }
 
 U32 AnimationStateMachine::GetStateCount() const
@@ -422,6 +548,62 @@ U32 AnimationStateMachine::GetStateIndexByName(U32 hashedName) const
 		}
 	}
 	return U32_Max;
+}
+
+void AnimationStateMachine::AddBlendStateToState(U32 stateIndex, U32 dimension)
+{
+	assert(stateIndex < GetStateCount());
+	assert(!mStates[stateIndex].HasBlendStateInfo());
+	mStates[stateIndex].CreateBlendStateInfo(dimension);
+}
+
+void AnimationStateMachine::RemoveBlendStateFromState(U32 stateIndex)
+{
+	assert(stateIndex < GetStateCount());
+	assert(mStates[stateIndex].HasBlendStateInfo());
+	mStates[stateIndex].RemoveBlendStateInfo();
+}
+
+void AnimationStateMachine::SetBlendStateParameter(U32 stateIndex, U32 dimensionIndex, U32 parameterIndex)
+{
+	assert(stateIndex < GetStateCount());
+	assert(mStates[stateIndex].HasBlendStateInfo());
+	assert(dimensionIndex < mStates[stateIndex].GetBlendStateInfo()->GetDimension());
+	assert(parameterIndex < GetParameterCount());
+	assert(GetParameter(parameterIndex).GetType() == Parameter::Type::Float || GetParameter(parameterIndex).GetType() == Parameter::Type::Integer);
+	mStates[stateIndex].GetBlendStateInfo()->SetParameter(dimensionIndex, parameterIndex);
+}
+
+U32 AnimationStateMachine::AddBlendStateMotion(U32 stateIndex, U32 clipIndex)
+{
+	assert(stateIndex < GetStateCount());
+	assert(mStates[stateIndex].HasBlendStateInfo());
+	assert(clipIndex < mAnimation.Get().GetClipCount()); // TODO : Check anim is valid
+	return mStates[stateIndex].GetBlendStateInfo()->AddMotion(clipIndex);
+}
+
+void AnimationStateMachine::SetBlendStateMotionValue(U32 stateIndex, U32 motionIndex, U32 dimensionIndex, F32 value)
+{
+	assert(stateIndex < GetStateCount());
+	assert(mStates[stateIndex].HasBlendStateInfo());
+	assert(motionIndex < mStates[stateIndex].GetBlendStateInfo()->GetMotionCount());
+	assert(dimensionIndex < mStates[stateIndex].GetBlendStateInfo()->GetDimension());
+	mStates[stateIndex].GetBlendStateInfo()->SetMotionValue(motionIndex, dimensionIndex, value);
+}
+
+void AnimationStateMachine::RemoveBlendStateMotion(U32 stateIndex, U32 motionIndex)
+{
+	assert(stateIndex < GetStateCount());
+	assert(mStates[stateIndex].HasBlendStateInfo());
+	assert(motionIndex < mStates[stateIndex].GetBlendStateInfo()->GetMotionCount());
+	mStates[stateIndex].GetBlendStateInfo()->RemoveMotion(motionIndex);
+}
+
+void AnimationStateMachine::ClearBlendStateMotions(U32 stateIndex)
+{
+	assert(stateIndex < GetStateCount());
+	assert(mStates[stateIndex].HasBlendStateInfo());
+	mStates[stateIndex].GetBlendStateInfo()->ClearMotions();
 }
 
 U32 AnimationStateMachine::AddParameter(const std::string& name, Parameter::Type type)
@@ -706,6 +888,12 @@ void AnimationStateMachine::SetTransitionToState(U32 index, U32 toState)
     assert(index < GetTransitionCount());
     assert(toState < GetStateCount());
     mTransitions[index].SetToState(toState);
+}
+
+void AnimationStateMachine::SetTransitionExitOnlyAtEnd(U32 index, bool exitOnlyAtEnd)
+{
+	assert(index < GetTransitionCount());
+	mTransitions[index].SetExitOnlyAtEnd(exitOnlyAtEnd);
 }
 
 void AnimationStateMachine::AddConditionToTransition(U32 transitionIndex, U32 conditionIndex)

@@ -27,12 +27,55 @@ public:
         void SetExitOnlyAtEnd(bool value) { mExitOnlyAtEnd = value; }
         bool GetExitOnlyAtEnd() const { return mExitOnlyAtEnd; }
 
+		class BlendStateInfo
+		{
+		public:
+			class Motion
+			{
+			public:
+				Motion(U32 clipIndex, U32 dimensions);
+
+				U32 GetClipIndex() const { return mClipIndex; }
+				U32 GetValueCount() const { return static_cast<U32>(mValues.size()); }
+
+				void SetValue(U32 dimensionIndex, F32 value);
+				F32 GetValue(U32 dimensionIndex) const;
+
+			private:
+				U32 mClipIndex;
+				std::vector<F32> mValues;
+			};
+
+			BlendStateInfo(U32 dimension);
+
+			U32 GetDimension() const { return static_cast<U32>(mParameters.size()); }
+			void SetParameter(U32 dimensionIndex, U32 parameterIndex);
+			U32 GetParameter(U32 dimensionIndex) const;
+
+			U32 GetMotionCount() const { return static_cast<U32>(mMotions.size()); }
+			U32 AddMotion(U32 clipIndex);
+			const Motion& GetMotion(U32 motionIndex) const;
+			void SetMotionValue(U32 motionIndex, U32 dimensionIndex, F32 value);
+			void RemoveMotion(U32 motionIndex);
+			void ClearMotions();
+
+		private:
+			std::vector<U32> mParameters;
+			std::vector<Motion> mMotions;
+		};
+		void CreateBlendStateInfo(U32 dimension);
+		void RemoveBlendStateInfo();
+		BlendStateInfo* GetBlendStateInfo() { return mBlendStateInfo; }
+		const BlendStateInfo* GetBlendStateInfo() const { return mBlendStateInfo; }
+		bool HasBlendStateInfo() const { return mBlendStateInfo != nullptr; }
+
     private:
 		std::string mName;
 		U32 mHashedName;
 		U32 mClipIndex;
 		F32 mSpeedScale;
 		bool mExitOnlyAtEnd;
+		BlendStateInfo* mBlendStateInfo;
 	};
 
 	class Parameter
@@ -125,7 +168,10 @@ public:
         U32 GetFromState() const { return mFromState; }
 
         void SetToState(U32 toState) { mToState = toState; }
-        U32 GetToState() const { return mToState; }
+		U32 GetToState() const { return mToState; }
+
+		void SetExitOnlyAtEnd(bool value) { mExitOnlyAtEnd = value; }
+		bool GetExitOnlyAtEnd() const { return mExitOnlyAtEnd; }
 
 		U32 GetConditionCount() const;
 		U32 GetCondition(U32 conditionIndexInTransition) const;
@@ -133,11 +179,12 @@ public:
 		bool HasCondition(U32 conditionIndex) const;
         U32 AddCondition(U32 conditionIndex);
         void RemoveCondition(U32 conditionIndex);
-        void ClearConditions();
+		void ClearConditions();
 
     private:
 		U32 mFromState;
 		U32 mToState;
+		bool mExitOnlyAtEnd;
 		std::vector<U32> mConditions;
 	};
 
@@ -147,7 +194,7 @@ public:
 	// IO
 	bool LoadFromFile(const std::string& filename);
 	bool SaveToFile(const std::string& filename);
-    void Clean();
+    void Precompute();
 
 	// Animation
 	void SetAnimation(AnimationPtr animation);
@@ -160,11 +207,19 @@ public:
 	void SetStateName(U32 index, const std::string& name);
 	void SetStateClipIndex(U32 index, U32 clipIndex);
 	void SetStateSpeedScale(U32 index, F32 speedScale);
-	void SetStateExitOnlyAtEnd(U32 index, bool exitOnlyAtEnd);
 	U32 GetStateCount() const;
 	const AnimationStateMachine::State& GetState(U32 index) const;
 	U32 GetStateIndexByName(const std::string& name) const;
 	U32 GetStateIndexByName(U32 hashedName) const;
+
+	// States - BlendState
+	void AddBlendStateToState(U32 stateIndex, U32 dimension);
+	void RemoveBlendStateFromState(U32 stateIndex);
+	void SetBlendStateParameter(U32 stateIndex, U32 dimensionIndex, U32 parameterIndex);
+	U32 AddBlendStateMotion(U32 stateIndex, U32 clipIndex);
+	void SetBlendStateMotionValue(U32 stateIndex, U32 motionIndex, U32 dimensionIndex, F32 value);
+	void RemoveBlendStateMotion(U32 stateIndex, U32 motionIndex);
+	void ClearBlendStateMotions(U32 stateIndex);
 
 	// Parameters
 	U32 AddParameter(const std::string& name, Parameter::Type type);
@@ -197,7 +252,8 @@ public:
     void RemoveTransition(U32 index);
     void ClearTransitions();
     void SetTransitionFromState(U32 index, U32 fromState);
-    void SetTransitionToState(U32 index, U32 toState);
+	void SetTransitionToState(U32 index, U32 toState);
+	void SetTransitionExitOnlyAtEnd(U32 index, bool exitOnlyAtEnd);
     void AddConditionToTransition(U32 transitionIndex, U32 conditionIndex);
     void RemoveConditionFromTransition(U32 transitionIndex, U32 conditionIndex);
     void ClearConditionsFromTransition(U32 transitionIndex);

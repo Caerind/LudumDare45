@@ -292,12 +292,6 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 	}
 	ImGui::PopItemWidth();
 
-	bool exitOnlyAtEnd = state.GetExitOnlyAtEnd();
-	if (ImGui::Checkbox("ExitOnlyAtEnd##SelectedNode", &exitOnlyAtEnd))
-	{
-		stateMachine.SetStateExitOnlyAtEnd(stateIndex, exitOnlyAtEnd);
-	}
-
     bool isDefaultState = (stateIndex == stateMachine.GetDefaultStateIndex());
     if (ImGui::Checkbox("DefaultState##SelectedNode", &isDefaultState))
     {
@@ -310,6 +304,121 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
             stateMachine.SetDefaultStateIndex(stateMachine.GetStateCount());
         }
     }
+
+	ImGui::Spacing();
+	if (state.HasBlendStateInfo())
+	{
+		const AnimationStateMachine::State::BlendStateInfo* blendStateInfo = state.GetBlendStateInfo();
+		if (ImGui::Button(ICON_FA_BAN " Remove BlendState"))
+		{
+			stateMachine.RemoveBlendStateFromState(stateIndex);
+		}
+		if (state.HasBlendStateInfo() && ImGui::CollapsingHeader("BlendState"))
+		{
+			// Parameters
+			std::vector<const char*> parameterNames;
+			std::vector<U32> parameterIndexes;
+			const U32 parameterCount = stateMachine.GetParameterCount();
+			for (U32 i = 0; i < parameterCount; ++i)
+			{
+				const AnimationStateMachine::Parameter& parameter = stateMachine.GetParameter(i);
+				if (parameter.GetType() == AnimationStateMachine::Parameter::Type::Float || parameter.GetType() == AnimationStateMachine::Parameter::Type::Integer)
+				{
+					parameterNames.push_back(parameter.GetName().c_str());
+					parameterIndexes.push_back(i);
+				}
+			}
+			const U32 dimensionCount = blendStateInfo->GetDimension();
+			for (U32 dimension = 0; dimension < dimensionCount; ++dimension)
+			{
+				int currentParameter = -1;
+				for (std::size_t j = 0; j < parameterIndexes.size(); ++j)
+				{
+					if (parameterIndexes[j] == blendStateInfo->GetParameter(dimension))
+					{
+						currentParameter = static_cast<int>(j);
+					}
+				}
+				if (currentParameter < 0)
+				{
+					// TODO : Default parameter
+				}
+				ImGui::PushID(1000 + dimension);
+				ImGui::Text("%d", dimension);
+				ImGui::SameLine();
+				ImGui::PushItemWidth(100.0f);
+				if (ImGui::Combo("##ComboParameterDimension", &currentParameter, parameterNames.data(), static_cast<int>(parameterNames.size())))
+				{
+					stateMachine.SetBlendStateParameter(stateIndex, dimension, parameterIndexes[currentParameter]);
+				}
+				ImGui::PopItemWidth();
+				ImGui::PopID();
+			}
+
+			ImGui::Spacing();
+
+			struct AnimInfo
+			{
+				U32 clipFrameIndex = 0;
+				Time accumulator;
+			};
+			static std::vector<AnimInfo> animInfos;
+			if (static_cast<U32>(animInfos.size()) != blendStateInfo->GetMotionCount())
+			{
+				animInfos.resize(blendStateInfo->GetMotionCount());
+			}
+			for (U32 motionIndex = 0; motionIndex < blendStateInfo->GetMotionCount(); ++motionIndex)
+			{
+				ImGui::PreviewAnimationClip(stateMachine.GetAnimation().Get(), 30.0f, blendStateInfo->GetMotion(motionIndex).GetClipIndex(), animInfos[motionIndex].clipFrameIndex, animInfos[motionIndex].accumulator, state.GetSpeedScale());
+				ImGui::Indent();
+				for (U32 valueIndex = 0; valueIndex < dimensionCount; ++valueIndex)
+				{
+					ImGui::PushID(2000 + motionIndex + valueIndex);
+					float value = blendStateInfo->GetMotion(motionIndex).GetValue(valueIndex);
+					ImGui::Text("%d", valueIndex);
+					ImGui::SameLine();
+					if (ImGui::InputFloat("##ValueMotionDimension", &value))
+					{
+						stateMachine.SetBlendStateMotionValue(stateIndex, motionIndex, valueIndex, value);
+					}
+					ImGui::PopID();
+				}
+				ImGui::Unindent();
+			}
+
+			ImGui::Spacing();
+
+			static AnimInfo animNewMotion;
+			static int animClipNewMotion = 0;
+			ImGui::PreviewAnimationClip(stateMachine.GetAnimation().Get(), 30.0f, static_cast<U32>(animClipNewMotion), animNewMotion.clipFrameIndex, animNewMotion.accumulator, state.GetSpeedScale());
+			ImGui::PushItemWidth(90.0f);
+			if (ImGui::InputInt("", &animClipNewMotion))
+			{
+				if (animClipNewMotion < 0) animClipNewMotion = 0;
+				//  TODO : Check out of bounds
+			}
+			ImGui::PopItemWidth();
+			ImGui::SameLine();
+			if (ImGui::Button("Add Motion"))
+			{
+				stateMachine.AddBlendStateMotion(stateIndex, static_cast<U32>(animClipNewMotion));
+				animClipNewMotion = 0;
+			}
+		}
+	}
+	else
+	{
+		static int dimensions = 1;
+		ImGui::PushItemWidth(60.0f);
+		ImGui::InputInt("D##SelectedNodeDimensionInput", &dimensions);
+		ImGui::PopItemWidth();
+		if (dimensions < 1) dimensions = 1;
+		ImGui::SameLine();
+		if (ImGui::Button("Add BlendState"))
+		{
+			stateMachine.AddBlendStateToState(stateIndex, static_cast<U32>(dimensions));
+		}
+	}
 
 	ImGui::PopID();
 
@@ -350,6 +459,12 @@ void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax:
 
 	ImGui::Text("From: %s", stateMachine.GetState(transition.GetFromState()).GetName().c_str());
 	ImGui::Text("To: %s", stateMachine.GetState(transition.GetToState()).GetName().c_str());
+
+	bool exitOnlyAtEnd = transition.GetExitOnlyAtEnd();
+	if (ImGui::Checkbox("ExitOnlyAtEnd##SelectedLink", &exitOnlyAtEnd))
+	{
+		stateMachine.SetTransitionExitOnlyAtEnd(transitionIndex, exitOnlyAtEnd);
+	}
 
 	if (stateMachine.GetParameterCount() > 0)
 	{
