@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Resources resourceCount="25" typeCount="8">
+<Resources resourceCount="23" typeCount="8">
 	<Resource identifier="MainFont" filename="Fonts/EndlessBossBattle.ttf" type="0" />
 	<Resource identifier="buble" filename="Textures/buble.png" type="1" />
 	<Resource identifier="coin" filename="Textures/coin.png" type="1" />
@@ -11,8 +11,6 @@
 	<Resource identifier="anim_perso_nothing" filename="Animations/perso_nothing.json" type="4" />
 	<Resource identifier="anim_perso_IA" filename="Animations/perso_IA.json" type="4" />
 	<Resource identifier="astm_perso_everything" filename="Animations/perso_everything.astm" type="5" />
-	<Resource identifier="astm_perso_nothing" filename="Animations/perso_nothing.astm" type="5" />
-	<Resource identifier="astm_perso_IA" filename="Animations/perso_IA.astm" type="5" />
 	<Resource identifier="mainTheme" filename="Musics/MainTheme.ogg" type="6" />
 	<Resource identifier="blablaTest" filename="Musics/MainTheme.ogg" type="6" />
 	<Resource identifier="chop" filename="Sounds/Chop.wav" type="7" />

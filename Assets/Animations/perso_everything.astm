@@ -1,32 +1,63 @@
 <?xml version="1.0"?>
 <AnimationStateMachine animation="anim_perso_everything">
-	<States count="4" defaultIndex="0">
-		<State name="TestA" clipIndex="0" speedScale="1" exitOnlyAtEnd="1" />
-		<State name="TestB" clipIndex="1" speedScale="1" exitOnlyAtEnd="1" />
-		<State name="TestC" clipIndex="2" speedScale="1" exitOnlyAtEnd="1" />
-		<State name="TestD" clipIndex="3" speedScale="1" exitOnlyAtEnd="1" />
+	<States count="2" defaultIndex="0">
+		<State name="Idle" clipIndex="0" speedScale="1" exitOnlyAtEnd="0">
+			<BlendState dimension="1">
+				<Parameters count="1">
+					<Parameter index="0" parameterIndex="1" />
+				</Parameters>
+				<Motions count="4">
+					<Motion index="0" clipIndex="0" values="1">
+						<Value index="0" value="0" />
+					</Motion>
+					<Motion index="1" clipIndex="1" values="1">
+						<Value index="0" value="1" />
+					</Motion>
+					<Motion index="2" clipIndex="2" values="1">
+						<Value index="0" value="2" />
+					</Motion>
+					<Motion index="3" clipIndex="3" values="1">
+						<Value index="0" value="3" />
+					</Motion>
+				</Motions>
+			</BlendState>
+		</State>
+		<State name="Walking" clipIndex="8" speedScale="1" exitOnlyAtEnd="0">
+			<BlendState dimension="1">
+				<Parameters count="1">
+					<Parameter index="0" parameterIndex="1" />
+				</Parameters>
+				<Motions count="4">
+					<Motion index="0" clipIndex="8" values="1">
+						<Value index="0" value="0" />
+					</Motion>
+					<Motion index="1" clipIndex="9" values="1">
+						<Value index="0" value="1" />
+					</Motion>
+					<Motion index="2" clipIndex="10" values="1">
+						<Value index="0" value="2" />
+					</Motion>
+					<Motion index="3" clipIndex="11" values="1">
+						<Value index="0" value="3" />
+					</Motion>
+				</Motions>
+			</BlendState>
+		</State>
 	</States>
-	<Parameters count="4">
-		<Parameter name="Jumping" type="0" defaultValue="0" />
+	<Parameters count="2">
 		<Parameter name="Speed" type="1" defaultValue="0" />
 		<Parameter name="Direction" type="2" defaultValue="0" />
-		<Parameter name="Action" type="3" defaultValue="0" />
 	</Parameters>
 	<Conditions count="2">
-		<Condition parameterIndex="0" operator="0" operandValue="1" />
-		<Condition parameterIndex="1" operator="2" operandValue="0" />
+		<Condition parameterIndex="0" operator="3" operandValue="0.100000001" />
+		<Condition parameterIndex="0" operator="5" operandValue="0.100000001" />
 	</Conditions>
-	<Transitions count="8">
-		<Transition fromState="0" toState="1" exitOnlyAtEnd="1" conditionCount="2">
-			<Condition conditionIndex="0" />
+	<Transitions count="2">
+		<Transition fromState="0" toState="1" exitOnlyAtEnd="0" conditionCount="1">
 			<Condition conditionIndex="1" />
 		</Transition>
-		<Transition fromState="0" toState="1" exitOnlyAtEnd="1" conditionCount="0" />
-		<Transition fromState="0" toState="1" exitOnlyAtEnd="1" conditionCount="0" />
-		<Transition fromState="0" toState="2" exitOnlyAtEnd="1" conditionCount="0" />
-		<Transition fromState="1" toState="0" exitOnlyAtEnd="1" conditionCount="0" />
-		<Transition fromState="1" toState="0" exitOnlyAtEnd="1" conditionCount="0" />
-		<Transition fromState="2" toState="3" exitOnlyAtEnd="1" conditionCount="0" />
-		<Transition fromState="3" toState="0" exitOnlyAtEnd="1" conditionCount="0" />
+		<Transition fromState="1" toState="0" exitOnlyAtEnd="0" conditionCount="1">
+			<Condition conditionIndex="0" />
+		</Transition>
 	</Transitions>
 </AnimationStateMachine>

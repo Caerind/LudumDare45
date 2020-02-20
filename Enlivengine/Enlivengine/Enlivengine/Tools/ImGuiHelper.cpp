@@ -105,7 +105,7 @@ void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& 
 
 	if (animationValid)
 	{
-		if (clipIndex > animation.GetClipCount())
+		if (clipIndex >= animation.GetClipCount())
 		{
 			clipIndex = 0;
 		}
@@ -113,7 +113,7 @@ void PreviewAnimation(const en::Animation& animation, en::F32 maxSize, en::U32& 
 		{
 			animationValid = false;
 		}
-		if (clipFrameIndex > animation.GetClip(clipIndex).GetFrameCount())
+		if (clipFrameIndex >= animation.GetClip(clipIndex).GetFrameCount())
 		{
 			clipFrameIndex = 0;
 		}

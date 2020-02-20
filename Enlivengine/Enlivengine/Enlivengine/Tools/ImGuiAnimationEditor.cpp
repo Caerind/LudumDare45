@@ -182,7 +182,7 @@ void ImGuiAnimationEditor::LeftPanel(AnimationStateMachine& stateMachine)
 	NewTransition(stateMachine);
 	NewParameter(stateMachine);
 	ParametersList(stateMachine); 
-	//Debug(stateMachine);
+	Debug(stateMachine);
 }
 
 void ImGuiAnimationEditor::StateMachine(AnimationStateMachine& stateMachine)
@@ -366,7 +366,7 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 
 			ImGui::Spacing();
 
-			static AnimInfo animNewMotion;
+			static AnimInfo animNewMotion{ state.GetClipIndex(), Time::Zero };
 			static int animClipNewMotion = 0;
 			ImGui::PreviewAnimationClip(stateMachine.GetAnimation().Get(), 30.0f, static_cast<U32>(animClipNewMotion), animNewMotion.clipFrameIndex, animNewMotion.accumulator, state.GetSpeedScale());
 			ImGui::PushItemWidth(90.0f);
@@ -380,7 +380,7 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 			if (ImGui::Button("Add Motion"))
 			{
 				stateMachine.AddBlendStateMotion(stateIndex, static_cast<U32>(animClipNewMotion));
-				animClipNewMotion = 0;
+				animClipNewMotion = state.GetClipIndex();
 			}
 		}
 	}
@@ -450,8 +450,17 @@ void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax:
 		ImGui::SameLine();
 		if (ImGui::Button("New condition"))
 		{
-			U32 conditionIndex = stateMachine.AddCondition(0);
+			constexpr U32 defaultParameterIndex = 0;
+			U32 conditionIndex = stateMachine.AddCondition(defaultParameterIndex);
 			stateMachine.AddConditionToTransition(transitionIndex, conditionIndex);
+			stateMachine.SetConditionOperator(conditionIndex, AnimationStateMachine::Condition::Operator::Equal);
+			switch (stateMachine.GetParameter(defaultParameterIndex).GetType())
+			{
+			case AnimationStateMachine::Parameter::Type::Boolean: stateMachine.SetConditionOperandBoolean(conditionIndex, true); break;
+			case AnimationStateMachine::Parameter::Type::Float: stateMachine.SetConditionOperandFloat(conditionIndex, 0.0f); break;
+			case AnimationStateMachine::Parameter::Type::Integer: stateMachine.SetConditionOperandInteger(conditionIndex, 0); break;
+			default: break;
+			}
 		}
 
 		std::vector<const char*> paramNames;
@@ -461,9 +470,9 @@ void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax:
 			paramNames.push_back(stateMachine.GetParameter(parameterIndex).GetName().c_str());
 		}
 
-		static const char* boolOperators[] = { "=", "!=" };
-		static const char* boolValues[] = { "False", "True" };
-		static const char* operators[] = { "=", "!=", "<", "<=", ">", ">=" };
+		static constexpr char* boolOperators[] = { "=", "!=" };
+		static constexpr char* boolValues[] = { "False", "True" };
+		static constexpr char* operators[] = { "=", "!=", "<", "<=", ">", ">=" };
 
 		ImGui::Indent();
 		for (U32 conditionIndexInTransition = 0; conditionIndexInTransition < transition.GetConditionCount(); ++conditionIndexInTransition)
@@ -724,7 +733,7 @@ void ImGuiAnimationEditor::NewParameter(AnimationStateMachine& stateMachine)
 		bool validNewParameter = true;
 
 		// Name
-		ImGui::InputText("Name##NewParameter", mParameterInputTextBuffer, kBufferSize);
+		ImGui::InputText("Name##NewParameterNameInput", mParameterInputTextBuffer, kBufferSize);
 		if (strlen(mParameterInputTextBuffer) <= 0)
 		{
 			validNewParameter = false;
@@ -739,7 +748,7 @@ void ImGuiAnimationEditor::NewParameter(AnimationStateMachine& stateMachine)
 		static const char* paramTypes[] = { "Boolean", "Float", "Integer", "Trigger" };
 		assert(IM_ARRAYSIZE(paramTypes) == static_cast<int>(AnimationStateMachine::Parameter::Type::Count));
 		int previousType = parameterType;
-		if (ImGui::Combo("Type##NewParameter", &parameterType, paramTypes, IM_ARRAYSIZE(paramTypes)))
+		if (ImGui::Combo("Type##NewParameterTypeInput", &parameterType, paramTypes, IM_ARRAYSIZE(paramTypes)))
 		{
 			if (previousType != parameterType)
 			{
@@ -777,7 +786,7 @@ void ImGuiAnimationEditor::NewParameter(AnimationStateMachine& stateMachine)
 
 		if (validNewParameter)
 		{
-			if (ImGui::Button("Add##NewParameter"))
+			if (ImGui::Button("Add##NewParameterButton"))
 			{
 				const U32 parameterIndex = stateMachine.AddParameter(std::string(mParameterInputTextBuffer), static_cast<AnimationStateMachine::Parameter::Type>(parameterType));
 				switch (parameterType)

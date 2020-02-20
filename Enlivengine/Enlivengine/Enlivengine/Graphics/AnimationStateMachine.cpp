@@ -318,6 +318,73 @@ bool AnimationStateMachine::LoadFromFile(const std::string& filename)
                 state.SetSpeedScale(speedScale);
                 state.SetExitOnlyAtEnd(static_cast<bool>(exitOnlyAtEnd));
 
+				// BlendState
+				if (xml.readNode("BlendState"))
+				{
+					U32 dimension = 1;
+					xml.getAttribute("dimension", dimension);
+					if (dimension >= 1)
+					{
+						state.CreateBlendStateInfo(dimension);
+
+						if (xml.readNode("Parameters"))
+						{
+							if (xml.readNode("Parameter"))
+							{
+								do
+								{
+									U32 parameterIndexInBlendState = 0;
+									xml.getAttribute("index", parameterIndexInBlendState);
+									U32 parameterIndex = 0;
+									xml.getAttribute("parameterIndex", parameterIndex);
+									state.GetBlendStateInfo()->SetParameter(parameterIndexInBlendState, parameterIndex);
+
+								} while (xml.nextSibling("Parameter"));
+								xml.closeNode();
+							}
+							xml.closeNode();
+						}
+
+						if (xml.readNode("Motions"))
+						{
+							U32 motionCount = 0;
+							xml.getAttribute("count", motionCount);
+							if (xml.readNode("Motion"))
+							{
+								do
+								{
+									U32 motionClipIndex;
+									xml.getAttribute("clipIndex", motionClipIndex);
+									U32 motionValueCount;
+									xml.getAttribute("values", motionValueCount);
+
+									const U32 motionIndex = state.GetBlendStateInfo()->AddMotion(motionClipIndex);
+
+									if (xml.readNode("Value"))
+									{
+										do
+										{
+											U32 motionValueDimension = 0;
+											xml.getAttribute("index", motionValueDimension);
+											F32 motionValue = 0.0f;
+											xml.getAttribute("value", motionValue);
+											state.GetBlendStateInfo()->SetMotionValue(motionIndex, motionValueDimension, motionValue);
+
+										} while (xml.nextSibling("Value"));
+										xml.closeNode();
+									}
+
+								} while (xml.nextSibling("Motion"));
+								xml.closeNode();
+							}
+							xml.closeNode();
+						}
+
+					}
+
+					xml.closeNode();
+				}
+
                 mStates.push_back(state);
 
             } while (xml.nextSibling("State"));
@@ -394,7 +461,7 @@ bool AnimationStateMachine::LoadFromFile(const std::string& filename)
 
                 Condition condition(parameterIndex);
                 condition.SetOperator(operatorType);
-                switch (operatorType)
+                switch (GetParameter(parameterIndex).GetType())
                 {
                 case Parameter::Type::Boolean:
                 {
@@ -523,7 +590,53 @@ bool AnimationStateMachine::SaveToFile(const std::string& filename)
                 }
                 const State::BlendStateInfo* blendState = state.GetBlendStateInfo();
                 xml.setAttribute("dimension", blendState->GetDimension());
-                xml.closeNode();
+
+				if (!xml.createChild("Parameters"))
+				{
+					continue;
+				}
+				xml.setAttribute("count", blendState->GetDimension());
+				for (U32 j = 0; j < blendState->GetDimension(); ++j)
+				{
+					if (!xml.createChild("Parameter"))
+					{
+						continue;
+					}
+					xml.setAttribute("index", j);
+					xml.setAttribute("parameterIndex", blendState->GetParameter(j));
+					xml.closeNode();
+				}
+				xml.closeNode(); // Parameters
+
+				if (!xml.createChild("Motions"))
+				{
+					continue;
+				}
+				xml.setAttribute("count", blendState->GetMotionCount());
+				for (U32 j = 0; j < blendState->GetMotionCount(); ++j)
+				{
+					if (!xml.createChild("Motion"))
+					{
+						continue;
+					}
+					xml.setAttribute("index", j);
+					xml.setAttribute("clipIndex", blendState->GetMotion(j).GetClipIndex());
+					xml.setAttribute("values", blendState->GetMotion(j).GetValueCount());
+					for (U32 k = 0; k < blendState->GetMotion(j).GetValueCount(); ++k)
+					{
+						if (!xml.createChild("Value"))
+						{
+							continue;
+						}
+						xml.setAttribute("index", k);
+						xml.setAttribute("value", blendState->GetMotion(j).GetValue(k));
+						xml.closeNode();
+					}
+					xml.closeNode();
+				}
+				xml.closeNode(); // Motions
+
+                xml.closeNode(); // BlendState
             }
 
             xml.closeNode();
@@ -688,13 +801,27 @@ void AnimationStateMachine::RemoveState(U32 index)
 
 	// Remove all transitions from/to this state
 	U32 transitionCount = GetTransitionCount();
-	for (U32 i = 0; i < transitionCount; ++i)
+	for (U32 i = 0; i < transitionCount; )
 	{
-		if (mTransitions[i].GetFromState() == index || mTransitions[i].GetToState() == index)
+		Transition& transtion = mTransitions[i];
+		const U32 fromState = transtion.GetFromState();
+		const U32 toState = transtion.GetToState();
+		if (fromState == index || toState == index)
 		{
 			RemoveTransition(i);
-			transitionCount--;
-			i--;
+			--transitionCount;
+		}
+		else
+		{
+			if (fromState > index)
+			{
+				transtion.SetFromState(fromState - 1);
+			}
+			if (toState > index)
+			{
+				transtion.SetToState(toState - 1);
+			}
+			++i;
 		}
 	}
 
@@ -825,13 +952,16 @@ void AnimationStateMachine::RemoveParameter(U32 index)
 	mParameters.erase(mParameters.begin() + index);
 	
 	U32 conditionCount = GetConditionCount();
-	for (U32 i = 0; i < conditionCount; ++i)
+	for (U32 i = 0; i < conditionCount; )
 	{
 		if (mConditions[i].GetParameterIndex() == index)
 		{
 			RemoveCondition(i);
-			conditionCount--;
-			i--;
+			--conditionCount;
+		}
+		else
+		{
+			++i;
 		}
 	}
 }
@@ -1051,7 +1181,7 @@ void AnimationStateMachine::RemoveTransition(U32 index)
 
 	// If a condition is only in this transition, remove it
 	U32 conditionCountInTransition = mTransitions[index].GetConditionCount();
-	for (U32 i = 0; i < conditionCountInTransition; ++i)
+	for (U32 i = 0; i < conditionCountInTransition; )
 	{
 		U32 conditionIndex = mTransitions[index].GetCondition(i);
 		bool conditionFound = false;
@@ -1068,8 +1198,11 @@ void AnimationStateMachine::RemoveTransition(U32 index)
 		if (!conditionFound)
 		{
 			RemoveCondition(conditionIndex);
-			conditionCountInTransition--;
-			i--;
+			--conditionCountInTransition;
+		}
+		else
+		{
+			++i;
 		}
 	}
 
