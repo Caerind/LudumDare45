@@ -270,15 +270,206 @@ AnimationStateMachine::AnimationStateMachine()
 
 bool AnimationStateMachine::LoadFromFile(const std::string& filename)
 {
-    // TODO : TODO
-	ENLIVE_UNUSED(filename);
+    std::string str = filename.substr(0, filename.size() - std::string("astm").size());
+    str += "json";
+    mAnimation = ResourceManager::GetInstance().GetFromFilename<Animation>(str);
+    if (!mAnimation.IsValid())
+    {
+        return false;
+    }
 
-	std::string str = filename.substr(0, filename.size() - 4);
-	str += "json";
+    ParserXml xml;
+    if (!xml.loadFromFile(filename))
+    {
+        return false;
+    }
+    if (!xml.readNode("AnimationStateMachine"))
+    {
+        return false;
+    }
 
-	mAnimation = ResourceManager::GetInstance().GetFromFilename<Animation>(str);
+    std::string animationIdentifier;
+    xml.getAttribute("animation", animationIdentifier);
+    // TODO : Maybe we can do something with it ?
 
-    return mAnimation.IsValid();
+    U32 stateCount = 0;
+    U32 parameterCount = 0;
+    U32 conditionCount = 0;
+    U32 transitionCount = 0;
+
+    // States
+    if (xml.readNode("States"))
+    {
+        xml.getAttribute("count", stateCount);
+        if (xml.readNode("State"))
+        {
+            do
+            {
+                std::string name = "";
+                xml.getAttribute("name", name);
+                U32 clipIndex = 0;
+                xml.getAttribute("clipIndex", clipIndex);
+                F32 speedScale = 1.0f;
+                xml.getAttribute("speedScale", speedScale);
+                I32 exitOnlyAtEnd = static_cast<I32>(true);
+                xml.getAttribute("exitOnlyAtEnd", exitOnlyAtEnd);
+
+                State state(name, clipIndex);
+                state.SetSpeedScale(speedScale);
+                state.SetExitOnlyAtEnd(static_cast<bool>(exitOnlyAtEnd));
+
+                mStates.push_back(state);
+
+            } while (xml.nextSibling("State"));
+            xml.closeNode();
+        }
+        xml.closeNode();
+    }
+
+    // Parameters
+    if (xml.readNode("Parameters"))
+    {
+        xml.getAttribute("count", parameterCount);
+        if (xml.readNode("Parameter"))
+        {
+            do
+            {
+                std::string name = "";
+                xml.getAttribute("name", name);
+                U32 typeIndex = 0;
+                xml.getAttribute("type", typeIndex);
+                Parameter::Type type = static_cast<Parameter::Type>(typeIndex);
+
+                Parameter parameter(name, type);
+                switch (type)
+                {
+                case Parameter::Type::Boolean:
+                {
+                    I32 defaultValue = static_cast<I32>(false);
+                    xml.getAttribute("defaultValue", defaultValue);
+                    parameter.SetBooleanValue(static_cast<bool>(defaultValue));
+                } break;
+                case Parameter::Type::Float:
+                {
+                    F32 defaultValue = 0.0f;
+                    xml.getAttribute("defaultValue", defaultValue);
+                    parameter.SetFloatValue(defaultValue);
+                } break;
+                case Parameter::Type::Integer:
+                {
+                    I32 defaultValue = 0;
+                    xml.getAttribute("defaultValue", defaultValue);
+                    parameter.SetIntegerValue(defaultValue);
+                } break;
+                case Parameter::Type::Trigger:
+                {
+                    I32 defaultValue = static_cast<I32>(false);
+                    xml.getAttribute("defaultValue", defaultValue);
+                    parameter.SetTriggerValue(static_cast<bool>(defaultValue));
+                } break;
+                default: break;
+                }
+
+                mParameters.push_back(parameter);
+
+            } while (xml.nextSibling("Parameter"));
+            xml.closeNode();
+        }
+        xml.closeNode();
+    }
+
+    // Conditions
+    if (xml.readNode("Conditions"))
+    {
+        xml.getAttribute("count", conditionCount);
+        if (xml.readNode("Condition"))
+        {
+            do
+            {
+                U32 parameterIndex = 0;
+                xml.getAttribute("parameterIndex", parameterIndex);
+                U32 operatorIndex = 0;
+                xml.getAttribute("operator", operatorIndex);
+                Condition::Operator operatorType = static_cast<Condition::Operator>(operatorIndex);
+
+                Condition condition(parameterIndex);
+                condition.SetOperator(operatorType);
+                switch (operatorType)
+                {
+                case Parameter::Type::Boolean:
+                {
+                    I32 operandValue = static_cast<I32>(false);
+                    xml.getAttribute("operandValue", operandValue);
+                    condition.SetOperandBoolean(static_cast<bool>(operandValue));
+                } break;
+                case Parameter::Type::Float:
+                {
+                    F32 operandValue = 0.0f;
+                    xml.getAttribute("operandValue", operandValue);
+                    condition.SetOperandFloat(operandValue);
+                } break;
+                case Parameter::Type::Integer:
+                {
+                    I32 defaultValue = 0;
+                    xml.getAttribute("operandValue", defaultValue);
+                    condition.SetOperandInteger(defaultValue);
+                } break;
+                case Parameter::Type::Trigger: break;
+                default: break;
+                }
+
+                mConditions.push_back(condition);
+
+            } while (xml.nextSibling("Condition"));
+            xml.closeNode();
+        }
+        xml.closeNode();
+    }
+
+    // Transitions
+    if (xml.readNode("Transitions"))
+    {
+        xml.getAttribute("count", transitionCount);
+        if (xml.readNode("Transition"))
+        {
+            do
+            {
+                U32 fromState = 0;
+                xml.getAttribute("fromState", fromState);
+                U32 toState = 0;
+                xml.getAttribute("toState", toState);
+                I32 exitOnlyAtEnd = static_cast<I32>(true);
+                xml.getAttribute("exitOnlyAtEnd", exitOnlyAtEnd);
+                U32 conditionInTransitionCount = 0;
+                xml.getAttribute("conditionCount", conditionInTransitionCount);
+
+                Transition transition(fromState, toState);
+                transition.SetExitOnlyAtEnd(static_cast<bool>(exitOnlyAtEnd));
+
+                if (xml.readNode("Condition"))
+                {
+                    do 
+                    {
+                        U32 conditionIndex = 0;
+                        xml.getAttribute("conditionIndex", conditionIndex);
+
+                        transition.AddCondition(conditionIndex);
+
+                    } while (xml.nextSibling("Condition"));
+                    xml.closeNode();
+                }
+
+                mTransitions.push_back(transition);
+
+            } while (xml.nextSibling("Transition"));
+            xml.closeNode();
+        }
+        xml.closeNode();
+    }
+
+    xml.closeNode();
+
+    return true;
 }
 
 bool AnimationStateMachine::SaveToFile(const std::string& filename)
@@ -307,107 +498,122 @@ bool AnimationStateMachine::SaveToFile(const std::string& filename)
     const U32 conditionCount = GetConditionCount();
     const U32 transitionCount = GetTransitionCount();
 
-    xml.setAttribute("states", stateCount);
-    xml.setAttribute("parameters", parameterCount);
-    xml.setAttribute("conditions", conditionCount);
-    xml.setAttribute("transitions", transitionCount);
-    xml.setAttribute("defaultStateIndex", mDefaultStateIndex);
-
     // States
-    for (U32 i = 0; i < stateCount; ++i)
+    if (xml.createChild("States"))
     {
-        if (!xml.createChild("State"))
+        xml.setAttribute("count", stateCount);
+        xml.setAttribute("defaultIndex", mDefaultStateIndex);
+        for (U32 i = 0; i < stateCount; ++i)
         {
-            continue;
+            if (!xml.createChild("State"))
+            {
+                continue;
+            }
+            const State& state = GetState(i);
+            xml.setAttribute("name", state.GetName());
+            xml.setAttribute("clipIndex", state.GetClipIndex());
+            xml.setAttribute("speedScale", state.GetSpeedScale());
+            xml.setAttribute("exitOnlyAtEnd", state.GetExitOnlyAtEnd());
+
+            if (state.HasBlendStateInfo())
+            {
+                if (!xml.createChild("BlendState"))
+                {
+                    continue;
+                }
+                const State::BlendStateInfo* blendState = state.GetBlendStateInfo();
+                xml.setAttribute("dimension", blendState->GetDimension());
+                xml.closeNode();
+            }
+
+            xml.closeNode();
         }
-        const State& state = GetState(i);
-        xml.setAttribute("name", state.GetName());
-        xml.setAttribute("clipIndex", state.GetClipIndex());
-        xml.setAttribute("speedScale", state.GetSpeedScale());
-        xml.setAttribute("exitOnlyAtEnd", state.GetExitOnlyAtEnd());
-
-		if (state.HasBlendStateInfo())
-		{
-			if (!xml.createChild("BlendState"))
-			{
-				continue;
-			}
-			const State::BlendStateInfo* blendState = state.GetBlendStateInfo();
-			xml.setAttribute("dimension", blendState->GetDimension());
-			xml.closeNode();
-		}
-
         xml.closeNode();
     }
 
     // Parameters
-    for (U32 i = 0; i < parameterCount; ++i)
+    if (xml.createChild("Parameters"))
     {
-        if (!xml.createChild("Parameter"))
+        xml.setAttribute("count", parameterCount);
+        for (U32 i = 0; i < parameterCount; ++i)
         {
-            continue;
-        }
-        const Parameter& parameter = GetParameter(i);
-        xml.setAttribute("name", parameter.GetName());
-        xml.setAttribute("type", static_cast<I32>(parameter.GetType()));
-        switch (parameter.GetType())
-        {
-        case Parameter::Type::Boolean: xml.setAttribute("defaultValue", parameter.GetBooleanValue()); break;
-        case Parameter::Type::Float: xml.setAttribute("defaultValue", parameter.GetFloatValue()); break;
-        case Parameter::Type::Integer: xml.setAttribute("defaultValue", parameter.GetIntegerValue()); break;
-        case Parameter::Type::Trigger: xml.setAttribute("defaultValue", parameter.GetTriggerValue()); break;
-        default: break;
-        }
+            if (!xml.createChild("Parameter"))
+            {
+                continue;
+            }
+            const Parameter& parameter = GetParameter(i);
+            xml.setAttribute("name", parameter.GetName());
+            xml.setAttribute("type", static_cast<I32>(parameter.GetType()));
+            switch (parameter.GetType())
+            {
+            case Parameter::Type::Boolean: xml.setAttribute("defaultValue", parameter.GetBooleanValue()); break;
+            case Parameter::Type::Float: xml.setAttribute("defaultValue", parameter.GetFloatValue()); break;
+            case Parameter::Type::Integer: xml.setAttribute("defaultValue", parameter.GetIntegerValue()); break;
+            case Parameter::Type::Trigger: xml.setAttribute("defaultValue", parameter.GetTriggerValue()); break;
+            default: break;
+            }
 
+            xml.closeNode();
+        }
         xml.closeNode();
     }
 
     // Conditions
-    for (U32 i = 0; i < conditionCount; ++i)
+    if (xml.createChild("Conditions"))
     {
-        if (!xml.createChild("Condition"))
+        xml.setAttribute("count", conditionCount);
+        for (U32 i = 0; i < conditionCount; ++i)
         {
-            continue;
-        }
-        const Condition& condition = GetCondition(i);
-        xml.setAttribute("parameterIndex", condition.GetParameterIndex());
-        xml.setAttribute("operator", static_cast<I32>(condition.GetOperator()));
-        switch (GetParameter(condition.GetParameterIndex()).GetType())
-        {
-        case Parameter::Type::Boolean: xml.setAttribute("operandValue", condition.GetOperandBoolean()); break;
-        case Parameter::Type::Float: xml.setAttribute("operandValue", condition.GetOperandFloat()); break;
-        case Parameter::Type::Integer: xml.setAttribute("operandValue", condition.GetOperandInteger()); break;
-        default: break;
-        }
+            if (!xml.createChild("Condition"))
+            {
+                continue;
+            }
+            const Condition& condition = GetCondition(i);
+            xml.setAttribute("parameterIndex", condition.GetParameterIndex());
+            xml.setAttribute("operator", static_cast<I32>(condition.GetOperator()));
+            switch (GetParameter(condition.GetParameterIndex()).GetType())
+            {
+            case Parameter::Type::Boolean: xml.setAttribute("operandValue", condition.GetOperandBoolean()); break;
+            case Parameter::Type::Float: xml.setAttribute("operandValue", condition.GetOperandFloat()); break;
+            case Parameter::Type::Integer: xml.setAttribute("operandValue", condition.GetOperandInteger()); break;
+            default: break;
+            }
 
+            xml.closeNode();
+        }
         xml.closeNode();
     }
 
     // Transitions
-    for (U32 i = 0; i < transitionCount; ++i)
+    if (xml.createChild("Transitions"))
     {
-        if (!xml.createChild("Transition"))
+        xml.setAttribute("count", transitionCount);
+        for (U32 i = 0; i < transitionCount; ++i)
         {
-            continue;
-        }
-        const Transition& transition = GetTransition(i);
-        xml.setAttribute("fromState", transition.GetFromState());
-        xml.setAttribute("toState", transition.GetToState());
-		xml.setAttribute("exitOnlyAtEnd", transition.GetExitOnlyAtEnd());
-        const U32 conditionCountInTransition = transition.GetConditionCount();
-        xml.setAttribute("conditionCount", conditionCountInTransition);
-        if (transition.GetConditionCount() > 0)
-        {
-            for (U32 j = 0; j < conditionCountInTransition; ++j)
+            if (!xml.createChild("Transition"))
             {
-                if (!xml.createChild("Condition"))
-                {
-                    continue;
-                }
-                xml.setAttribute("conditionIndex", transition.GetCondition(j));
-                xml.closeNode();
+                continue;
             }
-        }
+            const Transition& transition = GetTransition(i);
+            xml.setAttribute("fromState", transition.GetFromState());
+            xml.setAttribute("toState", transition.GetToState());
+            xml.setAttribute("exitOnlyAtEnd", transition.GetExitOnlyAtEnd());
+            const U32 conditionCountInTransition = transition.GetConditionCount();
+            xml.setAttribute("conditionCount", conditionCountInTransition);
+            if (transition.GetConditionCount() > 0)
+            {
+                for (U32 j = 0; j < conditionCountInTransition; ++j)
+                {
+                    if (!xml.createChild("Condition"))
+                    {
+                        continue;
+                    }
+                    xml.setAttribute("conditionIndex", transition.GetCondition(j));
+                    xml.closeNode();
+                }
+            }
+            xml.closeNode();
+        }   
         xml.closeNode();
     }
 

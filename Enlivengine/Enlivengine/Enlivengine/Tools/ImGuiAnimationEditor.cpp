@@ -82,28 +82,6 @@ bool ImGuiAnimationEditor::Initialize(AnimationStateMachinePtr stateMachinePtr)
 			return false;
 		}
 
-		// Debug
-		{
-			stateMachine.AddState("TestA", 0);
-			stateMachine.AddState("TestB", 1);
-			stateMachine.AddState("TestC", 2);
-			stateMachine.AddState("TestD", 3);
-
-			stateMachine.AddTransition(0, 1);
-			stateMachine.AddTransition(0, 1); // TODO : See many links
-			stateMachine.AddTransition(0, 1); // TODO : See many links
-			stateMachine.AddTransition(1, 0);
-			stateMachine.AddTransition(1, 0);
-			stateMachine.AddTransition(0, 2);
-			stateMachine.AddTransition(2, 3);
-			stateMachine.AddTransition(3, 0);
-
-			stateMachine.AddParameter("Jumping", AnimationStateMachine::Parameter::Type::Boolean);
-			stateMachine.AddParameter("Speed", AnimationStateMachine::Parameter::Type::Float);
-			stateMachine.AddParameter("Direction", AnimationStateMachine::Parameter::Type::Integer);
-			stateMachine.AddParameter("Action", AnimationStateMachine::Parameter::Type::Trigger);
-		}
-
 		mStateMachine = stateMachinePtr;
 
 		ax::NodeEditor::Config config;
