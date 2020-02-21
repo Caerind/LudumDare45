@@ -47,6 +47,7 @@ private:
 	void NewParameter(AnimationStateMachine& stateMachine);
 	void ParametersList(AnimationStateMachine& stateMachine);
 	void Debug(AnimationStateMachine& stateMachine);
+	void Preview(AnimationStateMachine& stateMachine);
 
 	void NodeEditor(AnimationStateMachine& stateMachine);
 	struct PinInfo
@@ -68,6 +69,8 @@ private:
 	static constexpr U32 kBufferSize{ 256 };
 	char mStateInputTextBuffer[kBufferSize];
 	char mParameterInputTextBuffer[kBufferSize];
+
+	AnimationController mAnimationController;
 
     bool mDisplayPreviews; 
 };

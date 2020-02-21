@@ -82,6 +82,11 @@ bool ImGuiAnimationEditor::Initialize(AnimationStateMachinePtr stateMachinePtr)
 			return false;
 		}
 
+		if (!mAnimationController.SetAnimationStateMachine(stateMachinePtr))
+		{
+			return false;
+		}
+
 		mStateMachine = stateMachinePtr;
 
 		ax::NodeEditor::Config config;
@@ -182,7 +187,8 @@ void ImGuiAnimationEditor::LeftPanel(AnimationStateMachine& stateMachine)
 	NewTransition(stateMachine);
 	NewParameter(stateMachine);
 	ParametersList(stateMachine); 
-	Debug(stateMachine);
+	//Debug(stateMachine);
+	Preview(stateMachine);
 }
 
 void ImGuiAnimationEditor::StateMachine(AnimationStateMachine& stateMachine)
@@ -967,6 +973,99 @@ void ImGuiAnimationEditor::Debug(AnimationStateMachine& stateMachine)
 			}
 			ImGui::EndTooltip();
 		}
+	}
+}
+
+void ImGuiAnimationEditor::Preview(AnimationStateMachine& stateMachine)
+{
+	if (ImGui::CollapsingHeader("Preview"))
+	{
+		ImGui::Indent();
+
+		// Parameters
+		if (mAnimationController.IsStateMachineValid())
+		{
+			U32 parameterCount = mAnimationController.GetParameterCount();
+			for (U32 parameterIndex = 0; parameterIndex < parameterCount; ++parameterIndex)
+			{
+				const AnimationStateMachine::Parameter& parameter = mAnimationController.GetParameter(parameterIndex);
+				ImGui::PushID(parameterIndex);
+
+				ImGui::Text("-");
+				ImGui::SameLine();
+
+				ImVec4 color;
+				switch (parameter.GetType())
+				{
+				case AnimationStateMachine::Parameter::Type::Boolean: color = Color::Lime.toImGuiColor(); break;
+				case AnimationStateMachine::Parameter::Type::Float: color = Color::Salmon.toImGuiColor(); break;
+				case AnimationStateMachine::Parameter::Type::Integer: color = Color::Cyan.toImGuiColor(); break;
+				case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
+				default: break;
+				}
+				ImGui::TextColored(color, parameter.GetName().c_str());
+
+				ImGui::SameLine();
+
+				ImGui::PushItemWidth(80.0f);
+				switch (parameter.GetType())
+				{
+				case AnimationStateMachine::Parameter::Type::Boolean: // Boolean
+				{
+					static const char* boolValues[] = { "False", "True" };
+					int boolValueIndex = (int)parameter.GetBooleanValue();
+					if (ImGui::Combo("##PreviewBoolParametersListInput", &boolValueIndex, boolValues, IM_ARRAYSIZE(boolValues)))
+					{
+						mAnimationController.SetParameterBoolean(parameter.GetHashedName(), (bool)boolValueIndex);
+					}
+				} break;
+				case AnimationStateMachine::Parameter::Type::Float: // Float
+				{
+					float floatValue = parameter.GetFloatValue();
+					if (ImGui::InputFloat("##PreviewFloatParametersListInput", &floatValue))
+					{
+						mAnimationController.SetParameterFloat(parameter.GetHashedName(), (F32)floatValue);
+					}
+				} break;
+				case AnimationStateMachine::Parameter::Type::Integer: // Integer
+				{
+					int intValue = parameter.GetIntegerValue();
+					if (ImGui::InputInt("##PreviewIntParametersListInput", &intValue))
+					{
+						mAnimationController.SetParameterInteger(parameter.GetHashedName(), (I32)intValue);
+					}
+				} break;
+				case AnimationStateMachine::Parameter::Type::Trigger: // Trigger
+				{
+					if (ImGui::Button("X##PreviewTriggerParametersListInput"))
+					{
+						mAnimationController.SetParameterTrigger(parameter.GetHashedName());
+					}
+				} break;
+				default:
+					break;
+				}
+				ImGui::PopItemWidth();
+
+				ImGui::PopID();
+			}
+		}
+
+		// Update
+		mAnimationController.Update(seconds(ImGui::GetIO().DeltaTime));
+
+		// Render
+		if (mAnimationController.IsStateMachineValid() && mAnimationController.AreIndicesValid())
+		{
+			const Animation& animation = stateMachine.GetAnimation().Get();
+			const Texture& texture = animation.GetTexture().Get();
+			const U32 frameIndex = mAnimationController.GetFrameIndex();
+			const Rectu textureRect = animation.GetFrame(frameIndex).GetRect();
+
+			ImGui::PreviewTexture(texture, textureRect, 100.0f, true);
+		}
+
+		ImGui::Unindent();
 	}
 }
 

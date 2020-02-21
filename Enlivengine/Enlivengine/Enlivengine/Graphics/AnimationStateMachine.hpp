@@ -27,6 +27,9 @@ public:
         void SetExitOnlyAtEnd(bool value) { mExitOnlyAtEnd = value; }
         bool GetExitOnlyAtEnd() const { return mExitOnlyAtEnd; }
 
+		void SetFirstOutputTransitionIndex(U32 firstOutputTransitionIndex) { mFirstOutputTransitionIndex = firstOutputTransitionIndex; }
+		U32 GetFirstOutputTransitionIndex() const { return mFirstOutputTransitionIndex; }
+
 		class BlendStateInfo
 		{
 		public:
@@ -75,6 +78,7 @@ public:
 		U32 mClipIndex;
 		F32 mSpeedScale;
 		bool mExitOnlyAtEnd;
+		U32 mFirstOutputTransitionIndex;
 		BlendStateInfo* mBlendStateInfo;
 	};
 
@@ -148,6 +152,12 @@ public:
 		F32 GetOperandFloat() const { return mOperand.fValue; }
 		I32 GetOperandInteger() const { return mOperand.iValue; }
 
+		bool Evaluate(const AnimationStateMachine::Parameter& parameter) const;
+		bool EvaluateBoolean(bool value) const;
+		bool EvaluateFloat(F32 value) const;
+		bool EvaluateInteger(I32 value) const;
+		bool EvaluateTrigger(bool value) const;
+
 	private:
 		U32 mParameterIndex;
 		Operator mOperator;
@@ -195,6 +205,7 @@ public:
 	bool LoadFromFile(const std::string& filename);
 	bool SaveToFile(const std::string& filename);
     void Precompute();
+	void Clear();
 
 	// Animation
 	void SetAnimation(AnimationPtr animation);
@@ -265,6 +276,8 @@ public:
     void SetDefaultStateIndex(U32 stateIndex);
     U32 GetDefaultStateIndex() const;
 
+	U32 GetDirtyIndex() const { return mDirtyIndex; }
+
 private:
 	AnimationPtr mAnimation;
 	std::vector<State> mStates;
@@ -272,6 +285,7 @@ private:
 	std::vector<Condition> mConditions;
 	std::vector<Transition> mTransitions;
     U32 mDefaultStateIndex;
+	U32 mDirtyIndex; // Transient
 };
 
 using AnimationStateMachinePtr = ResourcePtr<AnimationStateMachine>;

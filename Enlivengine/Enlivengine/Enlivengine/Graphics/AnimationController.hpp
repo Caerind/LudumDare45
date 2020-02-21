@@ -9,11 +9,12 @@ namespace en
 class AnimationController
 {
 public:
-	AnimationController() {}
+	AnimationController();
 
-	/*
-
-	void SetAnimationStateMachine(AnimationStateMachinePtr animation);
+	bool SetAnimationStateMachine(AnimationStateMachinePtr animationStateMachine);
+	bool IsStateMachineValid() const;
+	bool IsStateMachineDirty() const;
+	void Recompute();
 
 	bool HasParameter(const std::string& name) const;
 	bool HasParameter(U32 hashedName) const;
@@ -35,11 +36,34 @@ public:
 	I32 GetParameterInteger(U32 hashedName) const;
 	bool GetParameterTrigger(const std::string& name) const;
 	bool GetParameterTrigger(U32 hashedName) const;
+	U32 GetParameterIndexByName(const std::string& name) const;
+	U32 GetParameterIndexByName(U32 hashedName) const;
+	U32 GetParameterCount() const;
+	const AnimationStateMachine::Parameter& GetParameter(U32 index) const;
 
-	*/
+	void Update(const Time& dt);
+
+	bool AreIndicesValid() const;
+	U32 GetStateIndex() const;
+	U32 GetClipIndex() const;
+	U32 GetClipFrameIndex() const;
+	U32 GetFrameIndex() const;
 
 private:
+	U32 GetClipIndexFromState(const AnimationStateMachine::State& state);
+	bool CanUseTransition(const AnimationStateMachine::Transition& transition, bool lastFrameEnded);
 
+private:
+	AnimationStateMachinePtr mAnimationStateMachine;
+	U32 mAnimationStateMachineDirtyIndex;
+
+	U32 mStateIndex;
+	U32 mClipIndex;
+	U32 mClipFrameIndex;
+	U32 mFrameIndex;
+	Time mTimeAccumulator;
+
+	std::vector<AnimationStateMachine::Parameter> mParameters;
 };
 
 } // namespace en
