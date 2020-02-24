@@ -3,6 +3,7 @@
 #include <Enlivengine/System/PrimitiveTypes.hpp>
 
 #include <cstring>
+#include <string>
 
 namespace en
 {
@@ -14,9 +15,11 @@ public:
 
 	static constexpr U32 CRC32(const char* key)
 	{
-		size_t len = length(key);
+		std::size_t len = length(key);
 		if (key == nullptr || len == 0)
+		{
 			return 0;
+		}
 		U32 h = 0;
 		while (len--)
 		{
@@ -25,6 +28,29 @@ public:
 			h = crc32Table[h & 0x0f] ^ (h >> 4);
 		}
 		return { ~h }; // TODO : Endianness ?
+	}
+
+	// TODO : Ensures CRC32(char*) == CRC32(string_view)
+	static constexpr U32 CRC32(std::string_view key)
+	{
+		const std::size_t len = key.size();
+		if (len == 0)
+		{
+			return 0;
+		}
+		U32 h = 0;
+		for (U32 i = 0; i < len; ++i)
+		{
+			h ^= key[i];
+			h = crc32Table[h & 0x0f] ^ (h >> 4);
+			h = crc32Table[h & 0x0f] ^ (h >> 4);
+		}
+		return { ~h }; // TODO : Endianness ?
+	}
+
+	static constexpr inline U32 CombineHash(U32 hash1, U32 hash2)
+	{
+		return hash1 ^ (hash2 + 0x9e3779b9 + (hash1 << 6) + (hash1 >> 2));
 	}
 
 private:

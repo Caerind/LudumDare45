@@ -73,6 +73,14 @@ set(SRC_MATH
 )
 source_group("Math" FILES ${SRC_MATH})
 
+set(SRC_METADATA
+	Enlivengine/MetaData/MetaData.cpp
+	Enlivengine/MetaData/MetaData.hpp
+	Enlivengine/MetaData/TestClassA.hpp
+	Enlivengine/MetaData/TestClassB.hpp
+)
+source_group("MetaData" FILES ${SRC_METADATA})
+
 set(SRC_GRAPHICS
 	Enlivengine/Graphics/Animation.cpp
 	Enlivengine/Graphics/Animation.hpp
@@ -169,6 +177,7 @@ source_group("Tools" FILES ${SRC_TOOLS})
 add_library(Enlivengine STATIC
 	${SRC_SYSTEM} 
 	${SRC_MATH} 
+	${SRC_METADATA}
 	${SRC_GRAPHICS}
 	${SRC_MAP}
 	${SRC_APPLICATION}

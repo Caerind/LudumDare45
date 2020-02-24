@@ -9,8 +9,45 @@
 #include "GameState.hpp"
 #include "IntroState.hpp"
 
+// Test MetaData
+#include <Enlivengine/MetaData/MetaData.hpp>
+#include <iostream>
+#include <Enlivengine/MetaData/TestClassA.hpp>
+#include <Enlivengine/MetaData/TestClassB.hpp>
+
 int main()
 {
+	static_assert(en::MetaDataTypes::GetType("int").GetName() == "int");
+	static_assert(en::MetaDataTypes::GetType("int").GetSize() == 4);
+	static_assert(en::MetaDataTypes::GetType<int>().GetName() == "int");
+	static_assert(en::MetaDataTypes::GetType<int>().GetSize() == 4);
+	static_assert(en::MetaDataTypes::GetType<float>().GetName() == "float");
+	static_assert(en::MetaDataTypes::GetType<float>().GetSize() == 4);
+	static_assert(en::MetaDataTypes::GetType<int>() != en::MetaDataTypes::GetType<float>());
+
+	for (en::U32 i = 0; i < en::MetaDataTypes::GetTypeCount(); ++i)
+	{
+		const en::MetaDataType& typeInfo = en::MetaDataTypes::GetTypeByIndex(i);
+		std::cout << typeInfo.GetName() << " (" << typeInfo.GetID() << ") : " << typeInfo.GetSize() << std::endl;
+	}
+
+	static_assert(en::TestClassA::ClassName == "en::TestClassA");
+	std::cout << en::TestClassA::ClassName << " : " << en::TestClassA::ClassID << std::endl;
+	for (en::U32 i = 0; i < en::TestClassA::GetPropertieCount(); ++i)
+	{
+		const en::MetaDataProperty& propertyInfo = en::TestClassA::GetPropertyByIndex(i);
+		std::cout << propertyInfo.GetName() << " : " << propertyInfo.GetType().GetName() << std::endl;
+	}
+
+	static_assert(en::TestClassB::ClassName == "en::TestClassB");
+	std::cout << en::TestClassB::ClassName << " : " << en::TestClassB::ClassID << std::endl;
+	for (en::U32 i = 0; i < en::TestClassB::GetPropertieCount(); ++i)
+	{
+		const en::MetaDataProperty& propertyInfo = en::TestClassB::GetPropertyByIndex(i);
+		std::cout << propertyInfo.GetName() << " : " << propertyInfo.GetType().GetName() << std::endl;
+	}
+
+
 	en::Application::GetInstance().Initialize();
 
 	en::Application& app = en::Application::GetInstance();
