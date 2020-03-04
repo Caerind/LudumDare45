@@ -5,13 +5,10 @@ namespace en
 
 class NonCopyable
 {
-protected:
-	NonCopyable() {}
-	~NonCopyable() {}
-
 private:
-	NonCopyable(const NonCopyable&) {}
-	NonCopyable& operator=(const NonCopyable&) {}
+    NonCopyable() = delete;
+    NonCopyable(const NonCopyable&) = delete;
+	NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
 } // namespace en

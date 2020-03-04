@@ -131,6 +131,8 @@ set(SRC_MAP
 source_group("Map" FILES ${SRC_MAP})
 	
 set(SRC_APPLICATION
+	Enlivengine/Application/ActionSystem.cpp
+	Enlivengine/Application/ActionSystem.hpp
 	Enlivengine/Application/Application.cpp
 	Enlivengine/Application/Application.hpp
 	Enlivengine/Application/AudioSystem.cpp
