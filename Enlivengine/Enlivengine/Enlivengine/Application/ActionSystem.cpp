@@ -7,9 +7,14 @@ namespace en
 
 ActionInput::ActionInput(std::string_view name)
     : mName(name)
-    , mID(Hash::CRC32(id))
+    , mID(Hash::CRC32(name))
     , mActive(false) 
 {
+}
+
+bool ActionInput::IsLogicalOperator() const
+{
+    return false;
 }
 
 std::string_view ActionInput::GetName() const
@@ -32,12 +37,26 @@ void ActionInput::SetActive(bool active)
     mActive = active;
 }
 
+U32 ActionInput::GetPriorityLevel() const
+{
+    return 0;
+}
+
 ActionSystem::ActionSystem()
+    : mEvents()
+    , mInputs()
+    , mDirty(false)
 {
 }
 
 void ActionSystem::Update()
 {
+    if (mDirty)
+    {
+        Update_Internal();
+        mDirty = false;
+    }
+
     const U32 inputCount = GetInputCount();
     for (U32 i = 0; i < inputCount; ++i)
     {
@@ -46,6 +65,7 @@ void ActionSystem::Update()
             input->SetActive(input->IsCurrentlyActive(this));
         }
     }
+
     ClearEvents();
 }
 
@@ -82,12 +102,9 @@ bool ActionSystem::IsInputExisting(U32 inputID) const
     const U32 inputCount = GetInputCount();
     for (U32 i = 0; i < inputCount; ++i)
     {
-        if (const ActionInput* input = mInputs[i])
+        if (mInputs[i] != nullptr && mInputs[i]->GetID() == inputID)
         {
-            if (input->GetID() == inputID)
-            {
-                return true;
-            }
+            return true;
         }
     }
     return false;
@@ -102,6 +119,24 @@ const ActionInput* ActionSystem::GetInputByIndex(U32 index) const
 {
     assert(index < GetInputCount());
     return mInputs[index];
+}
+
+const ActionInput* ActionSystem::GetInputByName(std::string_view inputName) const
+{
+    return GetInputByID(Hash::CRC32(inputName));
+}
+
+const ActionInput* ActionSystem::GetInputByID(U32 inputID) const
+{
+    const U32 inputCount = GetInputCount();
+    for (U32 i = 0; i < inputCount; ++i)
+    {
+        if (mInputs[i] != nullptr && mInputs[i]->GetID() == inputID)
+        {
+            return mInputs[i];
+        }
+    }
+    return nullptr;
 }
 
 void ActionSystem::ClearInputs()
@@ -144,7 +179,63 @@ void ActionSystem::AddInput_Internal(ActionInput* input)
     if (input != nullptr)
     {
         mInputs.push_back(input);
+        mDirty = true;
     }
+}
+
+void ActionSystem::Update_Internal()
+{
+    bool priorityChanged = false;
+    const U32 inputCount = GetInputCount();
+    for (U32 i = 0; i < inputCount; ++i)
+    {
+        if (mInputs[i]->IsLogicalOperator())
+        {
+            if (ActionInputLogical* input = static_cast<ActionInputLogical*>(mInputs[i]))
+            {
+                const U32 previousPriority = input->GetPriorityLevel();
+                const U32 currentPriority = GetMaxPriority(input->GetInputAID(), input->GetInputBID()) + 1;
+                if (currentPriority != previousPriority)
+                {
+                    input->SetPriorityLevel(currentPriority);
+                    priorityChanged = true;
+                }
+            }
+        }
+    }
+    if (priorityChanged)
+    {
+        std::sort(mInputs.begin(), mInputs.end(), [](const ActionInput* a, const ActionInput* b)
+        {
+            assert(a != nullptr); //if (!a) return false;
+            assert(b != nullptr); //if (!b) return true;
+            const U32 pA = a->GetPriorityLevel();
+            const U32 pB = b->GetPriorityLevel();
+            if (pA == pB)
+            {
+                return a->GetID() < b->GetID();
+            }
+            else
+            {
+                return pA < pB;
+            }
+        });
+    }
+}
+
+U32 ActionSystem::GetMaxPriority(U32 inputAID) const
+{
+    const ActionInput* inputA = GetInputByID(inputAID);
+    return (inputA != nullptr) ? inputA->GetPriorityLevel() : 0;
+}
+
+U32 ActionSystem::GetMaxPriority(U32 inputAID, U32 inputBID) const
+{
+    const ActionInput* inputA = GetInputByID(inputAID);
+    const U32 priorityA = (inputA != nullptr) ? inputA->GetPriorityLevel() : 0;
+    const ActionInput* inputB = GetInputByID(inputBID);
+    const U32 priorityB = (inputB != nullptr) ? inputB->GetPriorityLevel() : 0;
+    return (priorityA >= priorityB) ? priorityA : priorityB;
 }
 
 ActionInputVariable::ActionInputVariable(std::string_view name, bool* variable) 
@@ -340,6 +431,82 @@ void ActionSystem::ActionInputMouse::SetButton(sf::Mouse::Button button)
 void ActionSystem::ActionInputMouse::SetActionType(ActionType actionType)
 {
     mActionType = actionType;
+}
+
+ActionSystem::ActionInputLogical::ActionInputLogical(std::string_view name, ActionInputLogicalOperator logic, U32 inputAID, U32 inputBID /*= U32_Max*/)
+    : ActionInput(name)
+    , mLogicOperator(logic)
+    , mInputAID(inputAID)
+    , mInputBID(inputBID)
+    , mPriorityLevel(0)
+{
+}
+
+ActionInputType ActionSystem::ActionInputLogical::GetInputType() const
+{
+    switch (GetLogicalOperator())
+    {
+    case ActionInputLogicalOperator::And: return ActionInputType::And;
+    case ActionInputLogicalOperator::Or: return ActionInputType::Or;
+    case ActionInputLogicalOperator::Not: return ActionInputType::Not;
+    default: assert(false);
+    }
+    return ActionInputType::Not;
+}
+
+bool ActionSystem::ActionInputLogical::IsLogicalOperator() const
+{
+    return true;
+}
+
+bool ActionSystem::ActionInputLogical::IsCurrentlyActive(ActionSystem* system) const
+{
+    if (system != nullptr)
+    {
+        switch (mLogicOperator)
+        {
+        case ActionInputLogicalOperator::And: return system->GetInputByIndex(mInputAID)->IsActive() && system->GetInputByIndex(mInputBID)->IsActive();
+        case ActionInputLogicalOperator::Or: return system->GetInputByIndex(mInputAID)->IsActive() || system->GetInputByIndex(mInputBID)->IsActive();
+        case ActionInputLogicalOperator::Not: return !system->GetInputByIndex(mInputAID)->IsActive();
+        default: assert(false);
+        }
+    }
+    return false;
+}
+
+U32 ActionSystem::ActionInputLogical::GetPriorityLevel() const
+{
+    return mPriorityLevel;
+}
+
+ActionInputLogicalOperator ActionSystem::ActionInputLogical::GetLogicalOperator() const
+{
+    return mLogicOperator;
+}
+
+U32 ActionSystem::ActionInputLogical::GetInputAID() const
+{
+    return mInputAID;
+}
+
+U32 ActionSystem::ActionInputLogical::GetInputBID() const
+{
+    return mInputBID;
+}
+
+void ActionSystem::ActionInputLogical::SetInputAID(U32 inputID)
+{
+    mInputAID = inputID;
+}
+
+void ActionSystem::ActionInputLogical::SetInputBID(U32 inputID)
+{
+    mInputBID = inputID;
+}
+
+void ActionSystem::ActionInputLogical::SetPriorityLevel(U32 priorityLevel)
+{
+    mPriorityLevel = priorityLevel;
 }
 
 } // namespace en

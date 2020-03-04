@@ -22,7 +22,8 @@ enum class ActionInputType : U32
     Key,
     Mouse,
     And,
-    Or
+    Or,
+    Not
 };
 
 enum class ActionType : U32
@@ -30,6 +31,13 @@ enum class ActionType : U32
     Hold,
     Pressed,
     Released
+};
+
+enum class ActionInputLogicalOperator : U32
+{
+    And,
+    Or,
+    Not
 };
 
 class ActionSystem;
@@ -40,6 +48,7 @@ public:
     ActionInput(std::string_view name);
 
     virtual ActionInputType GetInputType() const = 0;
+    virtual bool IsLogicalOperator() const;
 
     std::string_view GetName() const;
     U32 GetID() const;
@@ -55,9 +64,10 @@ protected:
 private:
     friend class ActionSystem;
     void SetActive(bool active);
+    virtual U32 GetPriorityLevel() const;
 };
 
-class ActionSystem
+class ActionSystem : private NonCopyable
 {
 public:
     ActionSystem();
@@ -74,6 +84,8 @@ public:
     void AddInput(std::string_view name, ActionInputType type, Args&& ... args);
     U32 GetInputCount() const;
     const ActionInput* GetInputByIndex(U32 index) const;
+    const ActionInput* GetInputByName(std::string_view inputName) const;
+    const ActionInput* GetInputByID(U32 inputID) const;
     void ClearInputs();
 
     void AddEvent(const sf::Event& event);
@@ -84,8 +96,11 @@ public:
 private:
     std::vector<sf::Event> mEvents;
     std::vector<ActionInput*> mInputs;
+    bool mDirty;
 
     void AddInput_Internal(ActionInput* input);
+    void Update_Internal();
+    U32 GetMaxPriority(U32 inputAID, U32 inputBID) const;    
 
 private:
     class ActionInputVariable : public ActionInput
@@ -165,6 +180,31 @@ private:
         sf::Mouse::Button mButton;
         ActionType mActionType;
     };
+
+    class ActionInputLogical : public ActionInput
+    {
+    public:
+        ActionInputLogical(std::string_view name, ActionInputLogicalOperator logic, U32 inputAID, U32 inputBID = U32_Max);
+
+        ActionInputType GetInputType() const override;
+        bool IsLogicalOperator() const override;
+        bool IsCurrentlyActive(ActionSystem* system) const override;
+        U32 GetPriorityLevel() const override;
+
+        ActionInputLogicalOperator GetLogicalOperator() const;
+        U32 GetInputAID() const;
+        U32 GetInputBID() const;
+
+        void SetInputAID(U32 inputID);
+        void SetInputBID(U32 inputID);
+        void SetPriorityLevel(U32 priorityLevel);
+
+    private:
+        ActionInputLogicalOperator mLogicOperator;
+        U32 mInputAID;
+        U32 mInputBID;
+        U32 mPriorityLevel;
+    };
 };
 
 template <typename ... Args>
@@ -177,8 +217,9 @@ void ActionSystem::AddInput(std::string_view name, ActionInputType type, Args&& 
     case ActionInputType::Event: AddInput_Internal(new ActionInputEvent(name, std::forward<Args>(args)...)); break;
     case ActionInputType::Key: AddInput_Internal(new ActionInputKey(name, std::forward<Args>(args)...)); break;
     case ActionInputType::Mouse: AddInput_Internal(new ActionInputMouse(name, std::forward<Args>(args)...)); break;
-    case ActionInputType::And: assert(false); break;
-    case ActionInputType::Or: assert(false); break;
+    case ActionInputType::And: AddInput_Internal(new ActionInputLogical(name, ActionInputLogicalOperator::And, std::forward<Args>(args)...)); break;
+    case ActionInputType::Or: AddInput_Internal(new ActionInputLogical(name, ActionInputLogicalOperator::Or, std::forward<Args>(args)...)); break;
+    case ActionInputType::Not: AddInput_Internal(new ActionInputLogical(name, ActionInputLogicalOperator::Not, std::forward<Args>(args)...)); break;
     default: assert(false); break;
     }
 }
