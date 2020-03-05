@@ -15,8 +15,33 @@
 #include <Enlivengine/MetaData/TestClassA.hpp>
 #include <Enlivengine/MetaData/TestClassB.hpp>
 
+void Test(const en::MetaDataType& typeInfo)
+{
+	/*
+	std::cout << typeInfo.GetName() << " (" << typeInfo.GetID() << ") : " << std::endl;
+	std::cout << "   - size of " << typeInfo.GetSize() << ", with align(" << typeInfo.GetAlignement() << ") and padding(" << typeInfo.GetPadding() << ")" << std::endl;
+	std::cout << "   - signature : " << typeInfo.GetSignature() << std::endl;
+	if (typeInfo.HasProperties())
+	{
+		const en::U32 propertyCount = typeInfo.GetPropertyCount();
+		std::cout << "   - " << propertyCount << " properties :" << std::endl;
+		for (en::U32 i = 0; i < propertyCount; ++i)
+		{
+			const en::MetaDataProperty& propertyInfo = typeInfo.GetPropertyByIndex(i);
+			std::cout << "       - " << propertyInfo.GetName() << " (" << propertyInfo.GetID() << ") of type " << en::MetaDataTypes::GetTypeByIndex(propertyInfo.GetTypeIndex()).GetName() << " at offset " << propertyInfo.GetOffset() << std::endl;
+		}
+	}
+	else
+	{
+		std::cout << "   - no properties" << std::endl;
+	}
+	std::cout << std::endl;
+	*/
+}
+
 int main()
 {
+	/*
 	static_assert(en::MetaDataTypes::GetType("int").GetName() == "int");
 	static_assert(en::MetaDataTypes::GetType("int").GetSize() == 4);
 	static_assert(en::MetaDataTypes::GetType<int>().GetName() == "int");
@@ -24,29 +49,15 @@ int main()
 	static_assert(en::MetaDataTypes::GetType<float>().GetName() == "float");
 	static_assert(en::MetaDataTypes::GetType<float>().GetSize() == 4);
 	static_assert(en::MetaDataTypes::GetType<int>() != en::MetaDataTypes::GetType<float>());
-
 	for (en::U32 i = 0; i < en::MetaDataTypes::GetTypeCount(); ++i)
 	{
-		const en::MetaDataType& typeInfo = en::MetaDataTypes::GetTypeByIndex(i);
-		std::cout << typeInfo.GetName() << " (" << typeInfo.GetID() << ") : " << typeInfo.GetSize() << std::endl;
+		Test(en::MetaDataTypes::GetTypeByIndex(i));
 	}
+	*/
 
-	static_assert(en::TestClassA::ClassName == "en::TestClassA");
-	std::cout << en::TestClassA::ClassName << " : " << en::TestClassA::ClassID << std::endl;
-	for (en::U32 i = 0; i < en::TestClassA::GetPropertieCount(); ++i)
-	{
-		const en::MetaDataProperty& propertyInfo = en::TestClassA::GetPropertyByIndex(i);
-		std::cout << propertyInfo.GetName() << " : " << propertyInfo.GetType().GetName() << std::endl;
-	}
 
-	static_assert(en::TestClassB::ClassName == "en::TestClassB");
-	std::cout << en::TestClassB::ClassName << " : " << en::TestClassB::ClassID << std::endl;
-	for (en::U32 i = 0; i < en::TestClassB::GetPropertieCount(); ++i)
-	{
-		const en::MetaDataProperty& propertyInfo = en::TestClassB::GetPropertyByIndex(i);
-		std::cout << propertyInfo.GetName() << " : " << propertyInfo.GetType().GetName() << std::endl;
-	}
-
+	static_assert(en::TestClassA::GetStaticMetaData().GetSize() == 8);
+	std::cout << en::TestClassA::GetStaticMetaData().GetSize() << std::endl;
 
 	en::Application::GetInstance().Initialize();
 

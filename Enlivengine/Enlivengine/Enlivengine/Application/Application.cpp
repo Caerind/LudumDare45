@@ -403,6 +403,8 @@ void Application::Events()
 	sf::Event event;
 	while (mWindow.pollEvent(event))
 	{
+		mActionSystem.AddEvent(event);
+
 		// Might have used Signal of the Window, but clearer like this
 		if (event.type == sf::Event::GainedFocus)
 		{
@@ -438,6 +440,7 @@ void Application::PreUpdate()
 {
 	ENLIVE_PROFILE_FUNCTION();
 	AudioSystem::GetInstance().Update();
+	mActionSystem.Update();
 }
 
 void Application::Update(Time dt)
@@ -497,6 +500,11 @@ void Application::RegisterTools()
 ScreenshotSystem& Application::GetScreenshotSystem()
 {
 	return mScreenshotSystem;
+}
+
+ActionSystem& Application::GetActionSystem()
+{
+	return mActionSystem;
 }
 
 } // namespace en

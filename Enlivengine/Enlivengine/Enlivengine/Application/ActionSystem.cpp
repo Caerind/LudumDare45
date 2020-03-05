@@ -1,6 +1,8 @@
 #include <Enlivengine/Application/ActionSystem.hpp>
 
 #include <Enlivengine/System/Hash.hpp>
+#include <Enlivengine/System/Assert.hpp>
+#include <Enlivengine/System/Profiler.hpp>
 
 namespace en
 {
@@ -51,6 +53,8 @@ ActionSystem::ActionSystem()
 
 void ActionSystem::Update()
 {
+	ENLIVE_PROFILE_FUNCTION();
+
     if (mDirty)
     {
         Update_Internal();
@@ -223,12 +227,6 @@ void ActionSystem::Update_Internal()
     }
 }
 
-U32 ActionSystem::GetMaxPriority(U32 inputAID) const
-{
-    const ActionInput* inputA = GetInputByID(inputAID);
-    return (inputA != nullptr) ? inputA->GetPriorityLevel() : 0;
-}
-
 U32 ActionSystem::GetMaxPriority(U32 inputAID, U32 inputBID) const
 {
     const ActionInput* inputA = GetInputByID(inputAID);
@@ -238,7 +236,7 @@ U32 ActionSystem::GetMaxPriority(U32 inputAID, U32 inputBID) const
     return (priorityA >= priorityB) ? priorityA : priorityB;
 }
 
-ActionInputVariable::ActionInputVariable(std::string_view name, bool* variable) 
+ActionSystem::ActionInputVariable::ActionInputVariable(std::string_view name, bool* variable)
     : ActionInput(name)
     , mVariable(variable) 
 {
@@ -333,14 +331,14 @@ bool ActionSystem::ActionInputKey::IsCurrentlyActive(ActionSystem* system) const
             const sf::Event& event = system->GetEvent(i);
             if (mActionType == ActionType::Pressed)
             {
-                if (event.type == sf::EventType::KeyPressed && event.key.code == mKey)
+                if (event.type == sf::Event::EventType::KeyPressed && event.key.code == mKey)
                 {
                     return true;
                 }
             }
             else if (mActionType == ActionType::Released)
             {
-                if (event.type == sf::EventType::KeyReleased && event.key.code == mKey)
+                if (event.type == sf::Event::EventType::KeyReleased && event.key.code == mKey)
                 {
                     return true;
                 }
@@ -396,14 +394,14 @@ bool ActionSystem::ActionInputMouse::IsCurrentlyActive(ActionSystem* system) con
             const sf::Event& event = system->GetEvent(i);
             if (mActionType == ActionType::Pressed)
             {
-                if (event.type == sf::EventType::MouseButtonPressed && event.mouseButton.button == mButton)
+                if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == mButton)
                 {
                     return true;
                 }
             }
             else if (mActionType == ActionType::Released)
             {
-                if (event.type == sf::EventType::MouseButtonReleased && event.mouseButton.button == mButton)
+                if (event.type == sf::Event::EventType::MouseButtonReleased && event.mouseButton.button == mButton)
                 {
                     return true;
                 }

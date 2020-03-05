@@ -23,21 +23,27 @@ enum class ActionInputType : U32
     Mouse,
     And,
     Or,
-    Not
+    Not,
+
+	Count
 };
 
 enum class ActionType : U32
 {
     Hold,
     Pressed,
-    Released
+	Released,
+
+	Count
 };
 
 enum class ActionInputLogicalOperator : U32
 {
     And,
     Or,
-    Not
+	Not,
+
+	Count
 };
 
 class ActionSystem;

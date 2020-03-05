@@ -10,6 +10,7 @@
 #include <Enlivengine/Application/Window.hpp>
 #include <Enlivengine/Application/StateManager.hpp>
 #include <Enlivengine/Application/ResourceManager.hpp>
+#include <Enlivengine/Application/ActionSystem.hpp>
 
 namespace en
 {
@@ -23,6 +24,7 @@ public:
 
 	Window& GetWindow();
 	ScreenshotSystem& GetScreenshotSystem();
+	ActionSystem& GetActionSystem();
 
 	template <typename State, typename ... Args>
 	void Start(Args&& ... args);
@@ -56,6 +58,7 @@ private:
 	StateManager mStates;
 	Window mWindow;
 	ScreenshotSystem mScreenshotSystem;
+	ActionSystem mActionSystem;
 
 	EnSlot(en::Window, onWindowClosed, mWindowClosedSlot);
 

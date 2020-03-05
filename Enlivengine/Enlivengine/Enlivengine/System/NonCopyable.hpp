@@ -5,8 +5,8 @@ namespace en
 
 class NonCopyable
 {
-private:
-    NonCopyable() = delete;
+protected:
+    NonCopyable() = default;
     NonCopyable(const NonCopyable&) = delete;
 	NonCopyable& operator=(const NonCopyable&) = delete;
 };

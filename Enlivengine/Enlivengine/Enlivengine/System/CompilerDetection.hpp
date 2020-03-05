@@ -115,6 +115,6 @@
 	#define ENLIVE_COMPILER_VERSION 0
 	#define ENLIVE_COMPILER_NAME "Unknown"
 
-	#error Unknwo compiler
+	#error Unknown compiler
 
 #endif
