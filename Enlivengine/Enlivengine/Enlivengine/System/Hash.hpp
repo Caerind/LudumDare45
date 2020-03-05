@@ -30,7 +30,6 @@ public:
 		return { ~h }; // TODO : Endianness ?
 	}
 
-	// TODO : Ensures CRC32(char*) == CRC32(string_view)
 	static constexpr U32 CRC32(std::string_view key)
 	{
 		const std::size_t len = key.size();
