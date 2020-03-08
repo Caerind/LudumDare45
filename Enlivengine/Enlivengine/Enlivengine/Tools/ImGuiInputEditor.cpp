@@ -117,8 +117,8 @@ void ImGuiInputEditor::Display()
 				inputNames.push_back(actionSystem.GetInputByIndex(i)->GetName().c_str());
 			}
 
-			ImGui::Combo("InputA##NewActionInput", &newActionInputAIndex, inputNames.data(), inputNames.size());
-			ImGui::Combo("InputB##NewActionInput", &newActionInputBIndex, inputNames.data(), inputNames.size());
+			ImGui::Combo("InputA##NewActionInput", &newActionInputAIndex, inputNames.data(), static_cast<int>(inputNames.size()));
+			ImGui::Combo("InputB##NewActionInput", &newActionInputBIndex, inputNames.data(), static_cast<int>(inputNames.size()));
 		} break;
 		case ActionInputType::Not:
 		{
@@ -178,19 +178,26 @@ void ImGuiInputEditor::Display()
 				case ActionInputType::Variable: assert(false); break;
 				case ActionInputType::Function: assert(false); break;
 				case ActionInputType::Event: assert(false); break;
-				case ActionInputType::Key: actionSystem.AddInput(std::string(newActionInputName), actionInputType, newActionInputKey, newActionInputType); break;
-				case ActionInputType::Mouse: actionSystem.AddInput(std::string(newActionInputName), actionInputType, newActionInputButton, newActionInputType); break;
+				case ActionInputType::Key: actionSystem.AddInputKey(std::string(newActionInputName), static_cast<sf::Keyboard::Key>(newActionInputKey), static_cast<ActionType>(newActionInputActionType)); break;
+				case ActionInputType::Mouse: actionSystem.AddInputMouse(std::string(newActionInputName), static_cast<sf::Mouse::Button>(newActionInputButton), static_cast<ActionType>(newActionInputActionType)); break;
 				case ActionInputType::And:
 				case ActionInputType::Or:
 				{
 					const U32 inputAID = actionSystem.GetInputByIndex(newActionInputAIndex)->GetID();
 					const U32 inputBID = actionSystem.GetInputByIndex(newActionInputBIndex)->GetID();
-					actionSystem.AddInput(std::string(newActionInputName), actionInputType, inputAID, inputBID);
+					if (actionInputType == ActionInputType::And)
+					{
+						actionSystem.AddInputAnd(std::string(newActionInputName), inputAID, inputBID);
+					}
+					else
+					{
+						actionSystem.AddInputOr(std::string(newActionInputName), inputAID, inputBID);
+					}
 				} break;
 				case ActionInputType::Not:
 				{
 					const U32 inputAID = actionSystem.GetInputByIndex(newActionInputAIndex)->GetID();
-					actionSystem.AddInput(std::string(newActionInputName), actionInputType, inputAID);
+					actionSystem.AddInputNot(std::string(newActionInputName), inputAID);
 				} break;
 				default: assert(false); break;
 				}

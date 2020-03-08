@@ -7,9 +7,9 @@
 namespace en
 {
 
-ActionInput::ActionInput(std::string_view name)
+ActionInput::ActionInput(const std::string& name)
     : mName(name)
-    , mID(Hash::CRC32(name))
+    , mID(Hash::CRC32(name.c_str()))
     , mActive(false) 
 {
 }
@@ -19,7 +19,7 @@ bool ActionInput::IsLogicalOperator() const
     return false;
 }
 
-std::string_view ActionInput::GetName() const
+const std::string& ActionInput::GetName() const
 {
     return mName;
 }
@@ -42,6 +42,277 @@ void ActionInput::SetActive(bool active)
 U32 ActionInput::GetPriorityLevel() const
 {
     return 0;
+}
+
+ActionInputVariable::ActionInputVariable(const std::string& name, bool* variable)
+	: ActionInput(name)
+	, mVariable(variable)
+{
+}
+
+ActionInputType ActionInputVariable::GetInputType() const
+{
+	return ActionInputType::Variable;
+}
+
+bool ActionInputVariable::IsCurrentlyActive(ActionSystem* system) const
+{
+	ENLIVE_UNUSED(system);
+	if (mVariable != nullptr)
+	{
+		return *mVariable;
+	}
+	return false;
+}
+
+ActionInputFunction::ActionInputFunction(const std::string& name, FuncType function)
+	: ActionInput(name)
+	, mFunction(function)
+{
+}
+
+ActionInputType ActionInputFunction::GetInputType() const
+{
+	return ActionInputType::Function;
+}
+
+bool ActionInputFunction::IsCurrentlyActive(ActionSystem* system) const
+{
+	ENLIVE_UNUSED(system);
+	if (mFunction)
+	{
+		return mFunction();
+	}
+	return false;
+}
+
+ActionInputEvent::ActionInputEvent(const std::string& name, FuncType eventValidator)
+	: ActionInput(name)
+	, mEventValidator(eventValidator)
+{
+}
+
+ActionInputType ActionInputEvent::GetInputType() const
+{
+	return ActionInputType::Event;
+}
+
+bool ActionInputEvent::IsCurrentlyActive(ActionSystem* system) const
+{
+	if (system != nullptr && mEventValidator)
+	{
+		const U32 eventCount = system->GetEventCount();
+		for (U32 i = 0; i < eventCount; ++i)
+		{
+			if (mEventValidator(system->GetEvent(i)))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+ActionInputKey::ActionInputKey(const std::string& name, sf::Keyboard::Key key, ActionType actionType /*= ActionType::Pressed*/)
+	: ActionInput(name)
+	, mKey(key)
+	, mActionType(actionType)
+{
+}
+
+ActionInputType ActionInputKey::GetInputType() const
+{
+	return ActionInputType::Key;
+}
+
+bool ActionInputKey::IsCurrentlyActive(ActionSystem* system) const
+{
+	if (mActionType == ActionType::Hold)
+	{
+		return sf::Keyboard::isKeyPressed(mKey);
+	}
+	else if (system != nullptr)
+	{
+		const U32 eventCount = system->GetEventCount();
+		for (U32 i = 0; i < eventCount; ++i)
+		{
+			const sf::Event& event = system->GetEvent(i);
+			if (mActionType == ActionType::Pressed)
+			{
+				if (event.type == sf::Event::EventType::KeyPressed && event.key.code == mKey)
+				{
+					return true;
+				}
+			}
+			else if (mActionType == ActionType::Released)
+			{
+				if (event.type == sf::Event::EventType::KeyReleased && event.key.code == mKey)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+sf::Keyboard::Key ActionInputKey::GetKey() const
+{
+	return mKey;
+}
+
+ActionType ActionInputKey::GetType() const
+{
+	return mActionType;
+}
+
+void ActionInputKey::SetKey(sf::Keyboard::Key key)
+{
+	mKey = key;
+}
+
+void ActionInputKey::SetActionType(ActionType actionType)
+{
+	mActionType = actionType;
+}
+
+ActionInputMouse::ActionInputMouse(const std::string& name, sf::Mouse::Button button, ActionType actionType /*= ActionType::Pressed*/)
+	: ActionInput(name)
+	, mButton(button)
+	, mActionType(actionType)
+{
+}
+
+ActionInputType ActionInputMouse::GetInputType() const
+{
+	return ActionInputType::Mouse;
+}
+
+bool ActionInputMouse::IsCurrentlyActive(ActionSystem* system) const
+{
+	if (mActionType == ActionType::Hold)
+	{
+		return sf::Mouse::isButtonPressed(mButton);
+	}
+	else if (system != nullptr)
+	{
+		const U32 eventCount = system->GetEventCount();
+		for (U32 i = 0; i < eventCount; ++i)
+		{
+			const sf::Event& event = system->GetEvent(i);
+			if (mActionType == ActionType::Pressed)
+			{
+				if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == mButton)
+				{
+					return true;
+				}
+			}
+			else if (mActionType == ActionType::Released)
+			{
+				if (event.type == sf::Event::EventType::MouseButtonReleased && event.mouseButton.button == mButton)
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+sf::Mouse::Button ActionInputMouse::GetButton() const
+{
+	return mButton;
+}
+
+ActionType ActionInputMouse::GetType() const
+{
+	return mActionType;
+}
+
+void ActionInputMouse::SetButton(sf::Mouse::Button button)
+{
+	mButton = button;
+}
+
+void ActionInputMouse::SetActionType(ActionType actionType)
+{
+	mActionType = actionType;
+}
+
+ActionInputLogical::ActionInputLogical(const std::string& name, ActionInputLogicalOperator logic, U32 inputAID, U32 inputBID /*= U32_Max*/)
+	: ActionInput(name)
+	, mLogicOperator(logic)
+	, mInputAID(inputAID)
+	, mInputBID(inputBID)
+	, mPriorityLevel(0)
+{
+}
+
+ActionInputType ActionInputLogical::GetInputType() const
+{
+	switch (GetLogicalOperator())
+	{
+	case ActionInputLogicalOperator::And: return ActionInputType::And;
+	case ActionInputLogicalOperator::Or: return ActionInputType::Or;
+	case ActionInputLogicalOperator::Not: return ActionInputType::Not;
+	default: assert(false);
+	}
+	return ActionInputType::Not;
+}
+
+bool ActionInputLogical::IsLogicalOperator() const
+{
+	return true;
+}
+
+bool ActionInputLogical::IsCurrentlyActive(ActionSystem* system) const
+{
+	if (system != nullptr)
+	{
+		switch (mLogicOperator)
+		{
+		case ActionInputLogicalOperator::And: return system->GetInputByIndex(mInputAID)->IsActive() && system->GetInputByIndex(mInputBID)->IsActive();
+		case ActionInputLogicalOperator::Or: return system->GetInputByIndex(mInputAID)->IsActive() || system->GetInputByIndex(mInputBID)->IsActive();
+		case ActionInputLogicalOperator::Not: return !system->GetInputByIndex(mInputAID)->IsActive();
+		default: assert(false);
+		}
+	}
+	return false;
+}
+
+U32 ActionInputLogical::GetPriorityLevel() const
+{
+	return mPriorityLevel;
+}
+
+ActionInputLogicalOperator ActionInputLogical::GetLogicalOperator() const
+{
+	return mLogicOperator;
+}
+
+U32 ActionInputLogical::GetInputAID() const
+{
+	return mInputAID;
+}
+
+U32 ActionInputLogical::GetInputBID() const
+{
+	return mInputBID;
+}
+
+void ActionInputLogical::SetInputAID(U32 inputID)
+{
+	mInputAID = inputID;
+}
+
+void ActionInputLogical::SetInputBID(U32 inputID)
+{
+	mInputBID = inputID;
+}
+
+void ActionInputLogical::SetPriorityLevel(U32 priorityLevel)
+{
+	mPriorityLevel = priorityLevel;
 }
 
 ActionSystem::ActionSystem()
@@ -73,10 +344,10 @@ void ActionSystem::Update()
     ClearEvents();
 }
 
-bool ActionSystem::IsInputActive(std::string_view inputName) const
+bool ActionSystem::IsInputActive(const std::string& inputName) const
 {
     assert(IsInputExisting(inputName));
-    return IsInputActive(Hash::CRC32(inputName));
+    return IsInputActive(Hash::CRC32(inputName.c_str()));
 }
 
 bool ActionSystem::IsInputActive(U32 inputID) const
@@ -96,9 +367,9 @@ bool ActionSystem::IsInputActive(U32 inputID) const
     return false;
 }
 
-bool ActionSystem::IsInputExisting(std::string_view inputName) const
+bool ActionSystem::IsInputExisting(const std::string& inputName) const
 {
-    return IsInputExisting(Hash::CRC32(inputName));
+    return IsInputExisting(Hash::CRC32(inputName.c_str()));
 }
 
 bool ActionSystem::IsInputExisting(U32 inputID) const
@@ -114,6 +385,46 @@ bool ActionSystem::IsInputExisting(U32 inputID) const
     return false;
 }
 
+void ActionSystem::AddInputVariable(const std::string& name, bool* variable)
+{
+	AddInput_Internal(new ActionInputVariable(name, variable));
+}
+
+void ActionSystem::AddInputFunction(const std::string& name, ActionInputFunction::FuncType function)
+{
+	AddInput_Internal(new ActionInputFunction(name, function));
+}
+
+void ActionSystem::AddInputEvent(const std::string& name, ActionInputEvent::FuncType eventValidator)
+{
+	AddInput_Internal(new ActionInputEvent(name, eventValidator));
+}
+
+void ActionSystem::AddInputKey(const std::string& name, sf::Keyboard::Key key, ActionType actionType /*= ActionType::Pressed*/)
+{
+	AddInput_Internal(new ActionInputKey(name, key, actionType));
+}
+
+void ActionSystem::AddInputMouse(const std::string& name, sf::Mouse::Button button, ActionType actionType /*= ActionType::Pressed*/)
+{
+	AddInput_Internal(new ActionInputMouse(name, button, actionType));
+}
+
+void ActionSystem::AddInputAnd(const std::string& name, U32 inputAID, U32 inputBID)
+{
+	AddInput_Internal(new ActionInputLogical(name, ActionInputLogicalOperator::And, inputAID, inputBID));
+}
+
+void ActionSystem::AddInputOr(const std::string& name, U32 inputAID, U32 inputBID)
+{
+	AddInput_Internal(new ActionInputLogical(name, ActionInputLogicalOperator::Or, inputAID, inputBID));
+}
+
+void ActionSystem::AddInputNot(const std::string& name, U32 inputAID)
+{
+	AddInput_Internal(new ActionInputLogical(name, ActionInputLogicalOperator::Not, inputAID));
+}
+
 U32 ActionSystem::GetInputCount() const
 {
     return static_cast<U32>(mInputs.size());
@@ -125,9 +436,9 @@ const ActionInput* ActionSystem::GetInputByIndex(U32 index) const
     return mInputs[index];
 }
 
-const ActionInput* ActionSystem::GetInputByName(std::string_view inputName) const
+const ActionInput* ActionSystem::GetInputByName(const std::string& inputName) const
 {
-    return GetInputByID(Hash::CRC32(inputName));
+    return GetInputByID(Hash::CRC32(inputName.c_str()));
 }
 
 const ActionInput* ActionSystem::GetInputByID(U32 inputID) const
@@ -234,277 +545,6 @@ U32 ActionSystem::GetMaxPriority(U32 inputAID, U32 inputBID) const
     const ActionInput* inputB = GetInputByID(inputBID);
     const U32 priorityB = (inputB != nullptr) ? inputB->GetPriorityLevel() : 0;
     return (priorityA >= priorityB) ? priorityA : priorityB;
-}
-
-ActionSystem::ActionInputVariable::ActionInputVariable(std::string_view name, bool* variable)
-    : ActionInput(name)
-    , mVariable(variable) 
-{
-}
-
-ActionInputType ActionSystem::ActionInputVariable::GetInputType() const
-{
-    return ActionInputType::Variable;
-}
-
-bool ActionSystem::ActionInputVariable::IsCurrentlyActive(ActionSystem* system) const
-{
-    ENLIVE_UNUSED(system);
-    if (mVariable != nullptr)
-    {
-        return *mVariable;
-    }
-    return false;
-}
-
-ActionSystem::ActionInputFunction::ActionInputFunction(std::string_view name, FuncType function)
-    : ActionInput(name)
-    , mFunction(function)
-{
-}
-
-ActionInputType ActionSystem::ActionInputFunction::GetInputType() const
-{
-    return ActionInputType::Function;
-}
-
-bool ActionSystem::ActionInputFunction::IsCurrentlyActive(ActionSystem* system) const
-{
-    ENLIVE_UNUSED(system);
-    if (mFunction)
-    {
-        return mFunction();
-    }
-    return false;
-}
-
-ActionSystem::ActionInputEvent::ActionInputEvent(std::string_view name, FuncType eventValidator)
-    : ActionInput(name)
-    , mEventValidator(eventValidator)
-{
-}
-
-ActionInputType ActionSystem::ActionInputEvent::GetInputType() const
-{
-    return ActionInputType::Event;
-}
-
-bool ActionSystem::ActionInputEvent::IsCurrentlyActive(ActionSystem* system) const
-{
-    if (system != nullptr && mEventValidator)
-    {
-        const U32 eventCount = system->GetEventCount();
-        for (U32 i = 0; i < eventCount; ++i)
-        {
-            if (mEventValidator(system->GetEvent(i)))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-ActionSystem::ActionInputKey::ActionInputKey(std::string_view name, sf::Keyboard::Key key, ActionType actionType /*= ActionType::Pressed*/)
-    : ActionInput(name)
-    , mKey(key)
-    , mActionType(actionType)
-{
-}
-
-ActionInputType ActionSystem::ActionInputKey::GetInputType() const
-{
-    return ActionInputType::Key;
-}
-
-bool ActionSystem::ActionInputKey::IsCurrentlyActive(ActionSystem* system) const
-{
-    if (mActionType == ActionType::Hold)
-    {
-        return sf::Keyboard::isKeyPressed(mKey);
-    }
-    else if (system != nullptr)
-    {
-        const U32 eventCount = system->GetEventCount();
-        for (U32 i = 0; i < eventCount; ++i)
-        {
-            const sf::Event& event = system->GetEvent(i);
-            if (mActionType == ActionType::Pressed)
-            {
-                if (event.type == sf::Event::EventType::KeyPressed && event.key.code == mKey)
-                {
-                    return true;
-                }
-            }
-            else if (mActionType == ActionType::Released)
-            {
-                if (event.type == sf::Event::EventType::KeyReleased && event.key.code == mKey)
-                {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-sf::Keyboard::Key ActionSystem::ActionInputKey::GetKey() const
-{
-    return mKey;
-}
-
-ActionType ActionSystem::ActionInputKey::GetType() const
-{
-    return mActionType;
-}
-
-void ActionSystem::ActionInputKey::SetKey(sf::Keyboard::Key key)
-{
-    mKey = key;
-}
-
-void ActionSystem::ActionInputKey::SetActionType(ActionType actionType)
-{
-    mActionType = actionType;
-}
-
-ActionSystem::ActionInputMouse::ActionInputMouse(std::string_view name, sf::Mouse::Button button, ActionType actionType /*= ActionType::Pressed*/)
-    : ActionInput(name)
-    , mButton(button)
-    , mActionType(actionType)
-{
-}
-
-ActionInputType ActionSystem::ActionInputMouse::GetInputType() const
-{
-    return ActionInputType::Mouse;
-}
-
-bool ActionSystem::ActionInputMouse::IsCurrentlyActive(ActionSystem* system) const
-{
-    if (mActionType == ActionType::Hold)
-    {
-        return sf::Mouse::isButtonPressed(mButton);
-    }
-    else if (system != nullptr)
-    {
-        const U32 eventCount = system->GetEventCount();
-        for (U32 i = 0; i < eventCount; ++i)
-        {
-            const sf::Event& event = system->GetEvent(i);
-            if (mActionType == ActionType::Pressed)
-            {
-                if (event.type == sf::Event::EventType::MouseButtonPressed && event.mouseButton.button == mButton)
-                {
-                    return true;
-                }
-            }
-            else if (mActionType == ActionType::Released)
-            {
-                if (event.type == sf::Event::EventType::MouseButtonReleased && event.mouseButton.button == mButton)
-                {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-sf::Mouse::Button ActionSystem::ActionInputMouse::GetButton() const
-{
-    return mButton;
-}
-
-ActionType ActionSystem::ActionInputMouse::GetType() const
-{
-    return mActionType;
-}
-
-void ActionSystem::ActionInputMouse::SetButton(sf::Mouse::Button button)
-{
-    mButton = button;
-}
-
-void ActionSystem::ActionInputMouse::SetActionType(ActionType actionType)
-{
-    mActionType = actionType;
-}
-
-ActionSystem::ActionInputLogical::ActionInputLogical(std::string_view name, ActionInputLogicalOperator logic, U32 inputAID, U32 inputBID /*= U32_Max*/)
-    : ActionInput(name)
-    , mLogicOperator(logic)
-    , mInputAID(inputAID)
-    , mInputBID(inputBID)
-    , mPriorityLevel(0)
-{
-}
-
-ActionInputType ActionSystem::ActionInputLogical::GetInputType() const
-{
-    switch (GetLogicalOperator())
-    {
-    case ActionInputLogicalOperator::And: return ActionInputType::And;
-    case ActionInputLogicalOperator::Or: return ActionInputType::Or;
-    case ActionInputLogicalOperator::Not: return ActionInputType::Not;
-    default: assert(false);
-    }
-    return ActionInputType::Not;
-}
-
-bool ActionSystem::ActionInputLogical::IsLogicalOperator() const
-{
-    return true;
-}
-
-bool ActionSystem::ActionInputLogical::IsCurrentlyActive(ActionSystem* system) const
-{
-    if (system != nullptr)
-    {
-        switch (mLogicOperator)
-        {
-        case ActionInputLogicalOperator::And: return system->GetInputByIndex(mInputAID)->IsActive() && system->GetInputByIndex(mInputBID)->IsActive();
-        case ActionInputLogicalOperator::Or: return system->GetInputByIndex(mInputAID)->IsActive() || system->GetInputByIndex(mInputBID)->IsActive();
-        case ActionInputLogicalOperator::Not: return !system->GetInputByIndex(mInputAID)->IsActive();
-        default: assert(false);
-        }
-    }
-    return false;
-}
-
-U32 ActionSystem::ActionInputLogical::GetPriorityLevel() const
-{
-    return mPriorityLevel;
-}
-
-ActionInputLogicalOperator ActionSystem::ActionInputLogical::GetLogicalOperator() const
-{
-    return mLogicOperator;
-}
-
-U32 ActionSystem::ActionInputLogical::GetInputAID() const
-{
-    return mInputAID;
-}
-
-U32 ActionSystem::ActionInputLogical::GetInputBID() const
-{
-    return mInputBID;
-}
-
-void ActionSystem::ActionInputLogical::SetInputAID(U32 inputID)
-{
-    mInputAID = inputID;
-}
-
-void ActionSystem::ActionInputLogical::SetInputBID(U32 inputID)
-{
-    mInputBID = inputID;
-}
-
-void ActionSystem::ActionInputLogical::SetPriorityLevel(U32 priorityLevel)
-{
-    mPriorityLevel = priorityLevel;
 }
 
 } // namespace en

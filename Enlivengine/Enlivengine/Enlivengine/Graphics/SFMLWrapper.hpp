@@ -5,6 +5,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/System/Vector3.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/Window/Keyboard.hpp>
 
 #include <Enlivengine/Math/Vector2.hpp>
 #include <Enlivengine/Math/Vector3.hpp>
@@ -104,5 +105,8 @@ inline sf::Time toSF(const Time& time)
 {
 	return sf::microseconds(time.asMicroseconds());
 }
+
+const char* sfKeyToString(sf::Keyboard::Key key);
+sf::Keyboard::Key stringToSfKey(const char* keyString);
 
 } // namespace en

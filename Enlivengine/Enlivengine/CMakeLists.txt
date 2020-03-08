@@ -98,6 +98,7 @@ set(SRC_GRAPHICS
 	Enlivengine/Graphics/ScreenshotSystem.hpp
 	Enlivengine/Graphics/SFMLResources.cpp
 	Enlivengine/Graphics/SFMLResources.hpp
+	Enlivengine/Graphics/SFMLWrapper.cpp
 	Enlivengine/Graphics/SFMLWrapper.hpp
 	Enlivengine/Graphics/View.cpp
 	Enlivengine/Graphics/View.hpp
