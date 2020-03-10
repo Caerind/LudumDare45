@@ -74,10 +74,10 @@ set(SRC_MATH
 source_group("Math" FILES ${SRC_MATH})
 
 set(SRC_METADATA
-	Enlivengine/MetaData/MetaData.cpp
 	Enlivengine/MetaData/MetaData.hpp
 	Enlivengine/MetaData/TestClassA.hpp
 	Enlivengine/MetaData/TestClassB.hpp
+	Enlivengine/MetaData/TestClassC.hpp
 )
 source_group("MetaData" FILES ${SRC_METADATA})
 
