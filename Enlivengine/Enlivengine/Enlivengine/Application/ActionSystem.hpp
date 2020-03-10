@@ -167,12 +167,21 @@ public:
 
 	void SetInputAID(U32 inputID);
 	void SetInputBID(U32 inputID);
+
+private:
+	friend class ActionSystem;
+	U32 GetInputAIndex() const;
+	U32 GetInputBIndex() const;
+	void SetInputAIndex(U32 inputAIndex);
+	void SetInputBIndex(U32 inputBIndex);
 	void SetPriorityLevel(U32 priorityLevel);
 
 private:
 	ActionInputLogicalOperator mLogicOperator;
 	U32 mInputAID;
 	U32 mInputBID;
+	U32 mInputAIndex;
+	U32 mInputBIndex;
 	U32 mPriorityLevel;
 };
 
@@ -202,6 +211,9 @@ public:
     const ActionInput* GetInputByIndex(U32 index) const;
     const ActionInput* GetInputByName(const std::string& inputName) const;
     const ActionInput* GetInputByID(U32 inputID) const;
+	void RemoveInputByIndex(U32 index);
+	U32 GetInputIndexFromName(const std::string& inputName) const;
+	U32 GetInputIndexFromID(U32 inputID) const;
     void ClearInputs();
 
     void AddEvent(const sf::Event& event);
@@ -210,13 +222,18 @@ public:
     void ClearEvents();
 
 private:
+	friend class ImGuiInputEditor;
+	ActionInput* GetInputByIndexNonConst(U32 index);
+	void FlagPriorityAsDirty();
+
+private:
     std::vector<sf::Event> mEvents;
     std::vector<ActionInput*> mInputs;
     bool mDirty;
 
     void AddInput_Internal(ActionInput* input);
     void Update_Internal();
-    U32 GetMaxPriority(U32 inputAID, U32 inputBID) const;
+    U32 GetMaxPriority_Internal(U32 inputAID, U32 inputBID) const;
 };
 
 } // namespace en

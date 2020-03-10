@@ -71,6 +71,20 @@ void ImGuiInputEditor::Display()
 	};
 	assert(IM_ARRAYSIZE(mouseButtonNames) == static_cast<int>(sf::Mouse::Button::ButtonCount));
 
+	static bool keysSet = false;
+	static std::vector<const char*> keyNames;
+	if (!keysSet)
+	{
+		const U32 keyCount = static_cast<U32>(sf::Keyboard::Key::KeyCount);
+		keyNames.reserve(keyCount);
+		for (U32 i = 0; i < keyCount; ++i)
+		{
+			keyNames.push_back(sfKeyToString(static_cast<sf::Keyboard::Key>(i)));
+		}
+		keysSet = true;
+	}
+	assert(keyNames.size() == static_cast<std::size_t>(sf::Keyboard::Key::KeyCount));
+
 	ActionSystem& actionSystem = Application::GetInstance().GetActionSystem();
 
 	// New action input
@@ -95,12 +109,12 @@ void ImGuiInputEditor::Display()
 		case ActionInputType::Key: 
 		{
 			ImGui::Combo("ActionType##NewActionInput", &newActionInputActionType, actionTypeNames, IM_ARRAYSIZE(actionTypeNames));
-
+			ImGui::Combo("Key##NewActionInput", &newActionInputKey, keyNames.data(), static_cast<int>(keyNames.size()));
 		} break;
 		case ActionInputType::Mouse: 
 		{
 			ImGui::Combo("ActionType##NewActionInput", &newActionInputActionType, actionTypeNames, IM_ARRAYSIZE(actionTypeNames));
-			ImGui::Combo("MouseButton##NewActionInput", &newActionInputButton, mouseButtonNames, IM_ARRAYSIZE(mouseButtonNames));
+			ImGui::Combo("Button##NewActionInput", &newActionInputButton, mouseButtonNames, IM_ARRAYSIZE(mouseButtonNames));
 		} break;
 		case ActionInputType::And:
 		case ActionInputType::Or: 
@@ -149,10 +163,6 @@ void ImGuiInputEditor::Display()
 		if (actionInputType == ActionInputType::Variable || actionInputType == ActionInputType::Function || actionInputType == ActionInputType::Event)
 		{
 			validNewInput = false;
-		}
-		if (actionInputType == ActionInputType::Key)
-		{
-			validNewInput = false; // TODO : Remove when cool way to set the key
 		}
 		if (actionInputType == ActionInputType::And || actionInputType == ActionInputType::Or)
 		{
@@ -218,10 +228,138 @@ void ImGuiInputEditor::Display()
 
 	ImGui::Separator();
 
+
 	// Input list
 	{
-		ImGui::Text("Coming soon");
+		ImGui::Text("Input list:");
+	
+		ImGui::Indent();
+		ImGui::Separator();
+		U32 inputCount = actionSystem.GetInputCount();
+		for (U32 i = 0; i < inputCount; i++)
+		{
+			ActionInput* actionInput = actionSystem.GetInputByIndexNonConst(i);
+			if (actionInput == nullptr)
+				continue;
+
+			ImGui::PushID(static_cast<int>(i));
+
+			ImGui::Text(actionInput->GetName().c_str());
+			if (ImGui::IsItemHovered())
+			{
+				ImGui::SetTooltip("ID:%d", actionInput->GetID());
+			}
+			ImGui::SameLine(); 
+			ImGui::Text(" : %s", actionInputTypeNames[static_cast<U32>(actionInput->GetInputType())]);
+			if (actionInput->IsActive())
+			{
+				ImGui::SameLine();
+				ImGui::Text(ICON_FA_COG);
+			}
+
+			switch (actionInput->GetInputType())
+			{
+			case ActionInputType::Variable: ImGui::Text("Not configurable yet"); /* TODO_Someday */ break;
+			case ActionInputType::Function: ImGui::Text("Not configurable yet"); /* TODO_Someday */ break;
+			case ActionInputType::Event: ImGui::Text("Not configurable yet"); /* TODO_Someday */ break;
+			case ActionInputType::Key: 
+			{
+				if (ActionInputKey* actionInputKey = static_cast<ActionInputKey*>(actionInput))
+				{
+					int actionType = static_cast<int>(actionInputKey->GetType());
+					if (ImGui::Combo("ActionType##ActionInput", &actionType, actionTypeNames, IM_ARRAYSIZE(actionTypeNames)))
+					{
+						actionInputKey->SetActionType(static_cast<ActionType>(actionType));
+					}
+
+					int actionKey = static_cast<int>(actionInputKey->GetKey());
+					if (ImGui::Combo("Key##ActionInput", &actionKey, keyNames.data(), static_cast<int>(keyNames.size())))
+					{
+						actionInputKey->SetKey(static_cast<sf::Keyboard::Key>(actionKey));
+					}
+				}
+				else
+				{
+					assert(false);
+				}
+			} break;
+			case ActionInputType::Mouse:
+			{
+				if (ActionInputMouse* actionInputMouse = static_cast<ActionInputMouse*>(actionInput))
+				{
+					int actionType = static_cast<int>(actionInputMouse->GetType());
+					if (ImGui::Combo("ActionType##ActionInput", &actionType, actionTypeNames, IM_ARRAYSIZE(actionTypeNames)))
+					{
+						actionInputMouse->SetActionType(static_cast<ActionType>(actionType));
+					}
+
+					int actionButton = static_cast<int>(actionInputMouse->GetButton());
+					if (ImGui::Combo("Button##ActionInput", &actionButton, mouseButtonNames, IM_ARRAYSIZE(mouseButtonNames)))
+					{
+						actionInputMouse->SetButton(static_cast<sf::Mouse::Button>(actionButton));
+					}
+				}
+				else
+				{
+					assert(false);
+				}
+			} break;
+			case ActionInputType::And:
+			case ActionInputType::Or:
+			case ActionInputType::Not:
+			{
+				if (ActionInputLogical* actionInputLogical = static_cast<ActionInputLogical*>(actionInput))
+				{
+					std::vector<const char*> inputNames;
+					inputNames.reserve(inputCount);
+					for (U32 j = 0; j < inputCount; ++j)
+					{
+						inputNames.push_back(actionSystem.GetInputByIndex(j)->GetName().c_str());
+					}
+
+					int inputAIndex = static_cast<int>(actionSystem.GetInputIndexFromID(actionInputLogical->GetInputAID()));
+					if (ImGui::Combo("InputA##ActionInput", &inputAIndex, inputNames.data(), static_cast<int>(inputNames.size())))
+					{
+						if (inputAIndex != static_cast<int>(i))
+						{
+							actionInputLogical->SetInputAID(actionSystem.GetInputByIndex(static_cast<U32>(inputAIndex))->GetID());
+							actionSystem.FlagPriorityAsDirty();
+						}
+					}
+
+					if (actionInput->GetInputType() != ActionInputType::Not)
+					{
+						int inputBIndex = static_cast<int>(actionSystem.GetInputIndexFromID(actionInputLogical->GetInputBID()));
+						if (ImGui::Combo("InputB##ActionInput", &inputBIndex, inputNames.data(), static_cast<int>(inputNames.size())))
+						{
+							if (inputBIndex != static_cast<int>(i))
+							{
+								actionInputLogical->SetInputBID(actionSystem.GetInputByIndex(static_cast<U32>(inputBIndex))->GetID());
+								actionSystem.FlagPriorityAsDirty();
+							}
+						}
+					}
+				}
+				else
+				{
+					assert(false);
+				}
+			} break;
+			}
+
+			if (ImGui::Button("Remove"))
+			{
+				actionSystem.RemoveInputByIndex(i);
+				i--;
+				inputCount--;
+			}
+
+			ImGui::PopID();
+			ImGui::Separator();
+		}
+		ImGui::Unindent();
 	}
+
 }
 
 } // namespace en
