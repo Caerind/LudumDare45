@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Enlivengine/MetaData/MetaData.hpp>
+#include <Enlivengine/MetaData/MetaDataBase.hpp>
 #include <Enlivengine/MetaData/TestClassA.hpp>
 
 namespace en
@@ -9,25 +9,37 @@ namespace en
 class TestClassB
 {
 public:
+	friend class MetaData_TestClassB;
+	static constexpr const en::MetaDataType& GetStaticMetaData();
+	virtual const en::MetaDataType& GetMetaData() { return GetStaticMetaData(); }
+
+	const TestClassA& GetA() const { return a; }
+	F32 GetB() const { return b; }
+	U32 GetC() const { return c; }
+
+private:
     TestClassA a;
     F32 b;
     U32 c;
-
-    static constexpr const en::MetaDataType& GetStaticMetaData();
-    constexpr const en::MetaDataType& GetMetaData() { return GetStaticMetaData(); }
 };
 
-static constexpr en::MetaDataProperty TestClassB_MetaDataProperties[] =
+class MetaData_TestClassB
 {
-    MetaDataProperty(Hash::CRC32("TestClassB::a"), TestClassA_MetaData, "a", ENLIVE_OFFSET_OF(TestClassB, a)),
-    MetaDataProperty(Hash::CRC32("TestClassB::b"), F32_MetaData, "b", ENLIVE_OFFSET_OF(TestClassB, b)),
-    MetaDataProperty(Hash::CRC32("TestClassB::c"), U32_MetaData, "c", ENLIVE_OFFSET_OF(TestClassB, c))
+public:
+	constexpr MetaData_TestClassB() = delete;
+	static constexpr const en::MetaDataType& GetMetaData() { return s_MetaData; }
+private:
+	static constexpr en::MetaDataProperty s_MetaDataProperties[] =
+	{
+		en::MetaDataProperty(en::Hash::CRC32("TestClassB::a"), en::MetaData_TestClassA::GetMetaData(), "a", ENLIVE_OFFSET_OF(en::TestClassB, a), en::MetaData_TestClassA::GetMetaData().GetTraits()),
+		en::MetaDataProperty(en::Hash::CRC32("TestClassB::b"), en::PrimitivesMetaData::GetType<en::F32>(), "b", ENLIVE_OFFSET_OF(en::TestClassB, b), en::PrimitivesMetaData::GetType<en::F32>().GetTraits()),
+		en::MetaDataProperty(en::Hash::CRC32("TestClassB::c"), en::PrimitivesMetaData::GetType<en::U32>(), "c", ENLIVE_OFFSET_OF(en::TestClassB, c), en::PrimitivesMetaData::GetType<en::U32>().GetTraits())
+	};
+	static constexpr en::MetaDataType s_MetaData = en::MetaDataType(en::Hash::CRC32("TestClassB"), "TestClassB", ENLIVE_SIZE_OF(en::TestClassB), ENLIVE_ALIGN_OF(en::TestClassB), TypeTraits_Class, nullptr, s_MetaDataProperties, ENLIVE_ARRAY_SIZE(s_MetaDataProperties));
 };
-static constexpr en::MetaDataType TestClassB_MetaData = en::MetaDataType(en::Hash::CRC32("TestClassB"), "TestClassB", ENLIVE_SIZE_OF(TestClassB), ENLIVE_ALIGN_OF(TestClassB), nullptr, TestClassB_MetaDataProperties, ENLIVE_ARRAY_SIZE(TestClassB_MetaDataProperties));
-
 constexpr const en::MetaDataType& TestClassB::GetStaticMetaData()
 {
-    return TestClassB_MetaData;
+	return MetaData_TestClassB::GetMetaData();
 }
 
 } // namespace en

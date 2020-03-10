@@ -75,6 +75,7 @@ source_group("Math" FILES ${SRC_MATH})
 
 set(SRC_METADATA
 	Enlivengine/MetaData/MetaData.hpp
+	Enlivengine/MetaData/MetaDataBase.hpp
 	Enlivengine/MetaData/TestClassA.hpp
 	Enlivengine/MetaData/TestClassB.hpp
 	Enlivengine/MetaData/TestClassC.hpp

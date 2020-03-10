@@ -11,10 +11,10 @@
 
 // Test MetaData
 #include <iostream>
-#include <Enlivengine/MetaData/MetaData.hpp>
 #include <Enlivengine/MetaData/TestClassA.hpp>
 #include <Enlivengine/MetaData/TestClassB.hpp>
 #include <Enlivengine/MetaData/TestClassC.hpp>
+#include <Enlivengine/MetaData/MetaData.hpp>
 
 void Test(const en::MetaDataType& typeInfo)
 {
@@ -44,12 +44,11 @@ void Test(const en::MetaDataType& typeInfo)
 
 int main()
 {
-    Test(en::TestClassA::GetStaticMetaData());
-    //Test(en::TestClassA_MetaData);
-    Test(en::TestClassB::GetStaticMetaData());
-    //Test(en::TestClassB_MetaData);
-    Test(en::TestClassC::GetStaticMetaData());
-    //Test(en::TestClassC_MetaData);
+	constexpr en::U32 typeCount = en::MetaData::GetTypeCount();
+	for (en::U32 i = 0; i < typeCount; ++i)
+	{
+		Test(en::MetaData::GetTypeFromIndex(i));
+	}
 
 
 	en::Application::GetInstance().Initialize();
