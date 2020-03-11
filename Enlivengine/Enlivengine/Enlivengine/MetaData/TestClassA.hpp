@@ -10,11 +10,14 @@ class TestClassA
 public:
 	friend class MetaData_TestClassA;
 	static constexpr const en::MetaDataType& GetStaticMetaData();
-	virtual const en::MetaDataType& GetMetaData() { return GetStaticMetaData(); }
 
 	U32 GetA() const { return a; }
 	I32 GetB() const { return b; }
 	F32 GetC() const { return c; }
+
+	void SetA(U32 v) { a = v; }
+	void SetB(I32 v) { b = v; }
+	void SetC(F32 v) { c = v; }
 
 private:
 	U32 a;

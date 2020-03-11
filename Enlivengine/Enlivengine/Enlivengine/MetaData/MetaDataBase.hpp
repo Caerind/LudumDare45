@@ -116,14 +116,15 @@ class MetaDataType
 {
 public:
 	constexpr MetaDataType() = delete;
-	constexpr MetaDataType(U32 id, const char* name, U32 size, U32 alignment, U32 traits, const MetaDataType* parent = nullptr, const MetaDataProperty* properties = nullptr, U32 propertyCount = 0, U32 attributes = 0) : mID(id), mName(name), mSize(size), mAlignment(alignment), mTraits(traits), mParent(parent), mProperties(properties), mPropertyCount(propertyCount), mAttributes(attributes) {}
+	constexpr MetaDataType(U32 id, const char* name, U32 size, U32 alignment, U32 traits, const MetaDataType* parent = nullptr, const MetaDataProperty* properties = nullptr, U32 propertyCount = 0, U32 attributes = 0) : mID(id), mName(name), mSize(size), mAlignment(alignment), mTraits(traits), mAttributes(attributes), mSignature(id), mParent(parent), mProperties(properties), mPropertyCount(propertyCount) { mSignature = GenerateSignature(); }
 
 	constexpr U32 GetID() const { return mID; }
 	constexpr const char* GetName() const { return mName; }
 	constexpr U32 GetSize() const { return mSize; }
-    constexpr U32 GetAlignment() const { return mAlignment; }
-	constexpr U32 GetAttributes() const { return mAttributes; }
+	constexpr U32 GetAlignment() const { return mAlignment; }
 	constexpr U32 GetTraits() const { return mTraits; }
+	constexpr U32 GetAttributes() const { return mAttributes; }
+	constexpr U32 GetSignature() const { return mSignature; }
 
     constexpr const MetaDataType* GetParent() const { return mParent; }
 
@@ -139,10 +140,35 @@ private:
 	U32 mSize;
 	U32 mAlignment;
 	U32 mTraits;
+	U32 mAttributes;
+	U32 mSignature;
     const MetaDataType* mParent;
 	const MetaDataProperty* mProperties;
 	U32 mPropertyCount;
-	U32 mAttributes;
+
+private:
+	constexpr U32 GenerateSignature() const
+	{
+		U32 signature = mSize;
+		signature = Hash::CombineHash(signature, mAlignment);
+		signature = Hash::CombineHash(signature, mTraits);
+		signature = Hash::CombineHash(signature, mAttributes);
+		if (mParent != nullptr)
+		{
+			signature = Hash::CombineHash(signature, mParent->GetSignature());
+		}
+		if (mProperties != nullptr && mPropertyCount > 0)
+		{
+			for (U32 i = 0; i < mPropertyCount; ++i)
+			{
+				signature = Hash::CombineHash(signature, mProperties[i].GetType().GetSize());
+				signature = Hash::CombineHash(signature, mProperties[i].GetOffset());
+				signature = Hash::CombineHash(signature, mProperties[i].GetTypeTraits());
+				signature = Hash::CombineHash(signature, mProperties[i].GetAttributes());
+			}
+		}
+		return signature;
+	}
 };
 
 class PrimitivesMetaData
@@ -158,7 +184,7 @@ public:
 
 private:
 	static constexpr en::U32 s_PrimitiveTypeCount = 4;
-	static constexpr en::MetaDataType s_Void_MetaData = en::MetaDataType(en::Hash::CRC32("void"), "void", 0, 0, TypeTraits_Null);
+	static constexpr en::MetaDataType s_Void_MetaData = en::MetaDataType(en::Hash::CRC32("void"), "void", 0, 0, TypeTraits_Null, 0);
 	static constexpr en::MetaDataType s_U32_MetaData = en::MetaDataType(en::Hash::CRC32("U32"), "U32", ENLIVE_SIZE_OF(en::U32), ENLIVE_ALIGN_OF(en::U32), TypeTraits_Primitive);
 	static constexpr en::MetaDataType s_I32_MetaData = en::MetaDataType(en::Hash::CRC32("I32"), "I32", ENLIVE_SIZE_OF(en::I32), ENLIVE_ALIGN_OF(en::I32), TypeTraits_Primitive);
 	static constexpr en::MetaDataType s_F32_MetaData = en::MetaDataType(en::Hash::CRC32("F32"), "F32", ENLIVE_SIZE_OF(en::F32), ENLIVE_ALIGN_OF(en::F32), TypeTraits_Primitive);
@@ -169,8 +195,3 @@ template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::I32>()
 template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::F32>() { return s_F32_MetaData; }
 
 } // namespace en
-
-// Don't use that yet, need to be more stable/polished
-//#define ENLIVE_BEGIN_PROPERTIES(className) static constexpr en::MetaDataProperty className##_MetaDataProperties[] = {
-//#define ENLIVE_END_PROPERTIES() };
-//#define ENLIVE_TYPE(className) static constexpr en::MetaDataType className##_MetaData = en::MetaDataType(en::Hash::CRC32(#className), std::string_view(#className), sizeof(className), className##_MetaDataProperties, ENLIVE_ARRAY_SIZE(className##_MetaDataProperties));

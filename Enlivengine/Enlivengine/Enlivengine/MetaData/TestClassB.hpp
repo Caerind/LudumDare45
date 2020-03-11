@@ -11,11 +11,14 @@ class TestClassB
 public:
 	friend class MetaData_TestClassB;
 	static constexpr const en::MetaDataType& GetStaticMetaData();
-	virtual const en::MetaDataType& GetMetaData() { return GetStaticMetaData(); }
 
 	const TestClassA& GetA() const { return a; }
 	F32 GetB() const { return b; }
 	U32 GetC() const { return c; }
+
+	void SetA(const TestClassA& v) { a = v; }
+	void SetB(F32 v) { b = v; }
+	void SetC(U32 v) { c = v; }
 
 private:
     TestClassA a;
@@ -31,7 +34,7 @@ public:
 private:
 	static constexpr en::MetaDataProperty s_MetaDataProperties[] =
 	{
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::a"), en::MetaData_TestClassA::GetMetaData(), "a", ENLIVE_OFFSET_OF(en::TestClassB, a), en::MetaData_TestClassA::GetMetaData().GetTraits()),
+		en::MetaDataProperty(en::Hash::CRC32("TestClassB::a"), en::TestClassA::GetStaticMetaData(), "a", ENLIVE_OFFSET_OF(en::TestClassB, a), en::TestClassA::GetStaticMetaData().GetTraits()),
 		en::MetaDataProperty(en::Hash::CRC32("TestClassB::b"), en::PrimitivesMetaData::GetType<en::F32>(), "b", ENLIVE_OFFSET_OF(en::TestClassB, b), en::PrimitivesMetaData::GetType<en::F32>().GetTraits()),
 		en::MetaDataProperty(en::Hash::CRC32("TestClassB::c"), en::PrimitivesMetaData::GetType<en::U32>(), "c", ENLIVE_OFFSET_OF(en::TestClassB, c), en::PrimitivesMetaData::GetType<en::U32>().GetTraits())
 	};
