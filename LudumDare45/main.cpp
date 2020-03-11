@@ -16,7 +16,7 @@
 #include <Enlivengine/MetaData/TestClassC.hpp>
 #include <Enlivengine/MetaData/MetaData.hpp>
 
-void Test(const en::MetaDataType& typeInfo)
+void TestMetaData(const en::MetaDataType& typeInfo)
 {
 	std::cout << typeInfo.GetName() << " (" << typeInfo.GetID() << ") : " << std::endl;
     std::cout << "   - size of " << typeInfo.GetSize() << ", with align(" << typeInfo.GetAlignment() << ")" << std::endl;
@@ -72,6 +72,12 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
 			default: assert(false); break;
 			}
 		}
+        else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Enum) == en::TypeTraits_Enum)
+        {
+            const en::U32 value = *(const en::U32*)GetSubObjectAtOffset(object, offset);
+            const en::MetaDataEnumValue& enumValue = metaDataProperty.GetEnumType()->GetValueByValue(value);
+			std::cout << enumValue.GetName() << " (" << value << ")" << std::endl; break;
+        }
 		else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Class) == en::TypeTraits_Class)
 		{
 			std::cout << std::endl;
@@ -92,7 +98,7 @@ int main()
 	constexpr en::U32 typeCount = en::MetaData::GetTypeCount();
 	for (en::U32 i = 0; i < typeCount; ++i)
 	{
-		Test(en::MetaData::GetTypeFromIndex(i));
+		TestMetaData(en::MetaData::GetTypeFromIndex(i));
 	}
 
 	std::cout << "----------------------------" << std::endl;
@@ -103,6 +109,7 @@ int main()
 	testA.SetA(10);
 	testA.SetB(-123);
 	testA.SetC(3.14152f);
+    testA.SetD(en::MyEnum::A);
 	TestSerialization(&testA, en::TestClassA::GetStaticMetaData());
 
 	std::cout << "----------------------------" << std::endl;
@@ -112,7 +119,7 @@ int main()
 	en::TestClassB testB;
 	testB.SetA(testA);
 	testB.SetB(123456789.0f);
-	testB.SetC(42);
+    testB.SetC(42);
 	TestSerialization(&testB, en::TestClassB::GetStaticMetaData());
 
 	std::cout << "----------------------------" << std::endl;
@@ -122,7 +129,8 @@ int main()
 	en::TestClassC testC;
 	testC.en::TestClassA::SetA(13);
 	testC.en::TestClassA::SetB(-13);
-	testC.en::TestClassA::SetC(13.31f);
+    testC.en::TestClassA::SetC(13.31f);
+    testC.en::TestClassA::SetD(en::MyEnum::C);
 	testC.SetB(987654321.0f);
 	testC.SetC(24);
 	TestSerialization(&testC, en::TestClassC::GetStaticMetaData());
