@@ -59,6 +59,7 @@ private:
 		&PrimitivesMetaData::GetType<en::U32>(),
 		&PrimitivesMetaData::GetType<en::I32>(),
 		&PrimitivesMetaData::GetType<en::F32>(),
+		&PrimitivesMetaData::GetType<bool>(),
 		// Engine types
         &MetaData_MyEnum::GetMetaData(),
 		&MetaData_TestClassA::GetMetaData(),
@@ -78,9 +79,11 @@ private:
 
 // -- Types --
 // Primitive types
+template <> constexpr const MetaDataType& MetaData::GetType<void>() { return en::PrimitivesMetaData::GetType<void>(); }
 template <> constexpr const MetaDataType& MetaData::GetType<en::U32>() { return en::PrimitivesMetaData::GetType<en::U32>(); }
 template <> constexpr const MetaDataType& MetaData::GetType<en::I32>() { return en::PrimitivesMetaData::GetType<en::I32>(); }
 template <> constexpr const MetaDataType& MetaData::GetType<en::F32>() { return en::PrimitivesMetaData::GetType<en::F32>(); }
+template <> constexpr const MetaDataType& MetaData::GetType<bool>() { return en::PrimitivesMetaData::GetType<bool>(); }
 // Engine types
 template <> constexpr const MetaDataType& MetaData::GetType<en::MyEnum>() { return en::MetaData_MyEnum::GetMetaData(); }
 template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassA>() { return en::MetaData_TestClassA::GetMetaData(); }

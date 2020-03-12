@@ -31,14 +31,14 @@ public:
 private:
 	static constexpr en::MetaDataProperty s_MetaDataProperties[] =
 	{
-		en::MetaDataProperty(en::Hash::CRC32("TestClassC::b"), en::PrimitivesMetaData::GetType<en::F32>(), "b", ENLIVE_OFFSET_OF(en::TestClassC, b), en::PrimitivesMetaData::GetType<en::F32>().GetTraits()),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassC::c"), en::PrimitivesMetaData::GetType<en::U32>(), "c", ENLIVE_OFFSET_OF(en::TestClassC, c), en::PrimitivesMetaData::GetType<en::U32>().GetTraits())
+		en::MetaDataProperty(en::Hash::CRC32("TestClassC::b"), en::PrimitivesMetaData::GetType<en::F32>(), "b", ENLIVE_OFFSET_OF(en::TestClassC, b), ENLIVE_SIZE_OF_MEMBER(en::TestClassC, b), en::PrimitivesMetaData::GetType<en::F32>().GetTraits()),
+		en::MetaDataProperty(en::Hash::CRC32("TestClassC::c"), en::PrimitivesMetaData::GetType<en::U32>(), "c", ENLIVE_OFFSET_OF(en::TestClassC, c), ENLIVE_SIZE_OF_MEMBER(en::TestClassC, c), en::PrimitivesMetaData::GetType<en::U32>().GetTraits())
 	};
-	static constexpr en::MetaDataType s_MetaData = en::MetaDataType(en::Hash::CRC32("TestClassC"), "TestClassC", ENLIVE_SIZE_OF(en::TestClassC), ENLIVE_ALIGN_OF(en::TestClassC), TypeTraits_Class, &TestClassA::GetStaticMetaData(), s_MetaDataProperties, ENLIVE_ARRAY_SIZE(s_MetaDataProperties));
+	static constexpr en::MetaDataType s_MetaData = en::MetaDataType(en::Hash::CRC32("TestClassC"), "TestClassC", ENLIVE_SIZE_OF(en::TestClassC), ENLIVE_ALIGN_OF(en::TestClassC), TypeTraits_Class, &en::MetaData_TestClassA::GetMetaData(), s_MetaDataProperties, ENLIVE_ARRAY_SIZE(s_MetaDataProperties));
 };
 constexpr const en::MetaDataType& TestClassC::GetStaticMetaData()
 {
-	return MetaData_TestClassC::GetMetaData();
+	return en::MetaData_TestClassC::GetMetaData();
 }
 
 } // namespace en

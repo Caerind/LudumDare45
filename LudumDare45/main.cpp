@@ -32,7 +32,7 @@ void TestMetaData(const en::MetaDataType& typeInfo)
 		for (en::U32 i = 0; i < propertyCount; ++i)
 		{
 			const en::MetaDataProperty& propertyInfo = typeInfo.GetPropertyByIndex(i);
-			std::cout << "       - " << propertyInfo.GetName() << " (" << propertyInfo.GetID() << ") of type " << propertyInfo.GetType().GetName() << " at offset " << propertyInfo.GetOffset() << std::endl;
+			std::cout << "       - " << propertyInfo.GetName() << " (" << propertyInfo.GetID() << ") of type " << propertyInfo.GetType().GetName() << " at offset " << propertyInfo.GetOffset() << " of size " << propertyInfo.GetSize() << std::endl;
 		}
 	}
 	else
@@ -62,13 +62,48 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
 		const en::MetaDataProperty& metaDataProperty = metaDataType.GetPropertyByIndex(i);
 		const en::U32 offset = metaDataProperty.GetOffset();
 		std::cout << metaDataProperty.GetName() << " : ";
-		if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Primitive) == en::TypeTraits_Primitive)
+
+        if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Pointer) == en::TypeTraits_Pointer)
+        {
+            if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Primitive) == en::TypeTraits_Primitive)
+            {
+                switch (metaDataProperty.GetType().GetID())
+                {
+                case en::MetaData::GetType<en::U32>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(en::U32*)); std::cout << *(const en::U32**)GetSubObjectAtOffset(object, offset) << " (U32*)" << std::endl; break;
+                case en::MetaData::GetType<en::I32>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(en::I32*)); std::cout << *(const en::I32**)GetSubObjectAtOffset(object, offset) << " (I32*)" << std::endl; break;
+                case en::MetaData::GetType<en::F32>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(en::F32*)); std::cout << *(const en::F32**)GetSubObjectAtOffset(object, offset) << " (F32*)" << std::endl; break;
+                case en::MetaData::GetType<bool>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(bool*)); std::cout << *(const bool**)GetSubObjectAtOffset(object, offset) << " (bool*)" << std::endl; break;
+                default: assert(false); break;
+                }
+            }
+            else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Enum) == en::TypeTraits_Enum)
+            {
+                const en::U32 value = *(const en::U32*)GetSubObjectAtOffset(object, offset);
+                const en::MetaDataEnumValue& enumValue = metaDataProperty.GetEnumType()->GetValueByValue(value);
+                std::cout << enumValue.GetName() << " (" << value << ")" << std::endl; break;
+            }
+            else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Class) == en::TypeTraits_Class)
+            {
+                std::cout << std::endl;
+                TestSerialization(*(const void**)GetSubObjectAtOffset(object, offset), metaDataProperty.GetType());
+            }
+            else
+            {
+                assert(false);
+            }
+        }
+        else if((metaDataProperty.GetTypeTraits() & en::TypeTraits_Reference) == en::TypeTraits_Reference)
+        {
+            assert(false);
+        }
+		else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Primitive) == en::TypeTraits_Primitive)
 		{
 			switch (metaDataProperty.GetType().GetID())
 			{
-			case en::MetaData::GetType<en::U32>().GetID(): std::cout << *(const en::U32*)GetSubObjectAtOffset(object, offset) << " (U32)" << std::endl; break;
-			case en::MetaData::GetType<en::I32>().GetID(): std::cout << *(const en::I32*)GetSubObjectAtOffset(object, offset) << " (I32)" << std::endl; break;
-			case en::MetaData::GetType<en::F32>().GetID(): std::cout << *(const en::F32*)GetSubObjectAtOffset(object, offset) << " (F32)" << std::endl; break;
+            case en::MetaData::GetType<en::U32>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(en::U32)); std::cout << *(const en::U32*)GetSubObjectAtOffset(object, offset) << " (U32)" << std::endl; break;
+			case en::MetaData::GetType<en::I32>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(en::I32)); std::cout << *(const en::I32*)GetSubObjectAtOffset(object, offset) << " (I32)" << std::endl; break;
+			case en::MetaData::GetType<en::F32>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(en::F32)); std::cout << *(const en::F32*)GetSubObjectAtOffset(object, offset) << " (F32)" << std::endl; break;
+			case en::MetaData::GetType<bool>().GetID(): assert(metaDataProperty.GetSize() == ENLIVE_SIZE_OF(bool)); std::cout << *(const bool*)GetSubObjectAtOffset(object, offset) << " (bool)" << std::endl; break;
 			default: assert(false); break;
 			}
 		}
@@ -81,7 +116,7 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
 		else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Class) == en::TypeTraits_Class)
 		{
 			std::cout << std::endl;
-			TestSerialization(GetSubObjectAtOffset(object, offset), metaDataProperty.GetType());
+			TestSerialization((const void*)GetSubObjectAtOffset(object, offset), metaDataProperty.GetType());
 		}
 		else
 		{
@@ -116,10 +151,14 @@ int main()
 	std::cout << std::endl;
 	std::cout << "----------------------------" << std::endl;
 
+    en::F32 bD = 0.1234f;
+    en::MyEnum bE = en::MyEnum::B;
 	en::TestClassB testB;
-	testB.SetA(testA);
+	testB.SetA(&testA);
 	testB.SetB(123456789.0f);
     testB.SetC(42);
+    testB.SetD(&bD);
+    testB.SetE(&bE);
 	TestSerialization(&testB, en::TestClassB::GetStaticMetaData());
 
 	std::cout << "----------------------------" << std::endl;

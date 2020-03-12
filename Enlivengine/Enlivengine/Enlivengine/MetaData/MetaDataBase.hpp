@@ -9,6 +9,13 @@ namespace en
 #define ENLIVE_SIZE_OF(type) static_cast<en::U32>(sizeof(type))
 #define ENLIVE_ALIGN_OF(type) static_cast<en::U32>(alignof(type))
 #define ENLIVE_OFFSET_OF(type, member) static_cast<en::U32>(offsetof(type, member))
+#define ENLIVE_SIZE_OF_MEMBER(type, member) GetSizeOfMember(&type::member)
+
+template <typename T, typename MemberType>
+constexpr en::U32 GetSizeOfMember(MemberType T::*member)
+{
+    return static_cast<en::U32>(sizeof(MemberType));
+}
 
 // https://stackoverflow.com/a/56766138
 template <typename T>
@@ -145,12 +152,13 @@ class MetaDataProperty
 {
 public:
 	constexpr MetaDataProperty() = delete;
-	constexpr MetaDataProperty(U32 id, const MetaDataType& type, const char* name, U32 offset, U32 typeTraits, U32 attributes = Attribute_None, const MetaDataEnum* enumType = nullptr) : mID(id), mType(type), mName(name), mOffset(offset), mTypeTraits(typeTraits), mAttributes(attributes), mEnumType(enumType) {}
+	constexpr MetaDataProperty(U32 id, const MetaDataType& type, const char* name, U32 offset, U32 size, U32 typeTraits, U32 attributes = Attribute_None, const MetaDataEnum* enumType = nullptr) : mID(id), mType(type), mName(name), mOffset(offset), mSize(size), mTypeTraits(typeTraits), mAttributes(attributes), mEnumType(enumType) {}
 
 	constexpr U32 GetID() const { return mID; }
 	constexpr const MetaDataType& GetType() const { return mType; }
 	constexpr const char* GetName() const { return mName; }
 	constexpr U32 GetOffset() const { return mOffset; }
+    constexpr U32 GetSize() const { return mSize; }
 	constexpr U32 GetTypeTraits() const { return mTypeTraits; }
     constexpr U32 GetAttributes() const { return mAttributes; }
     constexpr const MetaDataEnum* GetEnumType() const { return mEnumType; }
@@ -163,6 +171,7 @@ private:
     const MetaDataType& mType;
     const char* mName;
 	U32 mOffset;
+    U32 mSize;
 	U32 mTypeTraits;
 	U32 mAttributes; 
     const MetaDataEnum* mEnumType;
@@ -239,15 +248,17 @@ public:
 	}
 
 private:
-	static constexpr en::U32 s_PrimitiveTypeCount = 4;
+	static constexpr en::U32 s_PrimitiveTypeCount = 5;
 	static constexpr en::MetaDataType s_Void_MetaData = en::MetaDataType(en::Hash::CRC32("void"), "void", 0, 0, TypeTraits_Null, 0);
 	static constexpr en::MetaDataType s_U32_MetaData = en::MetaDataType(en::Hash::CRC32("U32"), "U32", ENLIVE_SIZE_OF(en::U32), ENLIVE_ALIGN_OF(en::U32), TypeTraits_Primitive);
 	static constexpr en::MetaDataType s_I32_MetaData = en::MetaDataType(en::Hash::CRC32("I32"), "I32", ENLIVE_SIZE_OF(en::I32), ENLIVE_ALIGN_OF(en::I32), TypeTraits_Primitive);
 	static constexpr en::MetaDataType s_F32_MetaData = en::MetaDataType(en::Hash::CRC32("F32"), "F32", ENLIVE_SIZE_OF(en::F32), ENLIVE_ALIGN_OF(en::F32), TypeTraits_Primitive);
+	static constexpr en::MetaDataType s_bool_MetaData = en::MetaDataType(en::Hash::CRC32("bool"), "bool", ENLIVE_SIZE_OF(bool), ENLIVE_ALIGN_OF(bool), TypeTraits_Primitive);
 };
 
 template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::U32>() { return s_U32_MetaData; }
 template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::I32>() { return s_I32_MetaData; }
 template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::F32>() { return s_F32_MetaData; }
+template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<bool>() { return s_bool_MetaData; }
 
 } // namespace en
