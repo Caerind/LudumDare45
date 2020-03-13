@@ -71,12 +71,12 @@ static constexpr U32 TypeTraits_Null = (1 << 0); // void, nullptr_t
 static constexpr U32 TypeTraits_Primitive = (1 << 1); // int, float, char, bool, double, long, +/- unsigned, short, ...
 static constexpr U32 TypeTraits_Pointer = (1 << 2); // *
 static constexpr U32 TypeTraits_Reference = (1 << 3); // &
-static constexpr U32 TypeTraits_Const = (1 << 4); // const
-static constexpr U32 TypeTraits_Enum = (1 << 5); // enum (class)
-static constexpr U32 TypeTraits_Class = (1 << 6); // class, struct
-static constexpr U32 TypeTraits_Array = (1 << 7); // T myArray[x]
-// TODO : static constexpr U32 TypeTraits_ArrayPtr = (1 << 8); // T (*myArray)[]
-// TODO : static constexpr U32 TypeTraits_Union = (1 << 9);
+static constexpr U32 TypeTraits_Enum = (1 << 4); // enum (class)
+static constexpr U32 TypeTraits_Class = (1 << 5); // class, struct
+static constexpr U32 TypeTraits_Array = (1 << 6); // T myArray[x]
+// TODO : static constexpr U32 TypeTraits_ArrayPtr = (1 << 7); // T (*myArray)[]
+// TODO : static constexpr U32 TypeTraits_Const = (1 << 8); // const
+// TODO : static constexpr U32 TypeTraits_Union = (1 << 9); // union
 
 class MetaDataEnumValue
 {
@@ -138,7 +138,7 @@ class MetaDataProperty
 {
 public:
 	constexpr MetaDataProperty() = delete;
-	constexpr MetaDataProperty(U32 id, const MetaDataType& type, const char* name, U32 offset, U32 size, U32 typeTraits, U32 attributes = Attribute_None, const MetaDataEnum* enumType = nullptr, U32 elementCount = 1) : mID(id), mType(type), mName(name), mOffset(offset), mSize(size), mTypeTraits(typeTraits), mAttributes(attributes), mEnumType(enumType), mElementCount(elementCount) {}
+	constexpr MetaDataProperty(U32 id, const MetaDataType& type, const char* name, U32 offset, U32 size, U32 typeTraits, U32 attributes = Attribute_None, U32 elementCount = 1) : mID(id), mType(type), mName(name), mOffset(offset), mSize(size), mTypeTraits(typeTraits), mAttributes(attributes), mElementCount(elementCount) {}
 
 	constexpr U32 GetID() const { return mID; }
 	constexpr const MetaDataType& GetType() const { return mType; }
@@ -147,7 +147,6 @@ public:
     constexpr U32 GetSize() const { return mSize; }
 	constexpr U32 GetTypeTraits() const { return mTypeTraits; }
     constexpr U32 GetAttributes() const { return mAttributes; }
-    constexpr const MetaDataEnum* GetEnumType() const { return mEnumType; }
 	constexpr U32 GetElementCount() const { return mElementCount; }
 	constexpr U32 GetElementSize() const { return mSize / mElementCount; }
 
@@ -161,8 +160,7 @@ private:
 	U32 mOffset;
     U32 mSize;
 	U32 mTypeTraits;
-	U32 mAttributes; 
-    const MetaDataEnum* mEnumType;
+	U32 mAttributes;
 	U32 mElementCount;
 };
 
@@ -170,7 +168,7 @@ class MetaDataType
 {
 public:
 	constexpr MetaDataType() = delete;
-	constexpr MetaDataType(U32 id, const char* name, U32 size, U32 alignment, U32 traits, const MetaDataType* parent = nullptr, const MetaDataProperty* properties = nullptr, U32 propertyCount = 0, U32 attributes = Attribute_None) : mID(id), mName(name), mSize(size), mAlignment(alignment), mTraits(traits), mAttributes(attributes), mSignature(id), mParent(parent), mProperties(properties), mPropertyCount(propertyCount) { mSignature = GenerateSignature(); }
+	constexpr MetaDataType(U32 id, const char* name, U32 size, U32 alignment, U32 traits, const MetaDataType* parent = nullptr, const MetaDataProperty* properties = nullptr, U32 propertyCount = 0, U32 attributes = Attribute_None, const MetaDataEnum* enumType = nullptr) : mID(id), mName(name), mSize(size), mAlignment(alignment), mTraits(traits), mAttributes(attributes), mSignature(id), mParent(parent), mProperties(properties), mPropertyCount(propertyCount), mEnumType(enumType) { mSignature = GenerateSignature(); }
 
 	constexpr U32 GetID() const { return mID; }
 	constexpr const char* GetName() const { return mName; }
@@ -185,6 +183,8 @@ public:
 	constexpr U32 GetPropertyCount() const { return mPropertyCount; }
 	constexpr const MetaDataProperty& GetPropertyByIndex(U32 index) const { return mProperties[index]; }
 
+    constexpr const MetaDataEnum* GetEnumType() const { return mEnumType; }
+
 	constexpr bool operator==(const MetaDataType& other) const { return mID == other.mID; }
 	constexpr bool operator!=(const MetaDataType& other) const { return mID != other.mID; }
 
@@ -198,7 +198,8 @@ private:
 	U32 mSignature;
     const MetaDataType* mParent;
 	const MetaDataProperty* mProperties;
-	U32 mPropertyCount;
+    U32 mPropertyCount;
+    const MetaDataEnum* mEnumType;
 
 private:
 	constexpr U32 GenerateSignature() const
@@ -220,7 +221,7 @@ private:
 				signature = Hash::CombineHash(signature, mProperties[i].GetTypeTraits());
 				signature = Hash::CombineHash(signature, mProperties[i].GetAttributes());
 			}
-		}
+        }
 		return signature;
 	}
 };
