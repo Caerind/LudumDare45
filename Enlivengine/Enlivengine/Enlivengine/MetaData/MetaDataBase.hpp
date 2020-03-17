@@ -168,7 +168,7 @@ class MetaDataType
 {
 public:
 	constexpr MetaDataType() = delete;
-	constexpr MetaDataType(U32 id, const char* name, U32 size, U32 alignment, U32 traits, const MetaDataType* parent = nullptr, const MetaDataProperty* properties = nullptr, U32 propertyCount = 0, U32 attributes = Attribute_None, const MetaDataEnum* enumType = nullptr) : mID(id), mName(name), mSize(size), mAlignment(alignment), mTraits(traits), mAttributes(attributes), mSignature(id), mParent(parent), mProperties(properties), mPropertyCount(propertyCount), mEnumType(enumType) { mSignature = GenerateSignature(); }
+	constexpr MetaDataType(U32 id, const char* name, U32 size, U32 alignment, U32 traits, const MetaDataType* parent = nullptr, const MetaDataProperty* properties = nullptr, U32 propertyCount = 0, U32 attributes = Attribute_None, const MetaDataEnum* enumType = nullptr, const MetaDataType* const* templateTypes = nullptr, U32 templateTypeCount = 0) : mID(id), mName(name), mSize(size), mAlignment(alignment), mTraits(traits), mAttributes(attributes), mSignature(id), mParent(parent), mProperties(properties), mPropertyCount(propertyCount), mEnumType(enumType), mTemplateTypes(templateTypes), mTemplateTypeCount(templateTypeCount) { mSignature = GenerateSignature(); }
 
 	constexpr U32 GetID() const { return mID; }
 	constexpr const char* GetName() const { return mName; }
@@ -183,7 +183,10 @@ public:
 	constexpr U32 GetPropertyCount() const { return mPropertyCount; }
 	constexpr const MetaDataProperty& GetPropertyByIndex(U32 index) const { return mProperties[index]; }
 
-    constexpr const MetaDataEnum* GetEnumType() const { return mEnumType; }
+	constexpr const MetaDataEnum* GetEnumType() const { return mEnumType; }
+
+	constexpr U32 GetTemplateTypeCount() const { return mTemplateTypeCount; }
+	constexpr const MetaDataType& GetTemplateTypeByIndex(U32 index) const { return *mTemplateTypes[index]; }
 
 	constexpr bool operator==(const MetaDataType& other) const { return mID == other.mID; }
 	constexpr bool operator!=(const MetaDataType& other) const { return mID != other.mID; }
@@ -199,7 +202,9 @@ private:
     const MetaDataType* mParent;
 	const MetaDataProperty* mProperties;
     U32 mPropertyCount;
-    const MetaDataEnum* mEnumType;
+	const MetaDataEnum* mEnumType;
+	const MetaDataType* const* mTemplateTypes;
+	U32 mTemplateTypeCount;
 
 private:
 	constexpr U32 GenerateSignature() const

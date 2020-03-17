@@ -74,10 +74,12 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
     }
     else if ((metaDataType.GetTraits() & en::TypeTraits_Primitive) > 0)
     {
-        #define PrimType(Type) case en::MetaData::GetType<Type>().GetID(): \
-                                    assert(metaDataType.GetSize() == ENLIVE_SIZE_OF(Type)); \
-                                    std::cout << *(const Type*)object; \
-                                break;
+        #define PrimType(Type) \
+			case en::MetaData::GetType<Type>().GetID(): \
+			{ \
+				assert(metaDataType.GetSize() == ENLIVE_SIZE_OF(Type)); \
+                std::cout << *(const Type*)object; \
+            } break;
         switch (metaDataType.GetID())
         {
             PrimType(en::U32);
@@ -97,12 +99,12 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
         std::cout << "{" << std::endl;
         Indent();
 
-        /*
-        if (metaDataType.GetParent() != nullptr)
+		/*
+		if (metaDataType.GetParent() != nullptr)
         {
             TestSerialization(object, *metaDataType.GetParent());
         }
-        */
+		*/
 
         const en::U32 propertyCount = metaDataType.GetPropertyCount();
         for (en::U32 i = 0; i < propertyCount; ++i)
@@ -112,18 +114,41 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
             std::cout << indentString << "\"" << metaDataProperty.GetName() << "\": ";
 
             if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Array) == en::TypeTraits_Array)
-            {
-                /*
-                assert(false);
-                std::cout << std::endl;
-                const en::U32 elementCount = metaDataProperty.GetElementCount();
-                const en::U32 elementSize = metaDataProperty.GetType().GetSize();
-                for (en::U32 j = 0; j < elementCount; ++j)
-                {
-                    std::cout << j << " ";
-                    TestSerialization(GetSubObjectAtOffset(object, offset + elementSize * j), metaDataProperty.GetType());
-                }
-                */
+			{
+				std::cout << "[" << std::endl;
+				Indent();
+
+				const en::U32 elementCount = metaDataProperty.GetElementCount();
+				const en::U32 elementSize = metaDataProperty.GetElementSize();
+				for (en::U32 j = 0; j < elementCount; ++j)
+				{
+					std::cout << indentString;
+
+					if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Pointer) == en::TypeTraits_Pointer)
+					{
+						if (const void* ptr = *(const void**)GetSubObjectAtOffset(object, offset + elementSize * j))
+						{
+							TestSerialization(ptr, metaDataProperty.GetType());
+						}
+						else
+						{
+							std::cout << "null";
+						}
+					}
+					else
+					{
+						TestSerialization(GetSubObjectAtOffset(object, offset + elementSize * j), metaDataProperty.GetType());
+					}
+
+					if (j < elementCount - 1)
+					{
+						std::cout << ",";
+					}
+					std::cout << std::endl;
+				}
+
+				Unindent();
+				std::cout << indentString << "]";
             }
             else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Pointer) == en::TypeTraits_Pointer)
             {
@@ -136,7 +161,7 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
                     }
                     else
                     {
-                        std::cout << "null" << std::endl;
+                        std::cout << "null";
                     }
                 }
                 else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Class) == en::TypeTraits_Class)
@@ -147,7 +172,7 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
                     }
                     else
                     {
-                        std::cout << "null" << std::endl;
+                        std::cout << "null";
                     }
                 }
                 else
@@ -162,25 +187,29 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
             else if ((metaDataProperty.GetTypeTraits() & (en::TypeTraits_Primitive | en::TypeTraits_Enum)) > 0)
             {
                 TestSerialization(GetSubObjectAtOffset(object, offset), metaDataProperty.GetType());
-                if (i < propertyCount - 1)
-                {
-                    std::cout << ",";
-                }
-                std::cout << std::endl;
             }
             else if ((metaDataProperty.GetTypeTraits() & en::TypeTraits_Class) == en::TypeTraits_Class)
             {
-                std::cout << std::endl;
                 TestSerialization((const void*)GetSubObjectAtOffset(object, offset), metaDataProperty.GetType());
             }
             else
             {
                 assert(false);
-            }
+			}
+
+			if (i < propertyCount - 1)
+			{
+				std::cout << ",";
+			}
+			std::cout << std::endl;
         }
 
         Unindent();
-        std::cout << indentString << "}" << std::endl;
+        std::cout << indentString << "}";
+		if (indentString.length() == 0)
+		{
+			std::cout << std::endl;
+		}
     }
     else
     {
@@ -225,7 +254,7 @@ int main()
 	std::cout << std::endl;
 	std::cout << "----------------------------" << std::endl;
 
-    static const bool testNullptr = true; // Change this to ensure nullptr are also tested
+    static const bool testNullptr = false; // Change this to ensure nullptr are also tested
     en::F32 bD = 0.1234f;
     en::MyEnum bE = en::MyEnum::B;
     en::F32 x = 10.0f;
@@ -247,22 +276,23 @@ int main()
 	std::cout << std::endl;
     std::cout << "----------------------------" << std::endl;
 
-    /*
+	en::TestArrayTemplate<en::U32> testAU;
+	testAU.SetElement(345);
+	en::TestArrayTemplate<en::F32> testBF;
+	testBF.SetElement(1234.f);
 
 	en::TestClassC testC;
 	testC.en::TestClassA::SetA(13);
 	testC.en::TestClassA::SetB(-13);
     testC.en::TestClassA::SetC(13.31f);
     testC.en::TestClassA::SetD(en::MyEnum::C);
-	testC.SetB(987654321.0f);
-	testC.SetC(24);
+	testC.SetB(testAU);
+	testC.SetC(testBF);
 	TestSerialization(&testC, en::TestClassC::GetStaticMetaData());
 
 	std::cout << "----------------------------" << std::endl;
 	std::cout << std::endl;
 	std::cout << "----------------------------" << std::endl;
-
-    */
 
     /*
 	en::Application::GetInstance().Initialize();

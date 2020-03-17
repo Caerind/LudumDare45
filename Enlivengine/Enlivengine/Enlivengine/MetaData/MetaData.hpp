@@ -55,16 +55,18 @@ private:
 	static constexpr const MetaDataType* s_MetaDataTypes[] =
 	{
 		// Primitive types
-		&PrimitivesMetaData::GetType<void>(),
-		&PrimitivesMetaData::GetType<en::U32>(),
-		&PrimitivesMetaData::GetType<en::I32>(),
-		&PrimitivesMetaData::GetType<en::F32>(),
-		&PrimitivesMetaData::GetType<bool>(),
+		&en::PrimitivesMetaData::GetType<void>(),
+		&en::PrimitivesMetaData::GetType<en::U32>(),
+		&en::PrimitivesMetaData::GetType<en::I32>(),
+		&en::PrimitivesMetaData::GetType<en::F32>(),
+		&en::PrimitivesMetaData::GetType<bool>(),
 		// Engine types
-        &MetaData_MyEnum::GetMetaData(),
-		&MetaData_TestClassA::GetMetaData(),
-		&MetaData_TestClassB::GetMetaData(),
-		&MetaData_TestClassC::GetMetaData()
+        &en::MetaData_MyEnum::GetMetaData(),
+		&en::MetaData_TestClassA::GetMetaData(),
+		&en::MetaData_TestClassB::GetMetaData(),
+		&en::MetaData_TestClassC::GetMetaData(),
+		&en::MetaData_TestArrayTemplate<en::U32>::GetMetaData(),
+		&en::MetaData_TestArrayTemplate<en::F32>::GetMetaData()
 		// User defined types
 		// ...
 	};
@@ -89,6 +91,8 @@ template <> constexpr const MetaDataType& MetaData::GetType<en::MyEnum>() { retu
 template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassA>() { return en::MetaData_TestClassA::GetMetaData(); }
 template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassB>() { return en::MetaData_TestClassB::GetMetaData(); }
 template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassC>() { return en::MetaData_TestClassC::GetMetaData(); }
+template <> constexpr const MetaDataType& MetaData::GetType<en::TestArrayTemplate<en::U32>>() { return en::MetaData_TestArrayTemplate<en::U32>::GetMetaData(); }
+template <> constexpr const MetaDataType& MetaData::GetType<en::TestArrayTemplate<en::F32>>() { return en::MetaData_TestArrayTemplate<en::F32>::GetMetaData(); }
 // User defined types
 // ...
 
