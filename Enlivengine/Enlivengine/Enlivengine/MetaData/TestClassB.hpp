@@ -9,8 +9,7 @@ namespace en
 class TestClassB
 {
 public:
-	friend class MetaData_TestClassB;
-	static constexpr const en::MetaDataType& GetStaticMetaData();
+	ENLIVE_META_CLASS_DECL(TestClassB)
 
 	TestClassA* GetA() const { return a; }
 	F32 GetB() const { return b; }
@@ -40,29 +39,16 @@ private:
 	// TODO : I32* (*i)[]; // Primitive/Ptr/ArrayPtr
 };
 
-class MetaData_TestClassB
-{
-public:
-	constexpr MetaData_TestClassB() = delete;
-	static constexpr const en::MetaDataType& GetMetaData() { return s_MetaData; }
-private:
-	static constexpr const en::MetaDataProperty s_MetaDataProperties[] =
-	{
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::a"), en::MetaData_TestClassA::GetMetaData(), "a", ENLIVE_OFFSET_OF(en::TestClassB, a), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, a), en::MetaData_TestClassA::GetMetaData().GetTraits() | en::TypeTraits_Pointer),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::b"), en::PrimitivesMetaData::GetType<en::F32>(), "b", ENLIVE_OFFSET_OF(en::TestClassB, b), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, b), en::PrimitivesMetaData::GetType<en::F32>().GetTraits()),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::c"), en::PrimitivesMetaData::GetType<en::U32>(), "c", ENLIVE_OFFSET_OF(en::TestClassB, c), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, c), en::PrimitivesMetaData::GetType<en::U32>().GetTraits()),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::d"), en::PrimitivesMetaData::GetType<en::F32>(), "d", ENLIVE_OFFSET_OF(en::TestClassB, d), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, d), en::PrimitivesMetaData::GetType<en::F32>().GetTraits() | en::TypeTraits_Pointer),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::e"), en::MetaData_MyEnum::GetMetaData(), "e", ENLIVE_OFFSET_OF(en::TestClassB, e), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, e), en::MetaData_MyEnum::GetMetaData().GetTraits() | en::TypeTraits_Pointer, en::Attribute_None),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::f"), en::MetaData_TestClassA::GetMetaData(), "f", ENLIVE_OFFSET_OF(en::TestClassB, f), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, f), en::MetaData_TestClassA::GetMetaData().GetTraits() | en::TypeTraits_Array, en::Attribute_None, 3),
-		en::MetaDataProperty(en::Hash::CRC32("TestClassB::g"), en::PrimitivesMetaData::GetType<en::F32>(), "g", ENLIVE_OFFSET_OF(en::TestClassB, g), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, g), en::PrimitivesMetaData::GetType<en::F32>().GetTraits() | en::TypeTraits_Array | en::TypeTraits_Pointer, en::Attribute_None, 2)
-		// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::h"), en::PrimitivesMetaData::GetType<en::U32>(), "h", ENLIVE_OFFSET_OF(en::TestClassB, h), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, h), en::PrimitivesMetaData::GetType<en::U32>().GetTraits() | en::TypeTraits_ArrayPtr),
-		// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::i"), en::PrimitivesMetaData::GetType<en::I32>(), "i", ENLIVE_OFFSET_OF(en::TestClassB, i), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, i), en::PrimitivesMetaData::GetType<en::I32>().GetTraits() | en::TypeTraits_ArrayPtr | en::TypeTraits_Pointer)
-	};
-	static constexpr const en::MetaDataType s_MetaData = en::MetaDataType(en::Hash::CRC32("TestClassB"), "TestClassB", ENLIVE_SIZE_OF(en::TestClassB), ENLIVE_ALIGN_OF(en::TestClassB), TypeTraits_Class, nullptr, s_MetaDataProperties, ENLIVE_ARRAY_SIZE(s_MetaDataProperties));
-};
-constexpr const en::MetaDataType& TestClassB::GetStaticMetaData()
-{
-	return en::MetaData_TestClassB::GetMetaData();
-}
+ENLIVE_META_CLASS_DEF(TestClassB)
+	ENLIVE_META_CLASS_PROPERTY_EX(en::TestClassB, a, en::MetaData_TestClassA::GetMetaData(), en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(en::TestClassB, b, en::PrimitivesMetaData::GetType<en::F32>()) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(en::TestClassB, c, en::PrimitivesMetaData::GetType<en::U32>()) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_EX(en::TestClassB, d, en::PrimitivesMetaData::GetType<en::F32>(), en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_EX(en::TestClassB, e, en::MetaData_MyEnum::GetMetaData(), en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_ARRAY(en::TestClassB, f, en::MetaData_TestClassA::GetMetaData(), 3) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_EX_ARRAY(en::TestClassB, g, en::PrimitivesMetaData::GetType<en::F32>(), en::TypeTraits_Pointer, 2)
+	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::h"), en::PrimitivesMetaData::GetType<en::U32>(), "h", ENLIVE_OFFSET_OF(en::TestClassB, h), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, h), en::PrimitivesMetaData::GetType<en::U32>().GetTraits() | en::TypeTraits_ArrayPtr),
+	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::i"), en::PrimitivesMetaData::GetType<en::I32>(), "i", ENLIVE_OFFSET_OF(en::TestClassB, i), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, i), en::PrimitivesMetaData::GetType<en::I32>().GetTraits() | en::TypeTraits_ArrayPtr | en::TypeTraits_Pointer)
+ENLIVE_META_CLASS_DEF_END(TestClassB, en::TestClassB)
 
 } // namespace en

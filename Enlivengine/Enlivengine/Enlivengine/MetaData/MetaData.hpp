@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Enlivengine/MetaData/MetaDataBase.hpp>
-#include <array>
+
+#ifdef ENLIVE_ENABLE_METADATA
 
 #include <Enlivengine/MetaData/TestClassA.hpp>
 #include <Enlivengine/MetaData/TestClassB.hpp>
@@ -56,19 +57,25 @@ private:
 	{
 		// Primitive types
 		&en::PrimitivesMetaData::GetType<void>(),
-		&en::PrimitivesMetaData::GetType<en::U32>(),
-		&en::PrimitivesMetaData::GetType<en::I32>(),
-		&en::PrimitivesMetaData::GetType<en::F32>(),
 		&en::PrimitivesMetaData::GetType<bool>(),
+		&en::PrimitivesMetaData::GetType<en::I8>(),
+		&en::PrimitivesMetaData::GetType<en::U8>(),
+		&en::PrimitivesMetaData::GetType<en::I16>(),
+		&en::PrimitivesMetaData::GetType<en::U16>(),
+		&en::PrimitivesMetaData::GetType<en::I32>(),
+		&en::PrimitivesMetaData::GetType<en::U32>(),
+		&en::PrimitivesMetaData::GetType<en::I64>(),
+		&en::PrimitivesMetaData::GetType<en::U64>(),
+		&en::PrimitivesMetaData::GetType<en::F32>(),
+		&en::PrimitivesMetaData::GetType<en::F64>(),
 		// Engine types
         &en::MetaData_MyEnum::GetMetaData(),
 		&en::MetaData_TestClassA::GetMetaData(),
 		&en::MetaData_TestClassB::GetMetaData(),
-		&en::MetaData_TestClassC::GetMetaData(),
-		&en::MetaData_TestArrayTemplate<en::U32>::GetMetaData(),
-		&en::MetaData_TestArrayTemplate<en::F32>::GetMetaData()
 		// User defined types
-		// ...
+		&MetaData_TestClassC::GetMetaData(),
+		&MetaData_TestArrayTemplate<en::U32>::GetMetaData(),
+		&MetaData_TestArrayTemplate<en::F32>::GetMetaData()
 	};
     static constexpr const MetaDataEnum* s_MetaDataEnums[] =
     {
@@ -79,29 +86,53 @@ private:
     };
 };
 
-// -- Types --
-// Primitive types
-template <> constexpr const MetaDataType& MetaData::GetType<void>() { return en::PrimitivesMetaData::GetType<void>(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::U32>() { return en::PrimitivesMetaData::GetType<en::U32>(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::I32>() { return en::PrimitivesMetaData::GetType<en::I32>(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::F32>() { return en::PrimitivesMetaData::GetType<en::F32>(); }
-template <> constexpr const MetaDataType& MetaData::GetType<bool>() { return en::PrimitivesMetaData::GetType<bool>(); }
-// Engine types
-template <> constexpr const MetaDataType& MetaData::GetType<en::MyEnum>() { return en::MetaData_MyEnum::GetMetaData(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassA>() { return en::MetaData_TestClassA::GetMetaData(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassB>() { return en::MetaData_TestClassB::GetMetaData(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::TestClassC>() { return en::MetaData_TestClassC::GetMetaData(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::TestArrayTemplate<en::U32>>() { return en::MetaData_TestArrayTemplate<en::U32>::GetMetaData(); }
-template <> constexpr const MetaDataType& MetaData::GetType<en::TestArrayTemplate<en::F32>>() { return en::MetaData_TestArrayTemplate<en::F32>::GetMetaData(); }
-// User defined types
+#define ENLIVE_METADATA_DEF_TYPE(type, metaDataType) template <> constexpr const MetaDataType& MetaData::GetType<type>() { return metaDataType; }
+#define ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(type) ENLIVE_METADATA_DEF_TYPE(type, en::PrimitivesMetaData::GetType<type>())
+#define ENLIVE_METADATA_DEF_TYPE_EN(type) ENLIVE_METADATA_DEF_TYPE(en::##type, en::MetaData_##type##::GetMetaData())
+#define ENLIVE_METADATA_DEF_ENUM(type, metaDataType) template <> constexpr const MetaDataEnum& MetaData::GetEnum<type>() { return metaDataType; }
+#define ENLIVE_METADATA_DEF_ENUM_EN(type) ENLIVE_METADATA_DEF_ENUM(en::##type, en::MetaData_##type##::GetMetaDataEnum())
+
+// --------------------------------
+// --         Types              --
+// --------------------------------
+//  Primitive types
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(void);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(bool);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::I8);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::U8);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::I16);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::U16);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::I32);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::U32);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::I64);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::U64);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::F32);
+ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE(en::F64);
+//  Engine types
+ENLIVE_METADATA_DEF_TYPE_EN(MyEnum);
+ENLIVE_METADATA_DEF_TYPE_EN(TestClassA);
+ENLIVE_METADATA_DEF_TYPE_EN(TestClassB);
+//  User defined types
+ENLIVE_METADATA_DEF_TYPE(TestClassC, MetaData_TestClassC::GetMetaData());
+ENLIVE_METADATA_DEF_TYPE(TestArrayTemplate<en::U32>, MetaData_TestArrayTemplate<en::U32>::GetMetaData());
+ENLIVE_METADATA_DEF_TYPE(TestArrayTemplate<en::F32>, MetaData_TestArrayTemplate<en::F32>::GetMetaData());
+
+// --------------------------------
+// --         Enums              --
+// --------------------------------
+//  Engine types
+ENLIVE_METADATA_DEF_ENUM_EN(MyEnum);
+//  User defined types
 // ...
 
-// -- Enums --
-// Engine types
-template <> constexpr const MetaDataEnum& MetaData::GetEnum<en::MyEnum>() { return en::MetaData_MyEnum::GetMetaDataEnum(); }
-// User defined types
-// ...
+
+#undef ENLIVE_METADATA_DEF_TYPE
+#undef ENLIVE_METADATA_DEF_TYPE_PRIMITIVE_TYPE
+#undef ENLIVE_METADATA_DEF_TYPE_EN
+#undef ENLIVE_METADATA_DEF_ENUM
+#undef ENLIVE_METADATA_DEF_ENUM_EN
 
 } // namespace en
 
+#endif // ENLIVE_ENABLE_METADATA
 

@@ -1,21 +1,14 @@
 #pragma once
 
+#include <Enlivengine/System/Config.hpp>
+#include <Enlivengine/System/PrimitiveTypes.hpp>
+
+#ifdef ENLIVE_ENABLE_METADATA
+
 #include <Enlivengine/System/Hash.hpp>
 
 namespace en
 {
-
-#define ENLIVE_ARRAY_SIZE(arr) static_cast<en::U32>(sizeof(arr)/sizeof(arr[0]))
-#define ENLIVE_SIZE_OF(type) static_cast<en::U32>(sizeof(type))
-#define ENLIVE_ALIGN_OF(type) static_cast<en::U32>(alignof(type))
-#define ENLIVE_OFFSET_OF(type, member) static_cast<en::U32>(offsetof(type, member))
-#define ENLIVE_SIZE_OF_MEMBER(type, member) static_cast<en::U32>(GetSizeOfMember(&type::member))
-
-template <typename T, typename MemberType>
-constexpr std::size_t GetSizeOfMember(MemberType T::*member)
-{
-    return sizeof(MemberType);
-}
 
 // https://stackoverflow.com/a/56766138
 template <typename T>
@@ -138,7 +131,7 @@ class MetaDataProperty
 {
 public:
 	constexpr MetaDataProperty() = delete;
-	constexpr MetaDataProperty(U32 id, const MetaDataType& type, const char* name, U32 offset, U32 size, U32 typeTraits, U32 attributes = Attribute_None, U32 elementCount = 1) : mID(id), mType(type), mName(name), mOffset(offset), mSize(size), mTypeTraits(typeTraits), mAttributes(attributes), mElementCount(elementCount) {}
+	constexpr MetaDataProperty(U32 id, const MetaDataType& type, const char* name, U32 offset, U32 size, U32 typeTraits, U32 elementCount = 1, U32 attributes = Attribute_None) : mID(id), mType(type), mName(name), mOffset(offset), mSize(size), mTypeTraits(typeTraits), mElementCount(elementCount), mAttributes(attributes) {}
 
 	constexpr U32 GetID() const { return mID; }
 	constexpr const MetaDataType& GetType() const { return mType; }
@@ -146,9 +139,9 @@ public:
 	constexpr U32 GetOffset() const { return mOffset; }
     constexpr U32 GetSize() const { return mSize; }
 	constexpr U32 GetTypeTraits() const { return mTypeTraits; }
-    constexpr U32 GetAttributes() const { return mAttributes; }
 	constexpr U32 GetElementCount() const { return mElementCount; }
 	constexpr U32 GetElementSize() const { return mSize / mElementCount; }
+    constexpr U32 GetAttributes() const { return mAttributes; }
 
 	constexpr bool operator==(const MetaDataProperty& other) const { return mID == other.mID; }
 	constexpr bool operator!=(const MetaDataProperty& other) const { return mID != other.mID; }
@@ -160,8 +153,8 @@ private:
 	U32 mOffset;
     U32 mSize;
 	U32 mTypeTraits;
-	U32 mAttributes;
 	U32 mElementCount;
+	U32 mAttributes;
 };
 
 class MetaDataType
@@ -244,16 +237,125 @@ public:
 
 private:
 	static constexpr en::U32 s_PrimitiveTypeCount = 5;
-	static constexpr en::MetaDataType s_Void_MetaData = en::MetaDataType(en::Hash::CRC32("void"), "void", 0, 0, TypeTraits_Null, 0);
-	static constexpr en::MetaDataType s_U32_MetaData = en::MetaDataType(en::Hash::CRC32("U32"), "U32", ENLIVE_SIZE_OF(en::U32), ENLIVE_ALIGN_OF(en::U32), TypeTraits_Primitive);
-	static constexpr en::MetaDataType s_I32_MetaData = en::MetaDataType(en::Hash::CRC32("I32"), "I32", ENLIVE_SIZE_OF(en::I32), ENLIVE_ALIGN_OF(en::I32), TypeTraits_Primitive);
-	static constexpr en::MetaDataType s_F32_MetaData = en::MetaDataType(en::Hash::CRC32("F32"), "F32", ENLIVE_SIZE_OF(en::F32), ENLIVE_ALIGN_OF(en::F32), TypeTraits_Primitive);
-	static constexpr en::MetaDataType s_bool_MetaData = en::MetaDataType(en::Hash::CRC32("bool"), "bool", ENLIVE_SIZE_OF(bool), ENLIVE_ALIGN_OF(bool), TypeTraits_Primitive);
+	static constexpr en::MetaDataType s_Void_MetaData = en::MetaDataType(en::Hash::CRC32("void"), "void", 0, 0, TypeTraits_Null);
+#define PRIMITIVE_TYPE_DECL(name, fullName) static constexpr en::MetaDataType s_##name##_MetaData = en::MetaDataType(en::Hash::CRC32(#name), #name, ENLIVE_SIZE_OF(##fullName), ENLIVE_ALIGN_OF(##fullName), TypeTraits_Primitive);
+	PRIMITIVE_TYPE_DECL(bool, bool);
+	PRIMITIVE_TYPE_DECL(I8, en::I8);
+	PRIMITIVE_TYPE_DECL(U8, en::U8);
+	PRIMITIVE_TYPE_DECL(I16, en::I16);
+	PRIMITIVE_TYPE_DECL(U16, en::U16);
+	PRIMITIVE_TYPE_DECL(I32, en::I32);
+	PRIMITIVE_TYPE_DECL(U32, en::U32);
+	PRIMITIVE_TYPE_DECL(I64, en::I64);
+	PRIMITIVE_TYPE_DECL(U64, en::U64);
+	PRIMITIVE_TYPE_DECL(F32, en::F32);
+	PRIMITIVE_TYPE_DECL(F64, en::F64);
+#undef PRIMITIVE_TYPE_DECL
 };
 
-template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::U32>() { return s_U32_MetaData; }
-template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::I32>() { return s_I32_MetaData; }
-template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<en::F32>() { return s_F32_MetaData; }
-template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<bool>() { return s_bool_MetaData; }
+#define PRIMITIVE_TYPE_DEF(name, fullName) template <> constexpr const MetaDataType& PrimitivesMetaData::GetType<##fullName>() { return s_##name##_MetaData; }
+PRIMITIVE_TYPE_DEF(bool, bool);
+PRIMITIVE_TYPE_DEF(I8, en::I8);
+PRIMITIVE_TYPE_DEF(U8, en::U8);
+PRIMITIVE_TYPE_DEF(I16, en::I16);
+PRIMITIVE_TYPE_DEF(U16, en::U16);
+PRIMITIVE_TYPE_DEF(I32, en::I32);
+PRIMITIVE_TYPE_DEF(U32, en::U32);
+PRIMITIVE_TYPE_DEF(I64, en::I64);
+PRIMITIVE_TYPE_DEF(U64, en::U64);
+PRIMITIVE_TYPE_DEF(F32, en::F32);
+PRIMITIVE_TYPE_DEF(F64, en::F64);
+#undef PRIMITIVE_TYPE_DEF
+
+// Enum macros
+#define ENLIVE_META_ENUM_DECL(name) ENLIVE_META_ENUM_DECL_EX(name, en::U32)
+#define ENLIVE_META_ENUM_DECL_EX(name, type) enum class name : type
+#define ENLIVE_META_ENUM_DEF(name) \
+	class MetaData_##name \
+	{ \
+	public: \
+		constexpr MetaData_##name() = delete; \
+		static constexpr const en::MetaDataEnum& GetMetaDataEnum() { return s_MetaDataEnum; } \
+		static constexpr const en::MetaDataType& GetMetaData() { return s_MetaData; } \
+	private: \
+		static constexpr const en::MetaDataEnumValue s_MetaDataValues[] = { 
+
+#define ENLIVE_META_ENUM_VALUE(enumName, valueName) ENLIVE_META_ENUM_VALUE_EX(enumName, valueName, en::U32)
+#define ENLIVE_META_ENUM_VALUE_EX(enumName, valueName, type) en::MetaDataEnumValue(en::Hash::CRC32(#enumName"::"#valueName), #valueName, static_cast<en::U32>(##enumName::##valueName))
+
+#define ENLIVE_META_ENUM_DEF_END(name) ENLIVE_META_ENUM_DEF_END_EX_ATTR(name, en::U32, en::Attribute_None)
+#define ENLIVE_META_ENUM_DEF_END_ATTR(name, attributes) ENLIVE_META_ENUM_DEF_END_EX_ATTR(name, en::U32, attributes)
+#define ENLIVE_META_ENUM_DEF_END_EX(name, type) ENLIVE_META_ENUM_DEF_END_EX_ATTR(name, type, en::Attribute_None)
+#define ENLIVE_META_ENUM_DEF_END_EX_ATTR(name, type, attributes) \
+		};\
+		static constexpr const en::MetaDataEnum s_MetaDataEnum = en::MetaDataEnum(en::Hash::CRC32(#name), #name, s_MetaDataValues, ENLIVE_ARRAY_SIZE(s_MetaDataValues)); \
+		static constexpr const en::MetaDataType s_MetaData = en::MetaDataType(en::Hash::CRC32(#name), #name, ENLIVE_SIZE_OF(type), ENLIVE_ALIGN_OF(type), en::TypeTraits_Enum, nullptr, nullptr, 0, attributes, &s_MetaDataEnum); \
+	};
+
+// Class macros
+#define ENLIVE_META_CLASS_DECL(name) \
+	public: \
+		friend class MetaData_##name; \
+		static constexpr const en::MetaDataType& GetStaticMetaData();
+
+#define ENLIVE_META_CLASS_PROPERTY(className, name, metaDataType) ENLIVE_META_CLASS_PROPERTY_EX_ATTR(className, name, metaDataType, en::TypeTraits_None, en::Attribute_None)
+#define ENLIVE_META_CLASS_PROPERTY_ATTR(className, name, metaDataType, attributes) ENLIVE_META_CLASS_PROPERTY_EX_ATTR(className, name, metaDataType, en::TypeTraits_None, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_EX(className, name, metaDataType, traits) ENLIVE_META_CLASS_PROPERTY_EX_ATTR(className, name, metaDataType, traits, en::Attribute_None)
+#define ENLIVE_META_CLASS_PROPERTY_EX_ATTR(className, name, metaDataType, traits, attributes) en::MetaDataProperty(en::Hash::CRC32(#className"::"#name), metaDataType, #name, ENLIVE_OFFSET_OF(className, name), ENLIVE_SIZE_OF_MEMBER(className, name), metaDataType.GetTraits() | traits, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_ARRAY(className, name, metaDataType, elementCount) ENLIVE_META_CLASS_PROPERTY_EX_ARRAY_ATTR(className, name, metaDataType, en::TypeTraits_None, elementCount, en::Attribute_None)
+#define ENLIVE_META_CLASS_PROPERTY_ARRAY_ATTR(className, name, metaDataType, elementCount, attributes) ENLIVE_META_CLASS_PROPERTY_EX_ARRAY_ATTR(className, name, metaDataType, en::TypeTraits_None, elementCount, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_EX_ARRAY(className, name, metaDataType, traits, elementCount) ENLIVE_META_CLASS_PROPERTY_EX_ARRAY_ATTR(className, name, metaDataType, traits, elementCount, en::Attribute_None)
+#define ENLIVE_META_CLASS_PROPERTY_EX_ARRAY_ATTR(className, name, metaDataType, traits, elementCount, attributes) en::MetaDataProperty(en::Hash::CRC32(#className"::"#name), metaDataType, #name, ENLIVE_OFFSET_OF(className, name), ENLIVE_SIZE_OF_MEMBER(className, name), metaDataType.GetTraits() | en::TypeTraits_Array | traits, elementCount, attributes)
+
+#define ENLIVE_META_CLASS_DEF(name) \
+	class MetaData_##name \
+	{ \
+	public: \
+		constexpr MetaData_##name() = delete; \
+		static constexpr const en::MetaDataType& GetMetaData() { return s_MetaData; } \
+	private: \
+		static constexpr const en::MetaDataProperty s_MetaDataProperties[] = {
+
+#define ENLIVE_META_CLASS_DEF_END(name, fullName) ENLIVE_META_CLASS_DEF_END_EX(name, fullName, nullptr)
+#define ENLIVE_META_CLASS_DEF_END_EX(name, fullName, parentMetaDataTypePtr) \
+		}; \
+		static constexpr const en::MetaDataType s_MetaData = en::MetaDataType(en::Hash::CRC32(#name), #name, ENLIVE_SIZE_OF(name), ENLIVE_ALIGN_OF(name), en::TypeTraits_Class, parentMetaDataTypePtr, s_MetaDataProperties, ENLIVE_ARRAY_SIZE(s_MetaDataProperties)); \
+	}; \
+	constexpr const en::MetaDataType& name::GetStaticMetaData() \
+	{ \
+		return MetaData_##name::GetMetaData(); \
+	}
+
+#define ENLIVE_METADATA_ONLY(code) code
+#define ENLIVE_METADATA_COMMA() ,
 
 } // namespace en
+
+#else // ENLIVE_ENABLE_METADATA
+
+#define ENLIVE_META_ENUM(name) enum class name : en::U32
+#define ENLIVE_META_ENUM_AS(name, type) enum class name : type
+#define ENLIVE_META_ENUM_DEF(name)
+#define ENLIVE_META_ENUM_VALUE(enumName, valueName)
+#define ENLIVE_META_ENUM_VALUE_EX(enumName, valueName, type)
+#define ENLIVE_META_ENUM_DEF_END(name)
+#define ENLIVE_META_ENUM_DEF_END_ATTR(name, attributes)
+#define ENLIVE_META_ENUM_DEF_END_EX(name, type)
+#define ENLIVE_META_ENUM_DEF_END_EX_ATTR(name, type, attributes)
+#define ENLIVE_META_CLASS_DECL(name)
+#define ENLIVE_META_CLASS_PROPERTY(className, name, metaDataType)
+#define ENLIVE_META_CLASS_PROPERTY_ATTR(className, name, metaDataType, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_EX(className, name, metaDataType, traits)
+#define ENLIVE_META_CLASS_PROPERTY_EX_ATTR(className, name, metaDataType, traits, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_ARRAY(className, name, metaDataType, elementCount)
+#define ENLIVE_META_CLASS_PROPERTY_ARRAY_ATTR(className, name, metaDataType, elementCount, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_EX_ARRAY(className, name, metaDataType, traits, elementCount)
+#define ENLIVE_META_CLASS_PROPERTY_EX_ARRAY_ATTR(className, name, metaDataType, traits, elementCount, attributes)
+#define ENLIVE_META_CLASS_DEF(name)
+#define ENLIVE_META_CLASS_DEF_END(name, fullName)
+#define ENLIVE_META_CLASS_DEF_END_EX(name, fullName, parentMetaDataTypePtr)
+
+#define ENLIVE_METADATA_ONLY(code)
+#define ENLIVE_METADATA_COMMA()
+
+#endif // ENLIVE_ENABLE_METADATA

@@ -12,12 +12,13 @@
 #define ENLIVE_ENABLE_PROFILE
 #define ENLIVE_ENABLE_IMGUI
 #define ENLIVE_ENABLE_GRAPHICS_API_DEBUG
+#define ENLIVE_ENABLE_METADATA
 
 
 // Some more specific choices
 #define ENLIVE_ENABLE_DEFAULT_LOGGER
-//#define ENLIVE_ENABLE_DOUBLE_PRECISION
-//#define ENLIVE_ENABLE_HASH_COLLISION_DETECTION
+//#define ENLIVE_ENABLE_DOUBLE_PRECISION // Define Real = float/double
+//#define ENLIVE_ENABLE_HASH_COLLISION_DETECTION // Check if hash is found for another different string 
 
 
 // TODO : Move this elsewhere ?

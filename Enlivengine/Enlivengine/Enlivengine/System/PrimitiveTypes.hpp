@@ -19,11 +19,6 @@ using U64 = std::uint64_t;
 
 using F32 = float;
 using F64 = double;
-#if defined(ENLIVE_ENABLE_DOUBLE_PRECISION)
-	using Real = F64;
-#else
-	using Real = F32;
-#endif
 
 constexpr I8 I8_Min = INT8_MIN;
 constexpr I8 I8_Max = INT8_MAX;
@@ -43,6 +38,12 @@ constexpr U64 U64_Min = 0;
 constexpr U64 U64_Max = UINT64_MAX;
 // TODO : Float min/max/epsilon
 // TODO : Double min/max/epsilon
+
+#if defined(ENLIVE_ENABLE_DOUBLE_PRECISION)
+	using Real = F64;
+#else
+	using Real = F32;
+#endif
 
 union U32F32
 {
@@ -64,8 +65,6 @@ inline F32 ConvertToF32Bytes(U32 value) // TODO : constexpr
 	return u.m_asF32;
 }
 
-// Static asserts only on Windows/Visual
-#if defined(ENLIVE_PLATFORM_WINDOWS) && defined(ENLIVE_COMPILER_MSVC)
 static_assert(sizeof(I8) == 1);
 static_assert(sizeof(U8) == 1);
 static_assert(sizeof(I16) == 2);
@@ -76,6 +75,5 @@ static_assert(sizeof(I64) == 8);
 static_assert(sizeof(U64) == 8);
 static_assert(sizeof(F32) == 4);
 static_assert(sizeof(F64) == 8);
-#endif
 
 } // namespace en

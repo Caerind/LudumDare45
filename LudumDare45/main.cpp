@@ -17,6 +17,8 @@
 #include <Enlivengine/MetaData/TestClassC.hpp>
 #include <Enlivengine/MetaData/MetaData.hpp>
 
+#ifdef ENLIVE_ENABLE_METADATA
+
 void TestMetaData(const en::MetaDataType& typeInfo)
 {
 	std::cout << typeInfo.GetName() << " (" << typeInfo.GetID() << ") : " << std::endl;
@@ -98,13 +100,6 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
     {
         std::cout << "{" << std::endl;
         Indent();
-
-		/*
-		if (metaDataType.GetParent() != nullptr)
-        {
-            TestSerialization(object, *metaDataType.GetParent());
-        }
-		*/
 
         const en::U32 propertyCount = metaDataType.GetPropertyCount();
         for (en::U32 i = 0; i < propertyCount; ++i)
@@ -271,24 +266,30 @@ int main()
     testB.SetG(0, &x);
     testB.SetG(1, &y);
 	TestSerialization(&testB, en::TestClassB::GetStaticMetaData());
-    
 	std::cout << "----------------------------" << std::endl;
 	std::cout << std::endl;
     std::cout << "----------------------------" << std::endl;
 
-	en::TestArrayTemplate<en::U32> testAU;
+	TestArrayTemplate<en::U32> testAU;
 	testAU.SetElement(345);
-	en::TestArrayTemplate<en::F32> testBF;
+	TestArrayTemplate<en::F32> testBF;
 	testBF.SetElement(1234.f);
 
-	en::TestClassC testC;
+	TestClassC testC;
 	testC.en::TestClassA::SetA(13);
 	testC.en::TestClassA::SetB(-13);
     testC.en::TestClassA::SetC(13.31f);
     testC.en::TestClassA::SetD(en::MyEnum::C);
 	testC.SetB(testAU);
 	testC.SetC(testBF);
-	TestSerialization(&testC, en::TestClassC::GetStaticMetaData());
+	TestSerialization(&testC, TestClassC::GetStaticMetaData());
+
+#else // ENLIVE_ENABLE_METADATA
+
+int main()
+{
+
+#endif // ENLIVE_ENABLE_METADATA
 
 	std::cout << "----------------------------" << std::endl;
 	std::cout << std::endl;
