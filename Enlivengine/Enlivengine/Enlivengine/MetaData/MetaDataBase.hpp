@@ -268,8 +268,8 @@ PRIMITIVE_TYPE_DEF(F64, en::F64);
 #undef PRIMITIVE_TYPE_DEF
 
 // Enum macros
-#define ENLIVE_META_ENUM_DECL(name) ENLIVE_META_ENUM_DECL_EX(name, en::U32)
-#define ENLIVE_META_ENUM_DECL_EX(name, type) enum class name : type
+#define ENLIVE_META_ENUM(name) ENLIVE_META_ENUM_AS(name, en::U32)
+#define ENLIVE_META_ENUM_AS(name, type) enum class name : type
 #define ENLIVE_META_ENUM_DEF(name) \
 	class MetaData_##name \
 	{ \
