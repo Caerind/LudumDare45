@@ -91,7 +91,7 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
 		{
 			std::cout << ((const en::Time*)object)->asMilliseconds() << "ms";
 		}
-		else if (metaDataType.GetTemplateID() == en::MetaData<en::TestArray<AnyTemplateType>>::Get().GetTemplateID())
+		else if (metaDataType.GetTemplateID() == en::MetaData<en::Array<AnyTemplateType>>::Get().GetTemplateID())
 		{
 			const en::U32 size = *(const en::U32*)GetSubObjectAtOffset(object, metaDataType.GetPropertyByIndex(1).GetOffset());
 			if (size > 0)
@@ -303,16 +303,10 @@ int main()
 		TestMetaData(en::MetaData<TestClassC>::Get());
 		TestMetaData(en::MetaData<en::Time>::Get());
 
-		TestMetaData(en::MetaData<en::TestArray<en::I8>>::Get());
-		TestMetaData(en::MetaData<en::TestArray<en::U32>>::Get());
-		TestMetaData(en::MetaData<en::TestArray<en::TestClassA>>::Get());
+		TestMetaData(en::MetaData<en::Array<en::I8>>::Get());
+		TestMetaData(en::MetaData<en::Array<en::U32>>::Get());
+		TestMetaData(en::MetaData<en::Array<en::TestClassA>>::Get());
 	}
-
-	constexpr const en::MetaDataType& i8 = en::MetaData<en::TestArray<en::I8>>::Get();
-	constexpr const en::MetaDataType& u32 = en::MetaData<en::TestArray<en::U32>>::Get();
-	constexpr const en::MetaDataType& a = en::MetaData<en::TestArray<en::TestClassA>>::Get();
-
-
 	/*
 	constexpr en::U32 typeCount = en::MetaData::GetTypeCount();
 	for (en::U32 i = 0; i < typeCount; ++i)

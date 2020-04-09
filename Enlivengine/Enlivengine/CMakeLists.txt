@@ -1,5 +1,6 @@
 
 set(SRC_SYSTEM
+    Enlivengine/System/Array.hpp
     Enlivengine/System/Assert.hpp
     Enlivengine/System/ByteUnits.hpp
     Enlivengine/System/CallOnExit.cpp
@@ -83,7 +84,6 @@ set(SRC_METADATA
 	Enlivengine/MetaData/TestClassA.hpp
 	Enlivengine/MetaData/TestClassB.hpp
 	Enlivengine/MetaData/TestClassC.hpp
-	Enlivengine/MetaData/TestClassTemplate.hpp
 )
 source_group("MetaData" FILES ${SRC_METADATA})
 

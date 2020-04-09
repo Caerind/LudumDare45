@@ -5,40 +5,6 @@
 
 #ifdef ENLIVE_ENABLE_METADATA
 
-#ifdef ENLIVE_ENABLE_METADATA_CHECKING
-template <typename T>
-constexpr bool CheckMetaDataType(const en::MetaDataType& metaDataType)
-{
-	en::U32 totalSizeProperties = metaDataType.GetTotalSizeProperties();
-	constexpr const bool hasVTable = en::Traits::HasVirtualDestructor<T>::value;
-	constexpr const en::U32 voidPtrSize = ENLIVE_SIZE_OF(void*);
-	constexpr const en::U32 typeSize = (hasVTable) ? ENLIVE_SIZE_OF(T) - voidPtrSize : ENLIVE_SIZE_OF(T);
-	constexpr const en::U32 typeAlign = ENLIVE_ALIGN_OF(T);
-	if (totalSizeProperties == 0)
-	{
-		if (!hasVTable)
-		{
-			return typeSize == 1 && typeAlign == 1;
-		}
-		else
-		{
-			return typeSize == 0 && typeAlign == voidPtrSize;
-		}
-	}
-	else
-	{
-		constexpr const en::U32 minSize = (typeSize >= typeAlign) ? typeSize - typeAlign : 0;
-		return minSize < totalSizeProperties && totalSizeProperties <= typeSize;
-	}
-}
-#else
-template <typename T>
-constexpr bool CheckMetaDataType(const en::MetaDataType& metaDataType)
-{
-	return true:
-}
-#endif // ENLIVE_ENABLE_METATA_CHECKING
-
 // Enums macros
 #define ENLIVE_META_ENUM(enumType) ENLIVE_META_ENUM_AS(enumType, en::U32)
 #define ENLIVE_META_ENUM_AS(enumType, underlyingType) enum class enumType : underlyingType
