@@ -1,0 +1,11 @@
+- AssetStore : Git/Github
+- ScopedResource : Load on GameState initialization, automagically unload when GameState is deinitialized
+- Animation part of Enlivengine : Read from Aseprite file format + tools in toolmode + runtime tools to make usage easier
+- TileMap part of Enlivengine : Better read from Tiled + tools in toolmode
+- Configurations :
+    - Toolmode (= Toolmode~Debug)
+    - Debug (= Debug~Release)
+    - Release (= Profile)
+    - Final
+- Better profiler
+- Packaging

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Enlivengine/System/Macros.hpp>
+#include <Enlivengine/System/Preprocessor.hpp>
 
 #if defined(__cplusplus)
 

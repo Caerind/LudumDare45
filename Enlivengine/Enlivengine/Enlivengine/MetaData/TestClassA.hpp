@@ -1,6 +1,8 @@
 #pragma once
 
-#include <Enlivengine/MetaData/MetaDataBase.hpp>
+#include <Enlivengine/MetaData/MetaData.hpp>
+
+#include <Enlivengine/MetaData/TestClassTemplate.hpp>
 
 namespace en
 {
@@ -12,15 +14,15 @@ ENLIVE_META_ENUM(MyEnum)
     C
 };
 ENLIVE_META_ENUM_DEF(MyEnum)
-	ENLIVE_META_ENUM_VALUE(MyEnum, A) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_ENUM_VALUE(MyEnum, B) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_ENUM_VALUE(MyEnum, C)
-ENLIVE_META_ENUM_DEF_END(MyEnum)
+	ENLIVE_META_ENUM_VALUE(A) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_ENUM_VALUE(B) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_ENUM_VALUE(C)
+ENLIVE_META_ENUM_DEF_END()
 
 class TestClassA
 {
 public:
-	ENLIVE_META_CLASS_DECL(TestClassA)
+	ENLIVE_META_CLASS_DECL(TestClassA);
 
 	U32 GetA() const { return a; }
 	I32 GetB() const { return b; }
@@ -43,11 +45,12 @@ protected:
 };
 
 ENLIVE_META_CLASS_DEF(TestClassA)
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassA, a, en::PrimitivesMetaData::GetType<en::U32>()) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassA, b, en::PrimitivesMetaData::GetType<en::I32>()) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassA, c, en::PrimitivesMetaData::GetType<en::F32>()) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassA, d, en::MetaData_MyEnum::GetMetaData()) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassA, e, en::PrimitivesMetaData::GetType<bool>())
-ENLIVE_META_CLASS_DEF_END(TestClassA, en::TestClassA)
+	ENLIVE_META_CLASS_PROPERTY(U32, a) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(I32, b) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(F32, c) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(MyEnum, d) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(bool, e)
+ENLIVE_META_CLASS_DEF_END()
+ENLIVE_META_CLASS_IMPL(TestClassA)
 
 } // namespace en

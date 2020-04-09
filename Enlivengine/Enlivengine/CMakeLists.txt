@@ -29,6 +29,7 @@ set(SRC_SYSTEM
     Enlivengine/System/ParserXml.cpp
     Enlivengine/System/ParserXml.hpp
     Enlivengine/System/PlatformDetection.hpp
+    Enlivengine/System/Preprocessor.hpp
     Enlivengine/System/PrimitiveTypes.hpp
     Enlivengine/System/Profiler.cpp
     Enlivengine/System/Profiler.hpp
@@ -38,6 +39,7 @@ set(SRC_SYSTEM
     Enlivengine/System/String.hpp
     Enlivengine/System/Time.cpp
     Enlivengine/System/Time.hpp
+    Enlivengine/System/TypeTraits.hpp
 )
 source_group("System" FILES ${SRC_SYSTEM})
 
@@ -76,9 +78,12 @@ source_group("Math" FILES ${SRC_MATH})
 set(SRC_METADATA
 	Enlivengine/MetaData/MetaData.hpp
 	Enlivengine/MetaData/MetaDataBase.hpp
+	Enlivengine/MetaData/MetaDataEnum.hpp
+	Enlivengine/MetaData/MetaDataType.hpp
 	Enlivengine/MetaData/TestClassA.hpp
 	Enlivengine/MetaData/TestClassB.hpp
 	Enlivengine/MetaData/TestClassC.hpp
+	Enlivengine/MetaData/TestClassTemplate.hpp
 )
 source_group("MetaData" FILES ${SRC_METADATA})
 

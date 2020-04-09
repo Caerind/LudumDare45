@@ -12,6 +12,8 @@
 namespace en
 {
 
+constexpr U32 StringLength(const char* const str) { return *str ? 1 + StringLength(str + 1) : 0; }
+
 void ltrim(std::string& s);
 void rtrim(std::string& s);
 void trim(std::string& s);
@@ -134,5 +136,59 @@ inline bool operator==(U32 id, const StringId& stringId)
 	return stringId == id;
 }
 */
+
+template <U32 N>
+struct ConstexprStringStorage
+{
+	constexpr ConstexprStringStorage()
+		: mData()
+		, mSize(1)
+	{
+		mData[0] = '\0';
+	}
+
+	constexpr ConstexprStringStorage(const char* s1)
+	{
+		Add(s1);
+	}
+
+	constexpr ConstexprStringStorage(const char* s1, const char* s2)
+	{
+		Add(s1);
+		Add(s2);
+	}
+
+	constexpr ConstexprStringStorage(const char* s1, const char* s2, const char* s3)
+	{
+		Add(s1);
+		Add(s2);
+		Add(s3);
+	}
+
+	constexpr ConstexprStringStorage(const char* s1, const char* s2, const char* s3, const char* s4)
+	{
+		Add(s1);
+		Add(s2);
+		Add(s3);
+		Add(s4);
+	}
+
+	constexpr void Add(const char* s)
+	{
+		const U32 length = StringLength(s);
+		for (U32 i = 0; i < length; ++i)
+		{
+			mData[mSize++] = s[i];
+		}
+		mData[mSize] = '\0';
+	}
+
+	constexpr const char* GetData() const { return mData; }
+	constexpr U32 GetSize() const { return mSize; }
+	constexpr U32 GetCapacity() const { return N; }
+
+	char mData[N]{};
+	U32 mSize{ 0 };
+};
 
 } // namespace en

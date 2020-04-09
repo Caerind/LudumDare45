@@ -1,4 +1,4 @@
-#include <Enlivengine/System/Macros.hpp>
+#include <Enlivengine/System/Preprocessor.hpp>
 #include <Enlivengine/System/PlatformDetection.hpp>
 #include <Enlivengine/System/CompilerDetection.hpp>
 #include <Enlivengine/System/CompilerTraits.hpp>
@@ -9,10 +9,22 @@
 #include <Enlivengine/System/Log.hpp>
 #include <Enlivengine/System/Time.hpp>
 #include <Enlivengine/System/Hash.hpp>
+#include <Enlivengine/System/String.hpp>
+#include <Enlivengine/System/TypeTraits.hpp>
 
 #include <Box2D/Box2D.h>
 
 #include <SFML/Graphics.hpp>
+
+
+class A {};
+ENLIVE_DEFINE_TYPE_TRAITS_NAME(A);
+
+template <typename T>
+class B {};
+ENLIVE_DEFINE_TYPE_TRAITS_NAME_TEMPLATE(B);
+
+class C {};
 
 int main()
 {
@@ -26,6 +38,13 @@ int main()
 	LogInfo(en::LogChannel::System, 9, "ENLIVE_COMPILER_STRING : %s", ENLIVE_COMPILER_STRING);
 	LogInfo(en::LogChannel::System, 9, "ENLIVE_PLATFORM_NAME : %s", ENLIVE_PLATFORM_NAME);
 	LogInfo(en::LogChannel::System, 9, "ENLIVE_PLATFORM_DESCRIPTION : %s", ENLIVE_PLATFORM_DESCRIPTION);
+
+	LogInfo(en::LogChannel::System, 9, "A: %s", en::TypeName<A>::name);
+	LogInfo(en::LogChannel::System, 9, "B<A>: %s", en::TypeName<B<A>>::name);
+	LogInfo(en::LogChannel::System, 9, "B<en::U32>: %s", en::TypeName<B<en::U32>>::name);
+	LogInfo(en::LogChannel::System, 9, "B<C>: %s", en::TypeName<B<C>>::name);
+
+
 
 	return 0;
 }

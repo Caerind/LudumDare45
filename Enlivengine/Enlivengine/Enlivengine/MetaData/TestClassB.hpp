@@ -1,6 +1,7 @@
 #pragma once
 
-#include <Enlivengine/MetaData/MetaDataBase.hpp>
+#include <Enlivengine/MetaData/MetaData.hpp>
+
 #include <Enlivengine/MetaData/TestClassA.hpp>
 
 namespace en
@@ -40,15 +41,16 @@ private:
 };
 
 ENLIVE_META_CLASS_DEF(TestClassB)
-	ENLIVE_META_CLASS_PROPERTY_EX(en::TestClassB, a, en::MetaData_TestClassA::GetMetaData(), en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassB, b, en::PrimitivesMetaData::GetType<en::F32>()) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY(en::TestClassB, c, en::PrimitivesMetaData::GetType<en::U32>()) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY_EX(en::TestClassB, d, en::PrimitivesMetaData::GetType<en::F32>(), en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY_EX(en::TestClassB, e, en::MetaData_MyEnum::GetMetaData(), en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY_ARRAY(en::TestClassB, f, en::MetaData_TestClassA::GetMetaData(), 3) ENLIVE_METADATA_COMMA()
-	ENLIVE_META_CLASS_PROPERTY_EX_ARRAY(en::TestClassB, g, en::PrimitivesMetaData::GetType<en::F32>(), en::TypeTraits_Pointer, 2)
-	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::h"), en::PrimitivesMetaData::GetType<en::U32>(), "h", ENLIVE_OFFSET_OF(en::TestClassB, h), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, h), en::PrimitivesMetaData::GetType<en::U32>().GetTraits() | en::TypeTraits_ArrayPtr),
-	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::i"), en::PrimitivesMetaData::GetType<en::I32>(), "i", ENLIVE_OFFSET_OF(en::TestClassB, i), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, i), en::PrimitivesMetaData::GetType<en::I32>().GetTraits() | en::TypeTraits_ArrayPtr | en::TypeTraits_Pointer)
-ENLIVE_META_CLASS_DEF_END(TestClassB, en::TestClassB)
+	ENLIVE_META_CLASS_PROPERTY_TRAITS(TestClassA, a, en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(F32, b) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY(U32, c) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_TRAITS(F32, d, en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_TRAITS(MyEnum, e, en::TypeTraits_Pointer) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_ARRAY(TestClassA, f, 3) ENLIVE_METADATA_COMMA()
+	ENLIVE_META_CLASS_PROPERTY_TRAITS_ARRAY(F32, g, en::TypeTraits_Pointer, 2)
+	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::h"), en::MetaDataPrimitiveTypes::GetType<en::U32>(), "h", ENLIVE_OFFSET_OF(en::TestClassB, h), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, h), en::MetaDataPrimitiveTypes::GetType<en::U32>().GetTraits() | en::TypeTraits_ArrayPtr),
+	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::i"), en::MetaDataPrimitiveTypes::GetType<en::I32>(), "i", ENLIVE_OFFSET_OF(en::TestClassB, i), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, i), en::MetaDataPrimitiveTypes::GetType<en::I32>().GetTraits() | en::TypeTraits_ArrayPtr | en::TypeTraits_Pointer)
+ENLIVE_META_CLASS_DEF_END()
+ENLIVE_META_CLASS_IMPL(TestClassB)
 
 } // namespace en

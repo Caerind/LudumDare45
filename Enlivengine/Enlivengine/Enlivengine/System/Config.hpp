@@ -18,7 +18,8 @@
 // Some more specific choices
 #define ENLIVE_ENABLE_DEFAULT_LOGGER
 //#define ENLIVE_ENABLE_DOUBLE_PRECISION // Define Real = float/double
-//#define ENLIVE_ENABLE_HASH_COLLISION_DETECTION // Check if hash is found for another different string 
+//#define ENLIVE_ENABLE_HASH_COLLISION_DETECTION // Check if hash is found for another different string
+#define ENLIVE_ENABLE_METADATA_CHECKING // Check that the meta data are valid
 
 
 // TODO : Move this elsewhere ?

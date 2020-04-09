@@ -1,12 +1,16 @@
 #pragma once
 
 #include <Enlivengine/System/PrimitiveTypes.hpp>
+#include <Enlivengine/MetaData/MetaData.hpp>
 
 namespace en
 {
 
 class Time
 {
+	public:
+		ENLIVE_META_CLASS_DECL(Time)
+
 	public:
 		static const I64 NanosecondsPerTick = 100;
 		static const I64 TicksPerMicrosecond = 10;
@@ -70,6 +74,10 @@ class Time
 	private:
 		I64 mTicks;
 };
+ENLIVE_META_CLASS_DEF(Time)
+	ENLIVE_META_CLASS_PROPERTY(I64, mTicks)
+ENLIVE_META_CLASS_DEF_END_ATTR(en::Attribute_CustomSerialization)
+ENLIVE_META_CLASS_IMPL(Time)
 
 inline Time operator*(F32 scalar, const Time& time)
 {
