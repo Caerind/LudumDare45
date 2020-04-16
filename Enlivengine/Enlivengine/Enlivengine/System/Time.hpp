@@ -77,7 +77,6 @@ class Time
 ENLIVE_META_CLASS_DEF(Time)
 	ENLIVE_META_CLASS_PROPERTY(I64, mTicks)
 ENLIVE_META_CLASS_DEF_END_ATTR(en::Attribute_CustomSerialization)
-ENLIVE_META_CLASS_IMPL(Time)
 
 inline Time operator*(F32 scalar, const Time& time)
 {

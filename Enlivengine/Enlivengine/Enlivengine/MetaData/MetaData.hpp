@@ -32,8 +32,7 @@
 // Class macros
 #define ENLIVE_META_CLASS_DECL(classType) \
 	public: \
-		template <typename T> friend class en::MetaData; \
-		static constexpr const en::MetaDataType& GetStaticMetaData();
+		template <typename T> friend class en::MetaData;
 
 #define ENLIVE_META_CLASS_DEF(classType) \
 	ENLIVE_DEFINE_TYPE_TRAITS_NAME(classType) \
@@ -83,19 +82,6 @@
 		static constexpr const en::MetaDataType s_MetaData = en::MetaDataType(en::TypeName<type>::hash, en::TypeName<type>::name, en::TypeSize<type>::size, en::TypeAlign<type>::align, en::TypeTraits_Class, parentMetaDataTypePtr, s_MetaDataProperties, ENLIVE_ARRAY_SIZE(s_MetaDataProperties), attributes, nullptr, nullptr, 0, en::Hash::CRC32(#templateBase)); \
 		static_assert(CheckMetaDataType<type>(s_MetaData), "Invalid meta data class layout"); \
 	};
-
-#define ENLIVE_META_CLASS_IMPL(classType) \
-	constexpr const en::MetaDataType& classType::GetStaticMetaData() \
-	{ \
-		return en::MetaData<classType>::Get(); \
-	}
-
-#define ENLIVE_META_CLASS_IMPL_TEMPLATE(templateBaseType) \
-	template <typename T> \
-	constexpr const en::MetaDataType& templateBaseType<T>::GetStaticMetaData() \
-	{ \
-		return en::MetaData<templateBaseType<T>>::Get(); \
-	}
 
 // Utils macros
 #define ENLIVE_METADATA_ONLY(code) code

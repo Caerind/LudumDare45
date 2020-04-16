@@ -1,6 +1,7 @@
 
 set(TESTS_SYSTEM_PATH System)
 set(TESTS_SYSTEM
+    ${TESTS_SYSTEM_PATH}/Array_Tests.cpp
     ${TESTS_SYSTEM_PATH}/Compression_Tests.cpp
     ${TESTS_SYSTEM_PATH}/Endianness_Tests.cpp
     ${TESTS_SYSTEM_PATH}/Hash_Tests.cpp

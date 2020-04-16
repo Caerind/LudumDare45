@@ -12,3 +12,4 @@
 			static className instance; \
 			return instance; \
 		}
+

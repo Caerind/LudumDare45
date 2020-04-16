@@ -289,8 +289,9 @@ void TestSerialization(const void* object, const en::MetaDataType& metaDataType)
 int main()
 {
 	const en::Time timeStart = en::Time::now();
-
 	std::cout << "----------------------------" << std::endl;
+
+	/*
 	{
 		TestMetaData(en::MetaData<bool>::Get());
 		TestMetaData(en::MetaData<en::I8>::Get());
@@ -307,13 +308,6 @@ int main()
 		TestMetaData(en::MetaData<en::Array<en::U32>>::Get());
 		TestMetaData(en::MetaData<en::Array<en::TestClassA>>::Get());
 	}
-	/*
-	constexpr en::U32 typeCount = en::MetaData::GetTypeCount();
-	for (en::U32 i = 0; i < typeCount; ++i)
-	{
-		TestMetaData(en::MetaData::GetTypeFromIndex(i));
-	}
-	*/
 
 	std::cout << "----------------------------" << std::endl;
 	std::cout << std::endl;
@@ -325,7 +319,7 @@ int main()
 	testA.SetC(3.14152f);
     testA.SetD(en::MyEnum::A);
     testA.SetE(true);
-    TestSerialization(&testA, en::TestClassA::GetStaticMetaData());
+    TestSerialization(&testA, en::MetaData<en::TestClassA>::Get());
 
     std::cout << "----------------------------" << std::endl;
     std::cout << std::endl;
@@ -337,7 +331,7 @@ int main()
     testA2.SetC(2.12102101f);
     testA2.SetD(en::MyEnum::C);
     testA2.SetE(false);
-    TestSerialization(&testA2, en::TestClassA::GetStaticMetaData());
+    TestSerialization(&testA2, en::MetaData<en::TestClassA>::Get());
 
 	std::cout << "----------------------------" << std::endl;
 	std::cout << std::endl;
@@ -359,7 +353,7 @@ int main()
     testB.SetF(2, testA2);
     testB.SetG(0, &x);
     testB.SetG(1, &y);
-	TestSerialization(&testB, en::TestClassB::GetStaticMetaData());
+	TestSerialization(&testB, en::MetaData<en::TestClassB>::Get());
 	std::cout << "----------------------------" << std::endl;
 	std::cout << std::endl;
     std::cout << "----------------------------" << std::endl;
@@ -377,7 +371,9 @@ int main()
 	testC.GetC()[0] = testA;
 	testC.GetC()[1] = testA2;
 	testC.SetDuration(en::Time::now() - timeStart);
-	TestSerialization(&testC, TestClassC::GetStaticMetaData());
+	TestSerialization(&testC, en::MetaData<TestClassC>::Get());
+
+	*/
 
 #else // ENLIVE_ENABLE_METADATA
 
@@ -387,10 +383,7 @@ int main()
 #endif // ENLIVE_ENABLE_METADATA
 
 	std::cout << "----------------------------" << std::endl;
-	std::cout << std::endl;
-	std::cout << "----------------------------" << std::endl;
 
-    /*
 	en::Application::GetInstance().Initialize();
 
 	en::Application& app = en::Application::GetInstance();
@@ -405,7 +398,6 @@ int main()
 	GameSingleton::setCursor(true);
 
 	app.Start<IntroState>();
-    */
 
 	return 0;
 }

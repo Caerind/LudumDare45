@@ -20,3 +20,9 @@ find_package(OpenGL REQUIRED)
 add_subdirectory(Enlivengine)
 
 add_subdirectory(LudumDare45)
+
+add_subdirectory(AtmogGameServerFinder)
+
+add_subdirectory(GameServerTest)
+
+add_subdirectory(GameClientTest)

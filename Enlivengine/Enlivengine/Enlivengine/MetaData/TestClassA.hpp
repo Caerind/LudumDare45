@@ -2,8 +2,6 @@
 
 #include <Enlivengine/MetaData/MetaData.hpp>
 
-#include <Enlivengine/MetaData/TestClassTemplate.hpp>
-
 namespace en
 {
 
@@ -51,6 +49,5 @@ ENLIVE_META_CLASS_DEF(TestClassA)
 	ENLIVE_META_CLASS_PROPERTY(MyEnum, d) ENLIVE_METADATA_COMMA()
 	ENLIVE_META_CLASS_PROPERTY(bool, e)
 ENLIVE_META_CLASS_DEF_END()
-ENLIVE_META_CLASS_IMPL(TestClassA)
 
 } // namespace en

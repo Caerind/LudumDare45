@@ -249,11 +249,11 @@ struct TypeName
 	struct en::TypeName<type> \
 	{ \
 		static constexpr const char* name = #type; \
-		static constexpr U32 hash = Hash::CRC32(name); \
+		static constexpr en::U32 hash = en::Hash::CRC32(name); \
 	};
 
-#define ENLIVE_DEFINE_TYPE_TRAITS_NAME_TEMPLATE(templateBase) \
-	template <typename T> \
+#define ENLIVE_DEFINE_TYPE_TRAITS_NAME_TEMPLATE(templateBase)
+	/*template <typename T> \
 	struct en::TypeName<templateBase<T>> \
 	{ \
 	private: \
@@ -261,8 +261,8 @@ struct TypeName
 		static constexpr en::ConstexprStringStorage s_stringStorage = en::ConstexprStringStorage<s_stringStorageSize>(#templateBase, "<", en::TypeName<T>::name, ">"); \
 	public: \
 		static constexpr const char* name = s_stringStorage.GetData(); \
-		static constexpr U32 hash = Hash::CRC32(name); \
-	};
+		static constexpr en::U32 hash = en::Hash::CRC32(name); \
+	};*/
 
 ENLIVE_DEFINE_TYPE_TRAITS_NAME(bool)
 ENLIVE_DEFINE_TYPE_TRAITS_NAME(I8)

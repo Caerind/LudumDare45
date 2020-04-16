@@ -51,6 +51,5 @@ ENLIVE_META_CLASS_DEF(TestClassB)
 	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::h"), en::MetaDataPrimitiveTypes::GetType<en::U32>(), "h", ENLIVE_OFFSET_OF(en::TestClassB, h), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, h), en::MetaDataPrimitiveTypes::GetType<en::U32>().GetTraits() | en::TypeTraits_ArrayPtr),
 	// TODO : en::MetaDataProperty(en::Hash::CRC32("TestClassB::i"), en::MetaDataPrimitiveTypes::GetType<en::I32>(), "i", ENLIVE_OFFSET_OF(en::TestClassB, i), ENLIVE_SIZE_OF_MEMBER(en::TestClassB, i), en::MetaDataPrimitiveTypes::GetType<en::I32>().GetTraits() | en::TypeTraits_ArrayPtr | en::TypeTraits_Pointer)
 ENLIVE_META_CLASS_DEF_END()
-ENLIVE_META_CLASS_IMPL(TestClassB)
 
 } // namespace en

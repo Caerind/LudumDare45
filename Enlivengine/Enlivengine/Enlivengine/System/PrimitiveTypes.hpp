@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #include <Enlivengine/System/CompilerTraits.hpp>
 #include <Enlivengine/System/Config.hpp>
