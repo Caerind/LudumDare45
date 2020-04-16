@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include <miniz/miniz.h>
+#include <miniz/miniz.hpp>
 
 namespace en
 {

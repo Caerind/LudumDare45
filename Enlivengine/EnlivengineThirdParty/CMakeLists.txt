@@ -201,8 +201,8 @@ source_group("metrics_gui" FILES ${SRC_METRICSGUI})
 
 # miniz
 set(SRC_MINIZ
-	miniz/miniz.c
-	miniz/miniz.h
+	miniz/miniz.cpp
+	miniz/miniz.hpp
 )
 source_group("miniz" FILES ${SRC_MINIZ})
 
