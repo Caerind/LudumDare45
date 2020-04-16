@@ -52,6 +52,7 @@ class ActionInput : private NonCopyable
 {
 public:
     ActionInput(const std::string& name);
+    virtual ~ActionInput() {};
 
     virtual ActionInputType GetInputType() const = 0;
     virtual bool IsLogicalOperator() const;

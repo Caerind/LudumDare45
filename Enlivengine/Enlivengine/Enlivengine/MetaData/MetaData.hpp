@@ -18,9 +18,9 @@
 		static constexpr const en::MetaDataEnum& GetEnum() { return s_MetaDataEnum; } \
 		static constexpr const en::MetaDataType& Get() { return s_MetaData; } \
 	private: \
-		static constexpr const en::MetaDataEnumValue s_MetaDataValues[] = { 
+		static constexpr const en::MetaDataEnumValue s_MetaDataValues[] = {
 
-#define ENLIVE_META_ENUM_VALUE(valueName) en::MetaDataEnumValue(en::Hash::CRC32(#valueName), #valueName, static_cast<en::U32>(type::##valueName))
+#define ENLIVE_META_ENUM_VALUE(valueName) en::MetaDataEnumValue(en::Hash::CRC32(#valueName), #valueName, static_cast<en::U32>(type::valueName))
 
 #define ENLIVE_META_ENUM_DEF_END() ENLIVE_META_ENUM_DEF_END_ATTR(en::Attribute_None)
 #define ENLIVE_META_ENUM_DEF_END_ATTR(attributes) \
@@ -32,12 +32,12 @@
 // Class macros
 #define ENLIVE_META_CLASS_DECL(classType) \
 	public: \
-		template <typename T> friend class en::MetaData;
+		template <typename AnyTypeThatHasMetaData> friend class en::MetaData;
 
 #define ENLIVE_META_CLASS_DEF(classType) \
 	ENLIVE_DEFINE_TYPE_TRAITS_NAME(classType) \
 	template <> \
-	class en::MetaData<classType> \
+	class MetaData<classType> \
 	{ \
 	public: \
 		using type = classType; \
@@ -48,7 +48,7 @@
 #define ENLIVE_META_CLASS_DEF_TEMPLATE(templateBase) \
 	ENLIVE_DEFINE_TYPE_TRAITS_NAME_TEMPLATE(templateBase) \
 	template <typename T> \
-	class en::MetaData<templateBase<T>> \
+	class MetaData<templateBase<T>> \
 	{ \
 	public: \
 		using type = templateBase<T>; \
@@ -90,19 +90,36 @@
 #else // ENLIVE_ENABLE_METADATA
 
 // Enum macros
-#define ENLIVE_META_ENUM(name)
-#define ENLIVE_META_ENUM_AS(name, type)
-#define ENLIVE_META_ENUM_DEF(name)
-#define ENLIVE_META_ENUM_VALUE(enumName, valueName)
-#define ENLIVE_META_ENUM_VALUE_EX(enumName, valueName, type)
-#define ENLIVE_META_ENUM_DEF_END(name)
-#define ENLIVE_META_ENUM_DEF_END_ATTR(name, attributes)
-#define ENLIVE_META_ENUM_DEF_END_EX(name, type)
-#define ENLIVE_META_ENUM_DEF_END_EX_ATTR(name, type, attributes)
+#define ENLIVE_META_ENUM(enumType) ENLIVE_META_ENUM_AS(enumType, en::U32)
+#define ENLIVE_META_ENUM_AS(enumType, underlyingType) enum class enumType : underlyingType
+#define ENLIVE_META_ENUM_DEF(enumType)
+#define ENLIVE_META_ENUM_VALUE(valueName)
+#define ENLIVE_META_ENUM_DEF_END()
+#define ENLIVE_META_ENUM_DEF_END_ATTR(attributes)
+
+// Class macros
+#define ENLIVE_META_CLASS_DECL(classType)
+#define ENLIVE_META_CLASS_DEF(classType)
+#define ENLIVE_META_CLASS_DEF_TEMPLATE(templateBase)
+#define ENLIVE_META_CLASS_PROPERTY(propertyType, propertyName)
+#define ENLIVE_META_CLASS_PROPERTY_ATTR(propertyType, propertyName, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_TRAITS(propertyType, propertyName, traits)
+#define ENLIVE_META_CLASS_PROPERTY_TRAITS_ATTR(propertyType, propertyName, traits, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_ARRAY(propertyType, propertyName, elementCount)
+#define ENLIVE_META_CLASS_PROPERTY_ARRAY_ATTR(propertyType, propertyName, elementCount, attributes)
+#define ENLIVE_META_CLASS_PROPERTY_TRAITS_ARRAY(propertyType, propertyName, traits, elementCount)
+#define ENLVIE_META_CLASS_PROPERTY_TRAITS_ARRAY_ATTR(propertyType, propertyName, traits, elementCount, attributes)
+#define ENLIVE_META_CLASS_DEF_END()
+#define ENLIVE_META_CLASS_DEF_END_ATTR(attributes)
+#define ENLIVE_META_CMASS_DEF_END_EX(parentMetaDataTypePtr)
+#define ENLIVE_META_CLASS_DEF_END_EX_ATTR(parentMetaDataTypePtr, attributes)
+#define ENLIVE_META_CLASS_DEF_END_TEMPLATE(templateBase)
+#define ENLIVE_META_CLASS_DEF_END_ATTR_TEMPLATE(attributes, templateBase)
+#define ENLIVE_META_CLASS_DEF_END_EX_TEMPLATE(parentMetaDataPtr, templateBase)
+#define ENLIVE_META_CLASS_DEF_END_EX_ATTR_TEMPLATE(parentMetaDataPtr, attributes, templateBase)
 
 // Utils macros
 #define ENLIVE_METADATA_ONLY(code)
 #define ENLIVE_METADATA_COMMA()
 
 #endif // ENLIVE_ENABLE_METADATA
-

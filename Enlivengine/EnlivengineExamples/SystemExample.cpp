@@ -18,11 +18,15 @@
 
 
 class A {};
+namespace en {
 ENLIVE_DEFINE_TYPE_TRAITS_NAME(A);
+} // namespace en
 
 template <typename T>
 class B {};
+namespace en {
 ENLIVE_DEFINE_TYPE_TRAITS_NAME_TEMPLATE(B);
+} // namespace en
 
 class C {};
 

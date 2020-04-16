@@ -365,7 +365,7 @@ void GameSingleton::renderMetricsWindow()
 	if (showWindow)
 	{
 		ImGui::Begin("Metrics");
-		ImGui::Text("Entities : %d", world.size());
+		ImGui::Text("Entities : %d", (int)world.size());
 		ImGui::Text("FPS : %d", (int)en::Application::GetInstance().GetFPS());
 		ImGui::Text("TotalTime : %d s", (int)en::Application::GetInstance().GetTotalDuration().asSeconds());
 		ImGui::Text("Mouse X (Window): %d", (int)en::Application::GetInstance().GetWindow().getCursorPosition().x);

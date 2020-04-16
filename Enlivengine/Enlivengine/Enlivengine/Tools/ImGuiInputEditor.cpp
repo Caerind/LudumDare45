@@ -244,7 +244,7 @@ void ImGuiInputEditor::Display()
 
 			ImGui::PushID(static_cast<int>(i));
 
-			ImGui::Text(actionInput->GetName().c_str());
+			ImGui::Text("%s", actionInput->GetName().c_str());
 			if (ImGui::IsItemHovered())
 			{
 				ImGui::SetTooltip("ID:%d", actionInput->GetID());
@@ -345,6 +345,7 @@ void ImGuiInputEditor::Display()
 					assert(false);
 				}
 			} break;
+                        default: assert(false); break;
 			}
 
 			if (ImGui::Button("Remove"))

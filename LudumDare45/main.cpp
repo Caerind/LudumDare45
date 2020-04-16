@@ -12,9 +12,10 @@
 // Test MetaData
 #include <iostream>
 #include <string>
+#include <Enlivengine/System/Array.hpp>
 #include <Enlivengine/MetaData/TestClassA.hpp>
 #include <Enlivengine/MetaData/TestClassB.hpp>
-#include <Enlivengine/MetaData/TestClassC.hpp>
+//#include <Enlivengine/MetaData/TestClassC.hpp>
 #include <Enlivengine/MetaData/MetaData.hpp>
 
 #ifdef ENLIVE_ENABLE_METADATA
@@ -291,7 +292,7 @@ int main()
 	const en::Time timeStart = en::Time::now();
 	std::cout << "----------------------------" << std::endl;
 
-	/*
+
 	{
 		TestMetaData(en::MetaData<bool>::Get());
 		TestMetaData(en::MetaData<en::I8>::Get());
@@ -301,7 +302,7 @@ int main()
 
 		TestMetaData(en::MetaData<en::TestClassA>::Get());
 		TestMetaData(en::MetaData<en::TestClassB>::Get());
-		TestMetaData(en::MetaData<TestClassC>::Get());
+//		TestMetaData(en::MetaData<TestClassC>::Get());
 		TestMetaData(en::MetaData<en::Time>::Get());
 
 		TestMetaData(en::MetaData<en::Array<en::I8>>::Get());
@@ -358,7 +359,7 @@ int main()
 	std::cout << std::endl;
     std::cout << "----------------------------" << std::endl;
 
-	TestClassC testC;
+/*	TestClassC testC;
 	testC.en::TestClassA::SetA(13);
 	testC.en::TestClassA::SetB(-13);
     testC.en::TestClassA::SetC(13.31f);
@@ -372,9 +373,7 @@ int main()
 	testC.GetC()[1] = testA2;
 	testC.SetDuration(en::Time::now() - timeStart);
 	TestSerialization(&testC, en::MetaData<TestClassC>::Get());
-
-	*/
-
+*/
 #else // ENLIVE_ENABLE_METADATA
 
 int main()
@@ -384,6 +383,8 @@ int main()
 
 	std::cout << "----------------------------" << std::endl;
 
+
+#ifdef _MSC_VER
 	en::Application::GetInstance().Initialize();
 
 	en::Application& app = en::Application::GetInstance();
@@ -398,6 +399,7 @@ int main()
 	GameSingleton::setCursor(true);
 
 	app.Start<IntroState>();
+#endif // _MSC_VER
 
 	return 0;
 }

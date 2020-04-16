@@ -15,6 +15,10 @@ public:
 
 	static constexpr U32 CRC32(const char* key)
 	{
+                if (key == nullptr)
+                {
+                    return 0;
+                }
 		std::size_t len = length(key);
 		if (key == nullptr || len == 0)
 		{

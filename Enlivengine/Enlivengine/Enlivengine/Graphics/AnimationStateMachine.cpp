@@ -205,6 +205,7 @@ bool AnimationStateMachine::Condition::Evaluate(const AnimationStateMachine::Par
 	case Parameter::Type::Float: return EvaluateFloat(parameter.GetFloatValue());
 	case Parameter::Type::Integer: return EvaluateInteger(parameter.GetIntegerValue());
 	case Parameter::Type::Trigger: return EvaluateTrigger(parameter.GetTriggerValue());
+        default: assert(false); break;
 	}
 	return false;
 }

@@ -39,7 +39,7 @@ class ImGuiEntityEditor {
 
 					//ImGuiWidgets::Entity(e, ecs, true);
 					if (ecs.valid(e)) {
-						ImGui::Text("id: %d, v: %d", ecs.entity(e), ecs.version(e));
+						ImGui::Text("id: %d, v: %d", (int)ecs.entity(e), (int)ecs.version(e));
 					} else {
 						ImGui::Text("INVALID ENTITY");
 					}

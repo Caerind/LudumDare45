@@ -68,7 +68,7 @@ void ImGuiProfiler::Display()
 
 		if (frames.size() > 1)
 		{
-			ImGui::Text("Frame : %d / %d", mCurrentFrameIndex + 1, frames.size());
+			ImGui::Text("Frame : %d / %d", mCurrentFrameIndex + 1, (int)frames.size());
 			ImGui::SameLine();
 			if (ImGui::Button("-"))
 			{

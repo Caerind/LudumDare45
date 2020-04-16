@@ -155,7 +155,7 @@ bool Map::LoadFromFile(const std::string& filename)
 		if (infinite > 0)
 		{
 			// TODO : Infinite maps
-			LogError(en::LogChannel::Map, 9, "Infinite maps aren't supported yet");
+			LogError(en::LogChannel::Map, 9, "Infinite maps aren't supported yet for %s", mName.c_str());
 			return false;
 		}
 
@@ -179,7 +179,7 @@ bool Map::LoadFromFile(const std::string& filename)
 					if (tilesetData.firstGid <= 0)
 					{
 						validTileset = false;
-						LogWarning(en::LogChannel::Map, 7, "Invalid firstGid");
+						LogWarning(en::LogChannel::Map, 7, "Invalid firstGid for %s", mName.c_str());
 					}
 
 					std::string source = "";
@@ -204,7 +204,7 @@ bool Map::LoadFromFile(const std::string& filename)
 					else
 					{
 						validTileset = false;
-						LogError(en::LogChannel::Map, 8, "Tileset inside maps aren't supported yet");
+						LogError(en::LogChannel::Map, 8, "Tileset inside maps aren't supported yet for %s", mName.c_str());
 						// TODO : Tilesets inside maps
 					}
 
@@ -491,7 +491,7 @@ std::vector<Vector2u> Map::GetNeighbors(const Vector2u& tileCoords, bool diag /*
 			}
 		}
 	}
-	return std::move(n);
+	return n;
 }
 
 Vector2f Map::CoordsToWorld(const Vector2u& tileCoords) const
@@ -560,17 +560,17 @@ Vector2u Map::WorldToCoords(const Vector2f& worldPos) const
     }
     else if (mOrientation == Orientation::Isometric)
     {
-        LogError(en::LogChannel::Map, 5, "Isometric WorldToCoords unimplemented");
+        LogError(en::LogChannel::Map, 5, "Isometric WorldToCoords unimplemented for %s", mName.c_str());
         return Vector2u(0, 0);
     }
     else if (mOrientation == Orientation::Staggered)
     {
-        LogError(en::LogChannel::Map, 5, "Staggered WorldToCoords unimplemented");
+        LogError(en::LogChannel::Map, 5, "Staggered WorldToCoords unimplemented for %s", mName.c_str());
         return Vector2u(0, 0);
     }
     else if (mOrientation == Orientation::Hexagonal)
     {
-        LogError(en::LogChannel::Map, 5, "Hexagonal WorldToCoords unimplemented");
+        LogError(en::LogChannel::Map, 5, "Hexagonal WorldToCoords unimplemented for %s", mName.c_str());
         return Vector2u(0, 0);
     }
 

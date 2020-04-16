@@ -97,7 +97,7 @@ void ImGuiResourceBrowser::Display()
 #ifdef ENLIVE_COMPILER_MSVC
 			strcpy_s(mFilenameBuffer, relativeResult.c_str());
 #else
-			strcpy(mFilenameBuffer, relativeResult..c_str());
+			strcpy(mFilenameBuffer, relativeResult.c_str());
 #endif // ENLIVE_COMPILER_MSVC
 		}
 		ImGuiFileDialog::Instance()->CloseDialog(key);
@@ -183,7 +183,7 @@ void ImGuiResourceBrowser::Display()
 
 			ImVec4 color = ResourceInfo::ResourceInfoTypeToColor(resourceInfo.type).toImGuiColor();
 
-			ImGui::TextColored(color, resourceInfo.identifier.c_str());
+			ImGui::TextColored(color, "%s", resourceInfo.identifier.c_str());
 			if (ImGui::IsItemHovered())
 			{
 				ImGui::SetTooltip("ID: %d", resourceInfo.resourceID);

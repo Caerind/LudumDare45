@@ -9,9 +9,9 @@ namespace tmx
 
 ObjectBase::ObjectBase(ObjectGroup& objectGroup)
 	: mObjectGroup(objectGroup)
+        , mID(0)
     , mName()
     , mType()
-	, mID(0)
 	, mPosition(0.0f, 0.0f)
     , mRotation(0.0f)
 {

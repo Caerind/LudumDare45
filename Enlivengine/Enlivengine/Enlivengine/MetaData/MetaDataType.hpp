@@ -169,7 +169,7 @@ constexpr bool CheckMetaDataType(const en::MetaDataType& metaDataType)
 
 #define ENLIVE_META_PRIMITIVE_TYPE_DECL(primitiveType) \
 	template <> \
-	class en::MetaData<primitiveType> \
+	class MetaData<primitiveType> \
 	{ \
 	public: \
 		using type = primitiveType; \
@@ -178,17 +178,17 @@ constexpr bool CheckMetaDataType(const en::MetaDataType& metaDataType)
 		static constexpr const en::MetaDataType s_MetaDataType = en::MetaDataType(en::TypeName<primitiveType>::hash, en::TypeName<primitiveType>::name, en::TypeSize<primitiveType>::size, en::TypeAlign<primitiveType>::align, en::TypeTraits_Primitive); \
 	};
 
-ENLIVE_META_PRIMITIVE_TYPE_DECL(bool);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I8);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U8);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I16);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U16);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I32);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U32);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I64);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U64);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::F32);
-ENLIVE_META_PRIMITIVE_TYPE_DECL(en::F64);
+ENLIVE_META_PRIMITIVE_TYPE_DECL(bool)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I8)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U8)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I16)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U16)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I32)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U32)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::I64)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::U64)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::F32)
+ENLIVE_META_PRIMITIVE_TYPE_DECL(en::F64)
 
 #undef ENLIVE_META_PRIMITIVE_TYPE_DECL
 

@@ -468,7 +468,7 @@ void DrawMetrics(
 		ImVec2(frame_bb.Max.x - style.FramePadding.x, frame_bb.Max.y - style.FramePadding.y));
 
     ImGui::ItemSize(frame_bb, style.FramePadding.y);
-    if (!ImGui::ItemAdd(frame_bb, NULL)) {
+    if (!ImGui::ItemAdd(frame_bb, 0)) {
         return;
     }
 

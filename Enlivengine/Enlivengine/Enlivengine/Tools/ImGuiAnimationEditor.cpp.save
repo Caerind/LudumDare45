@@ -261,7 +261,7 @@ void ImGuiAnimationEditor::SelectedNode(AnimationStateMachine& stateMachine, ax:
 
 	ImGui::PushID(stateIndex);
 
-    ImGui::Text("%s", state.GetName().c_str());
+    ImGui::Text(state.GetName().c_str());
 
     static U32 clipFrameIndex = 0;
 	static Time accumulator;
@@ -456,7 +456,8 @@ void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax:
 		ImGui::SameLine();
 		if (ImGui::Button("New condition"))
 		{
-			constexpr U32 defaultParameterIndex = 0;
+			
+constexpr U32 defaultParameterIndex = 0;
 			U32 conditionIndex = stateMachine.AddCondition(defaultParameterIndex);
 			stateMachine.AddConditionToTransition(transitionIndex, conditionIndex);
 			stateMachine.SetConditionOperator(conditionIndex, AnimationStateMachine::Condition::Operator::Equal);
@@ -476,9 +477,9 @@ void ImGuiAnimationEditor::SelectedLink(AnimationStateMachine& stateMachine, ax:
 			paramNames.push_back(stateMachine.GetParameter(parameterIndex).GetName().c_str());
 		}
 
-		static const char* boolOperators[] = { "=", "!=" };
-		static const char* boolValues[] = { "False", "True" };
-		static const char* operators[] = { "=", "!=", "<", "<=", ">", ">=" };
+		static constexpr const char* boolOperators[] = { "=", "!=" };
+		static constexpr const char* boolValues[] = { "False", "True" };
+		static constexpr const char* operators[] = { "=", "!=", "<", "<=", ">", ">=" };
 
 		ImGui::Indent();
 		for (U32 conditionIndexInTransition = 0; conditionIndexInTransition < transition.GetConditionCount(); ++conditionIndexInTransition)
@@ -847,7 +848,7 @@ void ImGuiAnimationEditor::ParametersList(AnimationStateMachine& stateMachine)
             case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
             default: break;
             }
-            ImGui::TextColored(color, "%s", parameter.GetName().c_str());
+            ImGui::TextColored(color, parameter.GetName().c_str());
 
             if (parameter.GetType() < AnimationStateMachine::Parameter::Type::Trigger)
             {
@@ -1003,7 +1004,7 @@ void ImGuiAnimationEditor::Preview(AnimationStateMachine& stateMachine)
 				case AnimationStateMachine::Parameter::Type::Trigger: color = Color::Yellow.toImGuiColor(); break;
 				default: break;
 				}
-				ImGui::TextColored(color, "%s", parameter.GetName().c_str());
+				ImGui::TextColored(color, parameter.GetName().c_str());
 
 				ImGui::SameLine();
 
@@ -1114,7 +1115,7 @@ void ImGuiAnimationEditor::NodeEditor(AnimationStateMachine& stateMachine)
             ImGui::SameLine();
         }
 
-        ImGui::Text("%s", state.GetName().c_str());
+        ImGui::Text(state.GetName().c_str());
         ImRect nodeRect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
         if (isDefaultState)
         {

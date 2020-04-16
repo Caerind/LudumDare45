@@ -21,12 +21,12 @@ class EditorComponents
 		static void registerToEditor(ImGuiEntityEditor<entt::registry>& editor)
 		{
 			#define TrivialComponent(ComponentType, ComponentName) \
-				editor.registerTrivial<##ComponentType>(GameSingleton::world, #ComponentName); \
+				editor.registerTrivial<ComponentType>(GameSingleton::world, #ComponentName); \
 				editor.registerComponentWidgetFn( \
-					GameSingleton::world.type<##ComponentType>(), \
+					GameSingleton::world.type<ComponentType>(), \
 					[](entt::registry& reg, auto e) { \
-						auto& comp = reg.get<##ComponentType>(e); \
-						EditorComponents::##ComponentName(comp); });
+						auto& comp = reg.get<ComponentType>(e); \
+						EditorComponents::ComponentName(comp); });
 
 			TrivialComponent(en::PositionComponent, Position);
 			TrivialComponent(en::RenderableComponent, Renderable);

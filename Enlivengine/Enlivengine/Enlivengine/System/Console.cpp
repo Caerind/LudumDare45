@@ -96,6 +96,7 @@ Console::Console()
 	help.SetManual("See the list of commands with short description");
 	help.SetFunction([this](Command::OptionSplit options)
 	{
+                ENLIVE_UNUSED(options);
 		for (auto command : mCommands)
 		{
 			AddLine(command.GetName() + " : " + command.GetHelp());
@@ -198,7 +199,7 @@ void Console::Command::Execute(const std::string& options)
 	}
 	else
 	{
-		LogError(en::LogChannel::System, 6, "Command not properly set\n");
+		LogError(en::LogChannel::System, 6, "Command not properly set%s\n", "");
 	}
 }
 
@@ -316,7 +317,7 @@ Console::Command::OptionSplit Console::Command::ParseOptions(const std::string& 
 			}
 		}
 	}
-	return std::move(split);
+	return split;
 }
 
 } // namespace en

@@ -2,6 +2,8 @@
 
 #include <Enlivengine/MetaData/MetaData.hpp>
 #include <Enlivengine/System/Assert.hpp>
+#include <Enlivengine/System/Macros.hpp>
+#include <Enlivengine/System/TypeTraits.hpp>
 
 #include <cstdlib> // malloc, realloc, free
 #include <algorithm> // sort
